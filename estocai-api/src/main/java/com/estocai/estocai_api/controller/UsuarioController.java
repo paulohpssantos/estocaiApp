@@ -4,7 +4,6 @@ import com.estocai.estocai_api.model.Usuario;
 import com.estocai.estocai_api.repository.UsuarioRepository;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/usuario")
