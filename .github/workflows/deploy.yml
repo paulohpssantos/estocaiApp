@@ -26,15 +26,14 @@ jobs:
         working-directory: estocai-api
 
       # 4 Copia o .jar para a instância EC2 via SSH
-	   - name: Copy jar to EC2
-         uses: appleboy/scp-action@v0.1.6
-         with:
-           host: ${{ secrets.EC2_HOST }}
-           username: ec2-user
-           key: ${{ secrets.EC2_SSH_KEY }}
-           source: "estocai-api/target/*.jar"
-           target: "/home/ec2-user/app"
-	
+      - name: Copy jar to EC2
+        uses: appleboy/scp-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "estocai-api/target/*.jar"
+          target: "/home/ec2-user/app"
 
       # 5 Reinicia a aplicação no servidor
       - name: Restart Spring Boot App on EC2
