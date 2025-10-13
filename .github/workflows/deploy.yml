@@ -25,6 +25,10 @@ jobs:
         run: mvn clean package -DskipTests
         working-directory: estocai-api
 
+      # Passo extra de debug — mostra o que tem dentro da pasta target
+      - name: Show target folder
+        run: ls -l estocai-api/target
+
       # 4 Copia o .jar para a instância EC2 via SSH
       - name: Copy jar to EC2
         uses: appleboy/scp-action@v0.1.6
@@ -34,6 +38,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "estocai-api/target/*.jar"
           target: "/home/ec2-user/app"
+          strip_components: 2
 
       # 5 Reinicia a aplicação no servidor
       - name: Restart Spring Boot App on EC2
