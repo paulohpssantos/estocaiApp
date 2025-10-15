@@ -13,6 +13,7 @@ import java.util.Map;
 public class AuthController {
 
     private final String SECRET_KEY = System.getenv("JWT_SECRET_KEY");
+    //private final String SECRET_KEY = "7k6IlVH7+vrTyGCKwobOyxYOuyf4hfR+soZAe74yUdw+gUyC6exWPjwIE1xCTDZf";
 
     @PostMapping("/login")
     public Map<String, String> login(@RequestParam String username, @RequestParam String password) {

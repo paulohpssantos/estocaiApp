@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -25,5 +26,7 @@ public class Usuario {
 
     @Column(nullable = false)
     private LocalDate dataExpiracao;
+
+    private LocalDateTime ultimoAcesso;
 
 }

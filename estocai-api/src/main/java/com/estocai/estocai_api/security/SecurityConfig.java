@@ -17,18 +17,11 @@ public class SecurityConfig {
 
                 // Configura autorização
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/auth/login").permitAll()
                         .anyRequest().authenticated()
                 )
 
-                // Configura autenticação HTTP Basic moderna
-                .httpBasic(httpBasic -> httpBasic
-                        .realmName("Estocai API")   // opcional, nome do realm
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(401);
-                            response.getWriter().write("Unauthorized");
-                        })
-                );
+                .addFilterBefore(new JwtAuthenticationFilter(), org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -21,4 +21,4 @@ exibir logs:
 tail -n 100 /home/ec2-user/app/app.log
 
 JWT Key:
-Hfvq"TIAM&,T'X%4RFIZBnOl+wQ6T1
+7k6IlVH7+vrTyGCKwobOyxYOuyf4hfR+soZAe74yUdw+gUyC6exWPjwIE1xCTDZf
