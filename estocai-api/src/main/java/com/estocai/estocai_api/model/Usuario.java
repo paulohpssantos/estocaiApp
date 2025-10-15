@@ -3,6 +3,8 @@ package com.estocai.estocai_api.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 @Entity
 @Table(name = "usuario")
@@ -20,5 +22,8 @@ public class Usuario {
 
     @Column(nullable = false, length = 255)
     private String senha;
+
+    @Column(nullable = false)
+    private LocalDate dataExpiracao;
 
 }

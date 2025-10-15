@@ -3,17 +3,22 @@ Conectar via terminal do EC2 AWS
 Na pasta do projeto abrir o terminal e digitar:
 ssh -i "estocai-key.pem" ec2-user@34.210.83.46
 
+Base estocai-db
+End-point: estocai-postgres.cluster-ctyg6coqg7ld.us-west-2.rds.amazonaws.com
+User: estocai_admin
+Password: KkW4dQsyWYgjeRJ9ONjz
 
 
 
-  senha base estocai
-
-	KkW4dQsyWYgjeRJ9ONjz
-
-
- user 
-	estocai_admin
+criar tunel de acesso ssh 
+ssh -i "estocai-key.pem" -L 5432:estocai-postgres.cluster-ctyg6coqg7ld.us-west-2.rds.amazonaws.com:5432 ec2-user@34.210.83.46
 
 
+reiniciar serviço via terminal
+sudo systemctl status estocai-api
 
-estocai-postgres.cluster-ctyg6coqg7ld.us-west-2.rds.amazonaws.com
+exibir logs:
+tail -n 100 /home/ec2-user/app/app.log
+
+JWT Key:
+Hfvq"TIAM&,T'X%4RFIZBnOl+wQ6T1
