@@ -7,7 +7,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-	env:
+    env:
       JWT_SECRET_KEY: ${{ vars.JWT_SECRET_KEY }}
 
     steps:
