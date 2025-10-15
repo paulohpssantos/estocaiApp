@@ -48,9 +48,15 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Stopping any app running on port 8080..."
+            echo "Limpando instâncias antigas..."
             sudo fuser -k 8080/tcp || true
-            echo "Starting new version..."
+
+            echo "Iniciando nova versão..."
             cd /home/ec2-user/app
+
+            export DB_URL=${{ secrets.DB_URL }}
+            export DB_USERNAME=${{ secrets.DB_USERNAME }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+
             nohup java -jar *.jar > app.log 2>&1 &
-            echo "Deployment completed successfully!"
+            echo "Aplicação reiniciada com sucesso!"
