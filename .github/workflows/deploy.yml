@@ -7,8 +7,6 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      JWT_SECRET_KEY: ${{ vars.JWT_SECRET_KEY }}
 
     steps:
       # 1 Faz o checkout do código-fonte
@@ -60,7 +58,7 @@ jobs:
             export DB_URL=${{ secrets.DB_URL }}
             export DB_USERNAME=${{ secrets.DB_USERNAME }}
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            export JWT_SECRET_KEY=${{ vars.JWT_SECRET_KEY }}
+            export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
 
             nohup java -jar -Dspring.profiles.active=prod *.jar > app.log 2>&1 &
             echo "Aplicação reiniciada com sucesso!"
