@@ -13,7 +13,7 @@ import io.jsonwebtoken.Jwts;
 import java.io.IOException;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    
+
     @Value("${JWT_SECRET_KEY}")
     private String secretKey;
 
