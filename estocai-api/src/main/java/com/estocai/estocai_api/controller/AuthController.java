@@ -2,6 +2,7 @@ package com.estocai.estocai_api.controller;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -12,8 +13,13 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final String SECRET_KEY = System.getenv("JWT_SECRET_KEY");
-    //private final String SECRET_KEY = "7k6IlVH7+vrTyGCKwobOyxYOuyf4hfR+soZAe74yUdw+gUyC6exWPjwIE1xCTDZf";
+
+    @Value("${JWT_SECRET_KEY}")
+    private String secretKey;
+
+    public String getSecretKey() {
+        return secretKey;
+    }
 
     @PostMapping("/login")
     public Map<String, String> login(@RequestParam String username, @RequestParam String password) {
@@ -23,7 +29,7 @@ public class AuthController {
                     .setSubject(username)
                     .setIssuedAt(new Date())
                     .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hora
-                    .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                    .signWith(SignatureAlgorithm.HS256, secretKey)
                     .compact();
             Map<String, String> response = new HashMap<>();
             response.put("token", token);

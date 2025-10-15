@@ -27,7 +27,7 @@ jobs:
         run: mvn clean package -DskipTests
         working-directory: estocai-api
 
-      # Passo extra de debug — mostra o que tem dentro da pasta target
+      # Mostra o conteúdo da pasta target para depuração
       - name: Show target folder
         run: ls -l estocai-api/target
 
@@ -42,7 +42,7 @@ jobs:
           target: "/home/ec2-user/app"
           strip_components: 2
 
-      # 5 Reinicia a aplicação no servidor
+      # 5 Reinicia a aplicação no servidor EC2 com variáveis de ambiente
       - name: Restart Spring Boot App on EC2
         uses: appleboy/ssh-action@v0.1.10
         with:
@@ -56,9 +56,11 @@ jobs:
             echo "Iniciando nova versão..."
             cd /home/ec2-user/app
 
+            # Exporta variáveis de ambiente necessárias para o Spring Boot
             export DB_URL=${{ secrets.DB_URL }}
             export DB_USERNAME=${{ secrets.DB_USERNAME }}
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export JWT_SECRET_KEY=${{ vars.JWT_SECRET_KEY }}
 
-            nohup java -jar *.jar > app.log 2>&1 &
+            nohup java -jar -Dspring.profiles.active=prod *.jar > app.log 2>&1 &
             echo "Aplicação reiniciada com sucesso!"
