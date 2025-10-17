@@ -1,8 +1,13 @@
 package com.estocai.estocai_api.controller;
 
+import com.estocai.estocai_api.model.Usuario;
+import com.estocai.estocai_api.repository.UsuarioRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -13,29 +18,60 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthController {
 
+    private final UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Value("${JWT_SECRET_KEY}")
     private String secretKey;
 
-    public String getSecretKey() {
-        return secretKey;
+    public AuthController(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Usuario usuario) {
+        // Verifica se o usuário já existe
+        if (usuarioRepository.findByCpf(usuario.getCpf()) != null) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "CPF já cadastrado"));
+        }
+
+        // Criptografa a senha antes de salvar
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+
+        Usuario novo = usuarioRepository.save(usuario);
+
+        // Gera token JWT
+        String token = gerarToken(usuario.getCpf());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("mensagem", "Usuário registrado com sucesso");
+        response.put("token", token);
+        response.put("usuario", novo);
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestParam String username, @RequestParam String password) {
-        // Aqui você valida usuário/senha no banco
-        if ("admin".equals(username) && "admin".equals(password)) {
-            String token = Jwts.builder()
-                    .setSubject(username)
-                    .setIssuedAt(new Date())
-                    .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hora
-                    .signWith(SignatureAlgorithm.HS256, secretKey)
-                    .compact();
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-            return response;
-        } else {
-            throw new RuntimeException("Usuário ou senha inválidos");
+    public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
+        Usuario usuario = usuarioRepository.findByCpf(username);
+
+        if (usuario == null || !passwordEncoder.matches(password, usuario.getSenha())) {
+            return ResponseEntity.status(401).body(Map.of("erro", "Usuário ou senha inválidos"));
         }
+
+        String token = gerarToken(usuario.getCpf());
+
+        return ResponseEntity.ok(Map.of("token", token, "usuario", usuario));
+    }
+
+    private String gerarToken(String subject) {
+        return Jwts.builder()
+                .setSubject(subject)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hora
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
     }
 }
