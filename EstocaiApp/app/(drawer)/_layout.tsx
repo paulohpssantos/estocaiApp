@@ -1,14 +1,15 @@
-import React from "react";
-import { Drawer } from "expo-router/drawer";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import {
   DrawerContentScrollView,
-  DrawerItemList,
-  DrawerItem,
+  DrawerItemList
 } from "@react-navigation/drawer";
-import { View, Text, StyleSheet, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { Drawer } from "expo-router/drawer";
+import React from "react";
+import { Alert, Button, Image, StyleSheet, Text, View } from "react-native";
 import colors from "../../constants/colors";
+import { useAuth } from "../../src/context/AuthContext";
 
 export default function DrawerLayout() {
   return (
@@ -115,6 +116,18 @@ export default function DrawerLayout() {
 }
 
 function CustomDrawerContent(props: any) {
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.replace("/(auth)/login");
+    } catch (error) {
+      Alert.alert("Erro", "Falha ao sair");
+    }
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <LinearGradient
@@ -139,11 +152,12 @@ function CustomDrawerContent(props: any) {
           <View style={{ flex: 1, paddingTop: 10 }}>
             <DrawerItemList {...props} />
           </View>
+          <Button title="Sair" onPress={handleLogout} color={colors.primary} />
         </DrawerContentScrollView>
       </LinearGradient>
 
       <View style={styles.footer}>
-  <Text style={styles.footerText}>© {new Date().getFullYear()} Estocaí</Text>
+        <Text style={styles.footerText}>© {new Date().getFullYear()} Estocaí</Text>
         <Text style={styles.footerSub}>Sistema de Gestão</Text>
       </View>
     </View>
@@ -151,6 +165,19 @@ function CustomDrawerContent(props: any) {
 }
 
 const styles = StyleSheet.create({
+  logoutButton: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  logoutText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 16,
+  },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",

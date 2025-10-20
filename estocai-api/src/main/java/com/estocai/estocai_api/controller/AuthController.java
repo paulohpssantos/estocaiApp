@@ -2,6 +2,9 @@ package com.estocai.estocai_api.controller;
 
 import com.estocai.estocai_api.model.Usuario;
 import com.estocai.estocai_api.repository.UsuarioRepository;
+import com.estocai.estocai_api.security.TokenBlacklistService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +26,9 @@ public class AuthController {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private TokenBlacklistService blacklistService;
 
     @Value("${JWT_SECRET_KEY}")
     private String secretKey;
@@ -62,8 +69,29 @@ public class AuthController {
         }
 
         String token = gerarToken(usuario.getCpf());
+        usuarioRepository.save(usuario);
+
+        //Atualiza a data do acesso
+        usuario.setUltimoAcesso( LocalDateTime.now());
 
         return ResponseEntity.ok(Map.of("token", token, "usuario", usuario));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader(name = "Authorization", required = false) String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Token ausente"));
+        }
+
+        String token = authHeader.substring(7);
+        try {
+            Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+            Date exp = claims.getExpiration();
+            blacklistService.blacklistToken(token, exp);
+            return ResponseEntity.ok(Map.of("mensagem", "Logout realizado"));
+        } catch (JwtException e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Token inválido"));
+        }
     }
 
     private String gerarToken(String subject) {
