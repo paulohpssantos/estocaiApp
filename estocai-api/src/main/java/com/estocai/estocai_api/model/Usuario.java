@@ -15,14 +15,17 @@ public class Usuario {
     @Column(nullable = false, length = 14, unique = true)
     private String cpf;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String nome;
 
     @Column(nullable = false, length = 12)
     private String celular;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String senha;
+
+    @Column(nullable = false)
+    private String email;
 
     @Column(nullable = false)
     private LocalDate dataExpiracao;

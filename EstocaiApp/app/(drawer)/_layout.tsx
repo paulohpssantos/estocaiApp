@@ -49,12 +49,19 @@ export default function DrawerLayout() {
         }}
       />
       <Drawer.Screen
-        name="estabelecimentos"
+        name="estabelecimentos/index"
         options={{
           title: "Estabelecimentos",
           drawerIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="office-building" size={size} color={color} />
           ),
+        }}
+      />
+      <Drawer.Screen
+        name="estabelecimentos/novo"
+        options={{
+          title: "Novo Estabelecimento",
+          drawerItemStyle: { display: 'none' },
         }}
       />
       <Drawer.Screen

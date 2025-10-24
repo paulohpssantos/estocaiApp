@@ -4,6 +4,7 @@ const colors = {
   background: "#fff",
   text: "#333",
   accent: "#fbe9e7",
+  border: "#fbc4bdff",
   mediumGray: "#666",
   borderColor: "#f1f1f1",
   backgroundLight: "#fcf3f2",

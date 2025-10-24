@@ -16,4 +16,22 @@ public class Estabelecimento {
     @JoinColumn(name = "cpf", nullable = false)
     private Usuario usuario;
 
+    @Column(nullable = false)
+    private String nome;
+
+    private String logradouro;
+
+    @Column(length = 8)
+    private String cep;
+
+    @Column(length = 2)
+    private String uf;
+
+    private String municipio;
+
+    @Column(length = 12)
+    private String telefone;
+
+    private String email;
+
 }
