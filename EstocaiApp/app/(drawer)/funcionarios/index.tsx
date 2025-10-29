@@ -1,33 +1,27 @@
+import { Funcionario } from '@/src/models/funcionario';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Button, Card, IconButton, Provider as PaperProvider } from 'react-native-paper';
 import colors from "../../../constants/colors";
 import globalStyles from '../../../constants/globalStyles';
-import { Estabelecimento } from '../../../src/models/estabelecimento';
-import { Usuario } from '../../../src/models/usuario';
-import { cadastrarEstabelecimento, listarEstabelecimentosPorCpf } from '../../../src/services/estabelecimentoService';
+import { cadastrarFuncionario, listarFuncionarios } from '../../../src/services/funcionarioService';
 import { formatCelular, formatCpfCnpj } from '../../../src/utils/formatters';
 
-export default function Estabelecimentos() {
+export default function Funcionarios() {
   const router = useRouter();
-  const [estabelecimentos, setEstabelecimentos] = useState<Estabelecimento[]>([]);
+  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usuario, setUsuario] = useState<Usuario | null>(null);
+  
 
-  const fetchEstabelecimentos = async () => {
+  const fetchFuncionarios = async () => {
     setLoading(true);
     try {
-      const usuarioString = await AsyncStorage.getItem("usuario");
-      if (!usuarioString) return;
-      const usuario = JSON.parse(usuarioString) as Usuario;
-      setUsuario(usuario);
-      const data = await listarEstabelecimentosPorCpf(usuario.cpf);
-      setEstabelecimentos(data);
+      const data = await listarFuncionarios();
+      setFuncionarios(data);
     } catch (e) {
-      setEstabelecimentos([]);
+      setFuncionarios([]);
     } finally {
       setLoading(false);
     }
@@ -37,18 +31,18 @@ export default function Estabelecimentos() {
     React.useCallback(() => {
       let mounted = true;
       (async () => {
-        if (mounted) await fetchEstabelecimentos();
+        if (mounted) await fetchFuncionarios();
       })();
       return () => { mounted = false; };
     }, [])
   );
 
 
-  function renderCard(est: Estabelecimento) {
+  function renderCard(func: Funcionario) {
     const handleDelete = () => {
       Alert.alert(
         'Confirmar exclusão',
-        'Deseja realmente deletar este estabelecimento?',
+        'Deseja realmente deletar este funcionário?',
         [
           { text: 'Cancelar', style: 'cancel' },
           {
@@ -56,11 +50,11 @@ export default function Estabelecimentos() {
             style: 'destructive',
             onPress: async () => {
               try {
-                const atualizado = { ...est, ativo: false };
-                await cadastrarEstabelecimento(atualizado);
-                await fetchEstabelecimentos(); // <-- recarrega a lista após deletar
+                const atualizado = { ...func, ativo: false };
+                await cadastrarFuncionario(atualizado);
+                await fetchFuncionarios(); 
               } catch (e) {
-                Alert.alert('Erro', 'Não foi possível deletar o estabelecimento.');
+                Alert.alert('Erro', 'Não foi possível deletar o funcionário.');
               }
             }
           }
@@ -74,49 +68,37 @@ export default function Estabelecimentos() {
             <MaterialCommunityIcons name="office-building" size={32} color={colors.background} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.text, marginBottom: 2 }}>{est.nome}</Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.text, marginBottom: 2 }}>{func.nome}</Text>
             <TouchableOpacity activeOpacity={0.7}>
-              <Text style={{ color: colors.secondary, fontWeight: '600', fontSize: 15, marginBottom: 2, borderColor: colors.border, borderWidth: 1, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 }}>{formatCpfCnpj(est.cpfCnpj)}</Text>
+              <Text style={{ color: colors.secondary, fontWeight: '600', fontSize: 15, marginBottom: 2, borderColor: colors.border, borderWidth: 1, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 }}>{formatCpfCnpj(func.cpf)}</Text>
             </TouchableOpacity>
           </View>
           <View style={{ flexDirection: 'row', gap: 2 }}>
             <IconButton
               icon="pencil-outline"
               size={22}
-              onPress={() => router.push({ pathname: '/(drawer)/estabelecimentos/novo', params: { estabelecimento: JSON.stringify(est) } })}
+              onPress={() => router.push({ pathname: '/(drawer)/funcionarios/novo', params: { funcionario: JSON.stringify(func) } })}
             />
             <IconButton icon="delete-outline" size={22} onPress={handleDelete} />
           </View>
         </View>
         <View style={{ borderTopWidth: 1, borderColor: '#f0f0f0', padding: 16, paddingTop: 10 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-            <MaterialCommunityIcons name="map-marker-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
-            <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">{est.logradouro}</Text>
+            <MaterialCommunityIcons name="briefcase-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+            <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">{func.cargo}</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
             <MaterialCommunityIcons name="phone-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
-            <Text style={{ color: colors.text, fontSize: 15 }}>{formatCelular(est.telefone)}</Text>
+            <Text style={{ color: colors.text, fontSize: 15 }}>{formatCelular(func.telefone)}</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <MaterialCommunityIcons name="email-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
-            <Text style={{ color: colors.text, fontSize: 15 }}>{est.email}</Text>
+            <Text style={{ color: colors.text, fontSize: 15 }}>{func.email}</Text>
           </View>
         </View>
       </Card>
     );
   }
-
-  // function formatCpfCnpj(value: string) {
-  //   if (!value) return '';
-  //   if (value.length === 14) {
-  //     // CNPJ
-  //     return value.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
-  //   } else if (value.length === 11) {
-  //     // CPF
-  //     return value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  //   }
-  //   return value;
-  // }
 
   return (
     <PaperProvider>
@@ -128,10 +110,10 @@ export default function Estabelecimentos() {
           <FlatList
             style={{ flex: 1 }}
             contentContainerStyle={{ paddingBottom: 80 }}
-            data={estabelecimentos}
+            data={funcionarios}
             keyExtractor={(_, idx) => String(idx)}
             renderItem={({ item }) => renderCard(item)}
-            ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 30 }}>Nenhum estabelecimento encontrado.</Text>}
+            ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 30 }}>Nenhum funcionário encontrado.</Text>}
             showsVerticalScrollIndicator={false}
           />
         )}
@@ -140,9 +122,9 @@ export default function Estabelecimentos() {
       <Button
           mode="contained"
           icon="plus"
-          onPress={() => router.push('/(drawer)/estabelecimentos/novo')}
+          onPress={() => router.push('/(drawer)/funcionarios/novo')}
           style={globalStyles.primaryButton}>
-          Novo Estabelecimento
+          Novo Funcionário
         </Button>
       </View>
     </PaperProvider>

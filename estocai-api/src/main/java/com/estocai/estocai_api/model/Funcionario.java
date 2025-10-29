@@ -16,4 +16,19 @@ public class Funcionario {
     @JoinColumn(name = "cpf_cnpj", nullable = false)
     private Estabelecimento estabelecimento;
 
+    @Column(nullable = false)
+    private String nome;
+
+    @Column(nullable = false)
+    private String cargo;
+
+    @Column(length = 12)
+    private String telefone;
+
+    private String email;
+
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean ativo = true;
+
+
 }

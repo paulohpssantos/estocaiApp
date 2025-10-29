@@ -25,7 +25,7 @@ public class EstabelecimentoController {
     @GetMapping
     public List<Estabelecimento> listar(@RequestParam String cpf) {
         if (cpf != null)
-            return estabelecimentoRepository.findByUsuarioCpf(cpf);
+            return estabelecimentoRepository.findByUsuarioCpfAndAtivo(cpf, true);
         return null;
     }
 }

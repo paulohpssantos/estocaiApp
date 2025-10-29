@@ -1,11 +1,12 @@
 package com.estocai.estocai_api.repository;
 
 import com.estocai.estocai_api.model.Estabelecimento;
+import com.estocai.estocai_api.model.Funcionario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface EstabelecimentoRepository extends JpaRepository<Estabelecimento, Long> {
+public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> {
 
-    List<Estabelecimento> findByUsuarioCpfAndAtivo(String cpf, boolean ativo);
+    List<Funcionario> findByAtivo(boolean ativo);
 }

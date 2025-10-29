@@ -64,8 +64,9 @@ export default function DrawerLayout() {
           drawerItemStyle: { display: 'none' },
         }}
       />
+
       <Drawer.Screen
-        name="funcionarios"
+        name="funcionarios/index"
         options={{
           title: "Funcionários",
           drawerIcon: ({ color, size }) => (
@@ -73,6 +74,14 @@ export default function DrawerLayout() {
           ),
         }}
       />
+      <Drawer.Screen
+        name="funcionarios/novo"
+        options={{
+          title: "Novo Funcionário",
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      
       <Drawer.Screen
         name="clientes"
         options={{

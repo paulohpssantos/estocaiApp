@@ -10,4 +10,5 @@ export interface Estabelecimento {
   telefone: string;
   email: string;
   usuario: Usuario;
+  ativo: boolean;
 }

@@ -34,4 +34,7 @@ public class Estabelecimento {
 
     private String email;
 
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean ativo = true;
+
 }

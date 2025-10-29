@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, TextInput, View } from 'react-native';
 import { Button } from 'react-native-paper';
@@ -13,7 +13,7 @@ import { getEndereco } from '../../../src/services/viacepService';
 
 export default function NovoEstabelecimento() {
   const router = useRouter();
-
+  const params = useLocalSearchParams();
   const [form, setForm] = useState<Estabelecimento>({
     cpfCnpj: '',
     nome: '',
@@ -24,22 +24,29 @@ export default function NovoEstabelecimento() {
     telefone: '',
     email: '',
     usuario: null as any,
+    ativo: true,
   });
+
   
   useEffect(() => {
-    const loadUsuario = async () => {
-      try {
-        const usuarioString = await AsyncStorage.getItem("usuario");
-        if (!usuarioString) return; 
-        const usuario = JSON.parse(usuarioString) as Usuario;
-        // assegura ao TS que usuario é um Usuario (não null) aqui
-        setForm(prev => ({ ...prev, usuario: usuario as Usuario }));
-      } catch (e) {
-        console.warn('Erro ao carregar usuário do AsyncStorage', e);
-      }
-    };
-    loadUsuario();
-  }, []);
+    if (params.estabelecimento) {
+      const est = JSON.parse(params.estabelecimento as string);
+      setForm(est);
+    } else {
+      const loadUsuario = async () => {
+        try {
+          const usuarioString = await AsyncStorage.getItem("usuario");
+          if (!usuarioString) return; 
+          const usuario = JSON.parse(usuarioString) as Usuario;
+          setForm(prev => ({ ...prev, usuario: usuario as Usuario }));
+        } catch (e) {
+          console.warn('Erro ao carregar usuário do AsyncStorage', e);
+        }
+      };
+      loadUsuario();
+    }  
+    
+  }, [params.estabelecimento]);
 
   const handleChange = (field: keyof Estabelecimento, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -129,7 +136,12 @@ export default function NovoEstabelecimento() {
         </View>
       </ScrollView>
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, backgroundColor: '#fff', borderTopWidth: 0.5, borderColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
-        <Button mode="outlined" onPress={() => {}} labelStyle={{ color: colors.primary }} style={[globalStyles.secondaryButton, { flex: 1 }]}>
+        <Button
+          mode="outlined"
+          onPress={() => router.replace('/estabelecimentos')} 
+          labelStyle={{ color: colors.primary }}
+          style={[globalStyles.secondaryButton, { flex: 1 }]}
+        >
           Cancelar
         </Button>
         <Button mode="contained" onPress={handleSubmit} style={[globalStyles.primaryButton, { flex: 1 }]}>
