@@ -22,3 +22,21 @@ export function formatDateBR(date: string) {
   return `${dia}/${mes}/${ano}`;
 }
 
+export function formatISODate(dateStr: string) {
+  if (!dateStr) return '';
+  const [dia, mes, ano] = dateStr.split('/');
+  return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+}
+
+export function formatMoney(value: number | string) {
+  const number = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
+  if (isNaN(number)) return '';
+  return number.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+export function formatMoneyNoSymbol(value: number | string) {
+  const number = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
+  if (isNaN(number)) return '';
+  return number.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+

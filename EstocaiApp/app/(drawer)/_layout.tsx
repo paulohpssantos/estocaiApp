@@ -98,9 +98,9 @@ export default function DrawerLayout() {
           drawerItemStyle: { display: 'none' },
         }}
       />
-      
-       <Drawer.Screen
-        name="produtos"
+
+      <Drawer.Screen
+        name="produtos/index"
         options={{
           title: "Produtos",
           drawerIcon: ({ color, size }) => (
@@ -108,6 +108,15 @@ export default function DrawerLayout() {
           ),
         }}
       />
+      <Drawer.Screen
+        name="produtos/novo"
+        options={{
+          title: "Novo Produto",
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      
+     
       <Drawer.Screen
         name="servicos"
         options={{

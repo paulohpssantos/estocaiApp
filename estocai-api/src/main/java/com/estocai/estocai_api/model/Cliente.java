@@ -1,6 +1,7 @@
 package com.estocai.estocai_api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -14,13 +15,16 @@ public class Cliente {
     @Column(nullable = false, length = 14, unique = true)
     private String cpf;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "cpf_cnpj", nullable = false)
     private Estabelecimento estabelecimento;
 
+    @NotNull
     @Column(nullable = false)
     private String nome;
 
+    @NotNull
     @Column(length = 12, nullable = false)
     private String telefone;
 
@@ -42,6 +46,7 @@ public class Cliente {
 
     private LocalDate dataNascimento;
 
+    @NotNull
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean ativo = true;
 

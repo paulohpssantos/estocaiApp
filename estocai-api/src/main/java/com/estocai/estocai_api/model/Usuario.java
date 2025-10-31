@@ -1,6 +1,7 @@
 package com.estocai.estocai_api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -15,18 +16,23 @@ public class Usuario {
     @Column(nullable = false, length = 14, unique = true)
     private String cpf;
 
+    @NotNull
     @Column(nullable = false)
     private String nome;
 
+    @NotNull
     @Column(nullable = false, length = 12)
     private String celular;
 
+    @NotNull
     @Column(nullable = false)
     private String senha;
 
+    @NotNull
     @Column(nullable = false)
     private String email;
 
+    @NotNull
     @Column(nullable = false)
     private LocalDate dataExpiracao;
 

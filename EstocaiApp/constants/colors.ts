@@ -1,3 +1,4 @@
+
 const colors = {
   primary: "#d32f2f",
   secondary: "#b71c1c",
@@ -8,6 +9,10 @@ const colors = {
   mediumGray: "#666",
   borderColor: "#f1f1f1",
   backgroundLight: "#fcf3f2",
+  green: "#4caf50",
+  darkGreen: "#388e3c",
+  backgroundGreen: "#e8f5e9",
+  greenBorder: "#bdfbbeff",
   
   
 };

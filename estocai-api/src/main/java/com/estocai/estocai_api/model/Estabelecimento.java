@@ -1,6 +1,7 @@
 package com.estocai.estocai_api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -12,10 +13,12 @@ public class Estabelecimento {
     @Column(name = "cpf_cnpj", nullable = false, length = 14, unique = true)
     private String cpfCnpj;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "cpf", nullable = false)
     private Usuario usuario;
 
+    @NotNull
     @Column(nullable = false)
     private String nome;
 
@@ -38,6 +41,7 @@ public class Estabelecimento {
 
     private String email;
 
+    @NotNull
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean ativo = true;
 

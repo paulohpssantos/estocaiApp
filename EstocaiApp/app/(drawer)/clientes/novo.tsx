@@ -1,5 +1,6 @@
 import { Cliente } from "@/src/models/cliente";
 import { Usuario } from "@/src/models/usuario";
+import { formatDateBR } from "@/src/utils/formatters";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
@@ -199,9 +200,9 @@ export default function NovoCliente() {
               onChange={(event: any, date: Date | undefined) => {
                 setShowDatePicker(false);
                 if (date) {
-                  // Formata para yyyy-mm-dd
                   const d = date.toISOString().slice(0, 10);
-                  handleChange('dataNascimento', d);
+                                const formatted = formatDateBR(d);
+                                handleChange('dataNascimento', formatted);
                 }
               }}
               maximumDate={new Date()}
