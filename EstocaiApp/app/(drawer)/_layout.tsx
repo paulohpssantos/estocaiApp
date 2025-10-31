@@ -116,9 +116,9 @@ export default function DrawerLayout() {
         }}
       />
       
-     
+
       <Drawer.Screen
-        name="servicos"
+        name="servicos/index"
         options={{
           title: "Serviços",
           drawerIcon: ({ color, size }) => (
@@ -126,6 +126,14 @@ export default function DrawerLayout() {
           ),
         }}
       />
+      <Drawer.Screen
+        name="servicos/novo"
+        options={{
+          title: "Novo Serviço",
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+     
       <Drawer.Screen
         name="ordens"
         options={{

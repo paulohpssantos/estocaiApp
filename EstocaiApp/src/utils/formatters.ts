@@ -40,3 +40,14 @@ export function formatMoneyNoSymbol(value: number | string) {
   return number.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+export function formatDurationHM(hm: string) {
+  if (!hm) return '';
+  const [h, m] = hm.split(':');
+  const hours = parseInt(h, 10);
+  const minutes = parseInt(m, 10);
+  let result = '';
+  if (hours) result += `${hours}h`;
+  if (minutes) result += (hours ? ' ' : '') + `${minutes}min`;
+  return result || '0min';
+}
+
