@@ -3,27 +3,34 @@ package com.estocai.estocai_api.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 @Entity
-@Table(name = "estabelecimento")
-public class Estabelecimento {
+@Table(name = "cliente")
+public class Cliente {
 
     @Id
-    @Column(name = "cpf_cnpj", nullable = false, length = 14, unique = true)
-    private String cpfCnpj;
+    @Column(nullable = false, length = 14, unique = true)
+    private String cpf;
 
     @ManyToOne
-    @JoinColumn(name = "cpf", nullable = false)
-    private Usuario usuario;
+    @JoinColumn(name = "cpf_cnpj", nullable = false)
+    private Estabelecimento estabelecimento;
 
     @Column(nullable = false)
     private String nome;
 
+    @Column(length = 12, nullable = false)
+    private String telefone;
+
+    private String email;
+
     private String logradouro;
 
-    private String bairro;
-
     private String numero;
+
+    private String bairro;
 
     @Column(length = 8)
     private String cep;
@@ -33,12 +40,10 @@ public class Estabelecimento {
 
     private String municipio;
 
-    @Column(length = 12)
-    private String telefone;
-
-    private String email;
+    private LocalDate dataNascimento;
 
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean ativo = true;
+
 
 }

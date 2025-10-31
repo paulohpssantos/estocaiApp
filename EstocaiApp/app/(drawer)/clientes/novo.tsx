@@ -1,32 +1,40 @@
-import { Funcionario } from "@/src/models/funcionario";
+import { Cliente } from "@/src/models/cliente";
 import { Usuario } from "@/src/models/usuario";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Button } from 'react-native-paper';
 import colors from '../../../constants/colors';
 import globalStyles from '../../../constants/globalStyles';
 import { Estabelecimento } from '../../../src/models/estabelecimento';
+import { cadastrarCliente } from '../../../src/services/clienteService';
 import { listarEstabelecimentosPorCpf } from '../../../src/services/estabelecimentoService';
-import { cadastrarFuncionario } from '../../../src/services/funcionarioService';
+import { getEndereco } from '../../../src/services/viacepService';
 
 
-export default function NovoFuncionario() {
+export default function NovoCliente() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [estabelecimentos, setEstabelecimentos] = useState<Estabelecimento[]>([]);
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState<Funcionario>({
+  const [form, setForm] = useState<Cliente>({
     cpf: '',
     nome: '',
-    cargo: '',
     telefone: '',
     email: '',
-    estabelecimento: null as any,
+    logradouro: '',
+    numero: '',
+    bairro: '',
+    cep: '',
+    uf: '',
+    municipio: '',
+    dataNascimento: '',
     ativo: true,
+    estabelecimento: null as any,
   });
 
 
@@ -50,24 +58,21 @@ export default function NovoFuncionario() {
     fetchEstabelecimentos();
   }, []);
   
-  
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const handleChange = (field: keyof Funcionario, value: string) => {
+  const handleChange = (field: keyof Cliente, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
   };
  
   const handleSubmit = async () => {
     try {
-      await cadastrarFuncionario(form);
-      Alert.alert('Sucesso', 'Funcionário cadastrado com sucesso!');
-      router.replace('/funcionarios');
+      await cadastrarCliente(form);
+      Alert.alert('Sucesso', 'Cliente cadastrado com sucesso!');
+      router.replace('/clientes');
     } catch (error) {
-      Alert.alert('Erro', 'Falha ao cadastrar funcionário');
+      Alert.alert('Erro', 'Falha ao cadastrar cliente');
     }
   };
-
-  const labelStyle = { marginBottom: 6, color: '#222', fontWeight: "600" };
-
   return (
     <View style={[globalStyles.centeredContainer, { paddingTop: 20 }, { paddingBottom: 20 }]}> 
       <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 32 }}>
@@ -111,13 +116,6 @@ export default function NovoFuncionario() {
             onChangeText={v => handleChange('nome', v)}
             style={globalStyles.input}
           />
-          <Text style={{ marginBottom: 4, color: colors.text }}>Cargo</Text>
-          <TextInput
-            placeholder="Cargo"
-            value={form.cargo}
-            onChangeText={v => handleChange('cargo', v)}
-            style={globalStyles.input}
-          />
           <Text style={{ marginBottom: 4, color: colors.text }}>Telefone</Text>
           <TextInput
             placeholder="Telefone"
@@ -132,6 +130,83 @@ export default function NovoFuncionario() {
             onChangeText={v => handleChange('email', v)}
             style={globalStyles.input}
           />
+          <Text style={{ marginBottom: 4, color: colors.text }}>CEP</Text>
+          <TextInput
+            placeholder="CEP"
+            value={form.cep}
+            onChangeText={async v => {
+              handleChange('cep', v);
+              if (v.length === 8) { 
+                try {
+                  const endereco = await getEndereco(v);
+                  if (endereco && !endereco.erro) {
+                    setForm(prev => ({
+                      ...prev,
+                      logradouro: endereco.logradouro || '',
+                      uf: endereco.uf || '',
+                      municipio: endereco.localidade || '',
+                      bairro: endereco.bairro || ''
+                    }));
+                  }
+                } catch (e) {}
+              }
+            }}
+            style={globalStyles.input}
+          />
+          <Text style={{ marginBottom: 4, color: colors.text }}>Logradouro</Text>
+          <TextInput
+            placeholder="Logradouro"
+            value={form.logradouro}
+            onChangeText={v => handleChange('logradouro', v)}
+            style={globalStyles.input}
+          />
+          <Text style={{ marginBottom: 4, color: colors.text }}>Número</Text>
+          <TextInput
+            placeholder="Número"
+            value={form.numero}
+            onChangeText={v => handleChange('numero', v)}
+            style={globalStyles.input}
+          />
+          <Text style={{ marginBottom: 4, color: colors.text }}>UF</Text>
+          <TextInput
+            placeholder="UF"
+            value={form.uf}
+            onChangeText={v => handleChange('uf', v)}
+            style={globalStyles.input}
+          />
+          <Text style={{ marginBottom: 4, color: colors.text }}>Município</Text>
+          <TextInput
+            placeholder="Município"
+            value={form.municipio}
+            onChangeText={v => handleChange('municipio', v)}
+            style={globalStyles.input}
+          />
+          <Text style={{ marginBottom: 4, color: colors.text }}>Data de Nascimento</Text>
+          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+            <TextInput
+              placeholder="Data de Nascimento"
+              value={form.dataNascimento}
+              style={globalStyles.input}
+              editable={false}
+              pointerEvents="none"
+            />
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={form.dataNascimento ? new Date(form.dataNascimento) : new Date()}
+              mode="date"
+              display="default"
+              onChange={(event: any, date: Date | undefined) => {
+                setShowDatePicker(false);
+                if (date) {
+                  // Formata para yyyy-mm-dd
+                  const d = date.toISOString().slice(0, 10);
+                  handleChange('dataNascimento', d);
+                }
+              }}
+              maximumDate={new Date()}
+            />
+          )}
           
         </View>
       </ScrollView>

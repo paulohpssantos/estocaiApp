@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, TextInput, View } from 'react-native';
+import { Alert, ScrollView, Text, TextInput, View } from 'react-native';
 import { Button } from 'react-native-paper';
 import colors from '../../../constants/colors';
 import globalStyles from '../../../constants/globalStyles';
@@ -68,18 +68,21 @@ export default function NovoEstabelecimento() {
     <View style={[globalStyles.centeredContainer, { paddingTop: 20 }, { paddingBottom: 80 }]}> 
       <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 32 }}>
         <View style={globalStyles.formContainer}>
+          <Text style={{ marginBottom: 4, color: colors.text }}>CNPJ/CPF</Text>
           <TextInput
             placeholder="CNPJ/CPF"
             value={form.cpfCnpj}
             onChangeText={v => handleChange('cpfCnpj', v)}
             style={globalStyles.input}
           />
+          <Text style={{ marginBottom: 4, color: colors.text }}>Nome</Text>
           <TextInput
             placeholder="Nome"
             value={form.nome}
             onChangeText={v => handleChange('nome', v)}
             style={globalStyles.input}
           />
+          <Text style={{ marginBottom: 4, color: colors.text }}>CEP</Text>
           <TextInput
             placeholder="CEP"
             value={form.cep}
@@ -96,43 +99,46 @@ export default function NovoEstabelecimento() {
                       municipio: endereco.localidade || ''
                     }));
                   }
-                } catch (e) {
-                }
+                } catch (e) {}
               }
             }}
             style={globalStyles.input}
           />
+          <Text style={{ marginBottom: 4, color: colors.text }}>Logradouro</Text>
           <TextInput
             placeholder="Logradouro"
             value={form.logradouro}
             onChangeText={v => handleChange('logradouro', v)}
             style={globalStyles.input}
           />
+          <Text style={{ marginBottom: 4, color: colors.text }}>UF</Text>
           <TextInput
             placeholder="UF"
             value={form.uf}
             onChangeText={v => handleChange('uf', v)}
             style={globalStyles.input}
           />
+          <Text style={{ marginBottom: 4, color: colors.text }}>Município</Text>
           <TextInput
             placeholder="Município"
             value={form.municipio}
             onChangeText={v => handleChange('municipio', v)}
             style={globalStyles.input}
           />
+          <Text style={{ marginBottom: 4, color: colors.text }}>Telefone</Text>
           <TextInput
             placeholder="Telefone"
             value={form.telefone}
             onChangeText={v => handleChange('telefone', v)}
             style={globalStyles.input}
           />
+          <Text style={{ marginBottom: 4, color: colors.text }}>Email</Text>
           <TextInput
             placeholder="Email"
             value={form.email}
             onChangeText={v => handleChange('email', v)}
             style={globalStyles.input}
           />
-          
         </View>
       </ScrollView>
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, backgroundColor: '#fff', borderTopWidth: 0.5, borderColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>

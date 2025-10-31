@@ -15,3 +15,10 @@ export function formatCelular(value: string) {
   const digits = value.replace(/\D/g, '');
   return digits.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1)$2-$3');
 }
+
+export function formatDateBR(date: string) {
+  if (!date) return '';
+  const [ano, mes, dia] = date.split('-');
+  return `${dia}/${mes}/${ano}`;
+}
+

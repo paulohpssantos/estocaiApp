@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import { AuthProvider } from "../src/context/AuthContext"; // ajuste o caminho se necessário
+import { AuthProvider } from "../src/context/AuthContext";
 
 export default function RootLayout() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
