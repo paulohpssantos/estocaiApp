@@ -133,9 +133,9 @@ export default function DrawerLayout() {
           drawerItemStyle: { display: 'none' },
         }}
       />
-     
-      <Drawer.Screen
-        name="ordens"
+
+       <Drawer.Screen
+        name="ordens/index"
         options={{
           title: "Ordens de Serviço",
           drawerIcon: ({ color, size }) => (
@@ -143,6 +143,22 @@ export default function DrawerLayout() {
           ),
         }}
       />
+      <Drawer.Screen
+        name="ordens/novo"
+        options={{
+          title: "Nova Ordem de Serviço",
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="ordens/preview"
+        options={{
+          title: "Visualizar Ordem de Serviço",
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+     
+      
       <Drawer.Screen
         name="relatorios"
         options={{

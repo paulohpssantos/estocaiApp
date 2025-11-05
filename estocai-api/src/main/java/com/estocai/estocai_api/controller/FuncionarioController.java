@@ -28,4 +28,9 @@ public class FuncionarioController {
     public List<Funcionario> listar() {
         return funcionarioRepository.findByAtivo(true);
     }
+
+    @GetMapping("/{estabelecimentoCpfCnpj}")
+    public List<Funcionario> listarPorEstabelecimento(@PathVariable String estabelecimentoCpfCnpj) {
+        return funcionarioRepository.findByEstabelecimentoCpfCnpjAndAtivo(estabelecimentoCpfCnpj, true);
+    }
 }
