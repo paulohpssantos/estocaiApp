@@ -11,3 +11,8 @@ export async function listarProdutos(): Promise<Produto[]> {
   const response = await api.get(`/produto`);
   return response.data;
 }
+
+export async function countProdutos(): Promise<number> {
+  const response = await api.get(`/produto/count`);
+  return response.data;
+}

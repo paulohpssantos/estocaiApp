@@ -33,4 +33,9 @@ public class FuncionarioController {
     public List<Funcionario> listarPorEstabelecimento(@PathVariable String estabelecimentoCpfCnpj) {
         return funcionarioRepository.findByEstabelecimentoCpfCnpjAndAtivo(estabelecimentoCpfCnpj, true);
     }
+
+    @GetMapping("/count")
+    public long totalCount() {
+        return funcionarioRepository.countByAtivo(true);
+    }
 }

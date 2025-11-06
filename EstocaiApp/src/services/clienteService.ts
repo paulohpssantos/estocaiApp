@@ -11,3 +11,8 @@ export async function listarClientes(): Promise<Cliente[]> {
   const response = await api.get(`/cliente`);
   return response.data;
 }
+
+export async function countClientes(): Promise<number> {
+  const response = await api.get(`/cliente/count`);
+  return response.data;
+}

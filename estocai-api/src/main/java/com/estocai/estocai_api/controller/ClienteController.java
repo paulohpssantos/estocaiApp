@@ -28,4 +28,9 @@ public class ClienteController {
     public List<Cliente> listar() {
         return clienteRepository.findByAtivo(true);
     }
+
+    @GetMapping("/count")
+    public long totalCount() {
+        return clienteRepository.countByAtivo(true);
+    }
 }

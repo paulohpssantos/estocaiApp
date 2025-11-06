@@ -150,13 +150,6 @@ export default function DrawerLayout() {
           drawerItemStyle: { display: 'none' },
         }}
       />
-      <Drawer.Screen
-        name="ordens/preview"
-        options={{
-          title: "Visualizar Ordem de Serviço",
-          drawerItemStyle: { display: 'none' },
-        }}
-      />
      
       
       <Drawer.Screen

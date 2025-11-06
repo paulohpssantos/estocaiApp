@@ -28,4 +28,9 @@ public class ServicoController {
     public List<Servico> listar() {
         return servicoRepository.findByAtivo(true);
     }
+
+    @GetMapping("/count")
+    public long totalCount() {
+        return servicoRepository.countByAtivo(true);
+    }
 }

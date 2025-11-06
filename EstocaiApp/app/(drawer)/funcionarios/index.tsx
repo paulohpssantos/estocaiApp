@@ -1,5 +1,5 @@
 import { Funcionario } from '@/src/models/funcionario';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
@@ -65,7 +65,7 @@ export default function Funcionarios() {
       <Card style={{ marginBottom: 18, borderRadius: 18, backgroundColor: colors.background, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', padding: 18, paddingBottom: 10 , backgroundColor: colors.accent}}>
           <View style={{ backgroundColor: colors.primary, borderRadius: 16, padding: 12, marginRight: 14 }}>
-            <MaterialCommunityIcons name="people" size={32} color={colors.background} />
+            <MaterialIcons name="people" size={32} color={colors.background} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.text, marginBottom: 2 }}>{func.nome}</Text>

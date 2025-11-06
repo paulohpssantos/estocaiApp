@@ -46,5 +46,12 @@ public class OrdemServicoController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/count")
+    public long totalCount() {
+
+        return ordemServicoRepository.count();
+
+    }
 }
 

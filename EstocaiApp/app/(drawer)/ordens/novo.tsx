@@ -19,17 +19,14 @@ import { Servico } from '../../../src/models/servico';
 import { Usuario } from '../../../src/models/usuario';
 
 import { listarClientes } from "@/src/services/clienteService";
-import { cadastrarOrdemServico, cadastrarProdutosOrdemServico, cadastrarServicoOrdemServico } from "@/src/services/ordemServicoService";
+import { cadastrarOrdemServico, cadastrarProdutosOrdemServico, cadastrarServicoOrdemServico, listarProdutosOrdemServico, listarServicosOrdemServico } from "@/src/services/ordemServicoService";
 import { listarProdutos } from "@/src/services/produtoService";
 import { listarServicos } from "@/src/services/servicoService";
-import { formatDateBR, formatISODate, formatMoney, formatMoneyNoSymbol } from "@/src/utils/formatters";
+import { formatDateBR, formatISODate, formatMoney } from "@/src/utils/formatters";
 import { listarEstabelecimentosPorCpf } from '../../../src/services/estabelecimentoService';
 import { listarFuncionariosPorEstabelecimento } from '../../../src/services/funcionarioService';
 
-
-
-
-export default function NovoFuncionario() {
+export default function NovaOrdemServico() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [estabelecimentos, setEstabelecimentos] = useState<Estabelecimento[]>([]);
@@ -43,10 +40,10 @@ export default function NovoFuncionario() {
   const [clientesFiltrados, setClientesFiltrados] = useState<Cliente[]>([]);
   const [servicoBusca, setServicoBusca] = useState('');
   const [servicosFiltrados, setServicosFiltrados] = useState<Servico[]>([]);
-  const [servicosSelecionados, setServicosSelecionados] = useState<{ servico: Servico, valor: number }[]>([]);
+  const [servicosSelecionados, setServicosSelecionados] = useState<{ id?: number,servico: Servico, valor: number }[]>([]);
   const [produtoBusca, setProdutoBusca] = useState('');
   const [produtosFiltrados, setProdutosFiltrados] = useState<Produto[]>([]);
-  const [produtosSelecionados, setProdutosSelecionados] = useState<{ produto: Produto, quantidade: number }[]>([]);
+  const [produtosSelecionados, setProdutosSelecionados] = useState<{ id?: number, produto: Produto, quantidade: number }[]>([]);
   const [form, setForm] = useState<OrdemServico>({
     id: null,
     numeroOS: '',
@@ -58,7 +55,8 @@ export default function NovoFuncionario() {
     status: '',
     valorTotal: 0,
   });
-    
+
+  
 
   const fetchEstabelecimentos = async () => {
     setLoading(true);
@@ -124,7 +122,52 @@ export default function NovoFuncionario() {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
+    const carregarDadosEdicao = async () => {
+      if (params.ordem) {
+        try {
+          const ordem = JSON.parse(params.ordem as string);
+
+          // 1. Buscar funcionários do estabelecimento da ordem
+          if (ordem.estabelecimento?.cpfCnpj) {
+            await fetchFuncionarios(ordem.estabelecimento.cpfCnpj);
+          }
+
+          // 2. Preencher o formulário
+          setForm({
+            ...ordem,
+            dataAbertura: ordem.dataAbertura ? formatDateBR(ordem.dataAbertura) : '',
+          });
+          setClienteBusca(ordem.cliente?.nome || '');
+
+          // 3. Buscar produtos e serviços vinculados à ordem
+          if (ordem.id) {
+            const produtosOrdem = await listarProdutosOrdemServico(ordem.id);
+            setProdutosSelecionados(
+              produtosOrdem.map((p: any) => ({
+                id: p.id,
+                produto: p.produto,
+                quantidade: p.quantidade,
+              }))
+            );
+            const servicosOrdem = await listarServicosOrdemServico(ordem.id);
+            setServicosSelecionados(
+              servicosOrdem.map((s: any) => ({
+                id: s.id,
+                servico: s.servico,
+                valor: s.valorTotal,
+              }))
+            );
+          }
+        } catch (e) {
+          // Se der erro, não faz nada
+        }
+      }
+    };
+    carregarDadosEdicao();
+  }, [params.ordem]);
+
+  useEffect(() => {
     fetchEstabelecimentos();
     fetchProdutos();
     fetchServicos();
@@ -178,8 +221,6 @@ export default function NovoFuncionario() {
  
   const handleSubmit = async () => {
     try {
-      
-      // Monta o objeto da ordem de serviço
       const ordemServicoData: OrdemServico = {
         ...form,
         valorTotal: valorTotal,
@@ -187,13 +228,11 @@ export default function NovoFuncionario() {
         status: form.status && form.status.trim() !== '' ? form.status : 'Aberta',
       };
 
-      // 1. Cadastra a ordem de serviço
       const ordemCriada = await cadastrarOrdemServico(ordemServicoData);
 
-      // 2. Cadastra os produtos vinculados à ordem
       for (const item of produtosSelecionados) {
         const produtoOrdem: ProdutoOrdemServico = {
-          id: null,
+          id: item.id ?? null,
           ordemServico: ordemCriada,
           produto: item.produto,
           quantidade: item.quantidade,
@@ -202,10 +241,9 @@ export default function NovoFuncionario() {
         await cadastrarProdutosOrdemServico(produtoOrdem);
       }
 
-      // 3. Cadastra os serviços vinculados à ordem
       for (const item of servicosSelecionados) {
         const servicoOrdem: ServicoOrdemServico = {
-          id: null,
+          id: item.id ?? null,
           ordemServico: ordemCriada,
           servico: item.servico,
           valorTotal: item.valor,
@@ -223,14 +261,14 @@ export default function NovoFuncionario() {
   const handleAddServico = (servico: Servico) => {
     setServicosSelecionados(prev => [
       ...prev,
-      { servico, valor: servico.valor }
+      { id: undefined, servico, valor: servico.valor }
     ]);
     setServicoBusca('');
     setServicosFiltrados([]);
   };
 
   const handleValorServicoChange = (index: number, valor: string) => {
-  const novoValor = Number(valor.replace(/\D/g, ''));
+    const novoValor = Number(valor.replace(/\D/g, ''));
     setServicosSelecionados(prev => {
       const arr = [...prev];
       arr[index].valor = novoValor;
@@ -245,7 +283,7 @@ export default function NovoFuncionario() {
   const handleAddProduto = (produto: Produto) => {
     setProdutosSelecionados(prev => [
       ...prev,
-      { produto, quantidade: 1 }
+      { id: undefined, produto, quantidade: 1 }
     ]);
     setProdutoBusca('');
     setProdutosFiltrados([]);
@@ -272,13 +310,40 @@ export default function NovoFuncionario() {
 
   const valorTotal = calcularValorTotal();
 
-
   const labelStyle = { marginBottom: 6, color: '#222', fontWeight: "600" };
+  const isEditing = !!form.id;
+  const isViewOnly = params.viewOnly === 'true';
 
   return (
     <View style={[globalStyles.centeredContainer, { paddingTop: 20 }, { paddingBottom: 20 }]}> 
       <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 32 }}>
         <View style={globalStyles.formContainer}>
+
+          {isEditing && (
+            <>
+              <Text style={{ marginBottom: 4, color: colors.text }}>Status</Text>
+              <View style={[globalStyles.input, { justifyContent: 'center', height: 70, overflow: 'hidden' }]}>
+                <Picker
+                  selectedValue={form.status}
+                  onValueChange={(status: string) => setForm(prev => ({ ...prev, status }))}
+                  style={{
+                    color: colors.text,
+                    fontSize: 16,
+                    backgroundColor: 'transparent',
+                    width: '100%',
+                  }}
+                  dropdownIconColor={colors.primary}
+                  enabled={!isViewOnly}
+                >
+                  <Picker.Item label="Selecione o status" value="" />
+                  <Picker.Item label="Aberta" value="Aberta" />
+                  <Picker.Item label="Em Andamento" value="Em Andamento" />
+                  <Picker.Item label="Finalizada" value="Finalizada" />
+                  <Picker.Item label="Cancelada" value="Cancelada" />
+                </Picker>
+              </View>
+            </>
+          )}
 
           <Text style={{ marginBottom: 4, color: colors.text }}>Estabelecimento</Text>
           <View style={[globalStyles.input, { justifyContent: 'center', height: 70, overflow: 'hidden' }]}>
@@ -288,7 +353,7 @@ export default function NovoFuncionario() {
                 const est = estabelecimentos.find(e => e.cpfCnpj === cpfCnpj);
                 if (est) {
                   setForm(prev => ({ ...prev, estabelecimento: est }));
-                  fetchFuncionarios(est.cpfCnpj); // Chama ao selecionar
+                  fetchFuncionarios(est.cpfCnpj);
                 }
               }}
               style={{
@@ -298,6 +363,7 @@ export default function NovoFuncionario() {
                 width: '100%',
               }}
               dropdownIconColor={colors.primary}
+              enabled={!isViewOnly}
             >
               <Picker.Item label="Selecione o estabelecimento" value="" />
               {estabelecimentos.map(est => (
@@ -323,6 +389,7 @@ export default function NovoFuncionario() {
                 width: '100%',
               }}
               dropdownIconColor={colors.primary}
+              enabled={!isViewOnly}
             >
               <Picker.Item label="Selecione o funcionário" value="" />
               {funcionarios.map(func => (
@@ -332,39 +399,39 @@ export default function NovoFuncionario() {
           </View>
 
           <Text style={{ marginBottom: 4, color: colors.text }}>Cliente</Text>
-            <TextInput
-              placeholder="Buscar cliente"
-              value={clienteBusca}
-              onChangeText={setClienteBusca}
-              style={globalStyles.input}
-              onFocus={() => {
-                if (clienteBusca.trim() === '') setClientesFiltrados(clientes);
-              }}
-              onBlur={() => {
-                // Opcional: esconde a lista ao perder o foco
-                 setClientesFiltrados([]);
-              }}
-            />
-            {clientesFiltrados.length > 0 && (
-              <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}>
-                {clientesFiltrados.map(cliente => (
-                  <TouchableOpacity
-                    key={cliente.cpf}
-                    onPress={() => {
-                      setForm(prev => ({ ...prev, cliente }));
-                      setClienteBusca(cliente.nome);
-                      setClientesFiltrados([]);
-                    }}
-                    style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: colors.border }}
-                  >
-                    <Text style={{ color: colors.text }}>{cliente.nome}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}  
+          <TextInput
+            placeholder="Buscar cliente"
+            value={clienteBusca}
+            onChangeText={setClienteBusca}
+            style={globalStyles.input}
+            onFocus={() => {
+              if (clienteBusca.trim() === '') setClientesFiltrados(clientes);
+            }}
+            onBlur={() => {
+              setClientesFiltrados([]);
+            }}
+            editable={!isViewOnly}
+          />
+          {clientesFiltrados.length > 0 && !isViewOnly && (
+            <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}>
+              {clientesFiltrados.map(cliente => (
+                <TouchableOpacity
+                  key={cliente.cpf}
+                  onPress={() => {
+                    setForm(prev => ({ ...prev, cliente }));
+                    setClienteBusca(cliente.nome);
+                    setClientesFiltrados([]);
+                  }}
+                  style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: colors.border }}
+                >
+                  <Text style={{ color: colors.text }}>{cliente.nome}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}  
 
           <Text style={{ marginBottom: 4, color: colors.text }}>Data de Abertura</Text>
-          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+          <TouchableOpacity onPress={() => !isViewOnly && setShowDatePicker(true)}>
             <TextInput
               placeholder="Data de Abertura"
               value={form.dataAbertura}
@@ -399,20 +466,22 @@ export default function NovoFuncionario() {
           <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.text, marginBottom: 8 }}>
             <MaterialCommunityIcons name="cog-outline" size={22} color={colors.primary} /> Serviços
           </Text>
-          <TextInput
-            placeholder="Buscar serviço"
-            value={servicoBusca}
-            onChangeText={setServicoBusca}
-            style={globalStyles.input}
-            onFocus={() => {
-              if (servicoBusca.trim() === '') setServicosFiltrados(servicos);
-            }}
-            onBlur={() => {
-              // Opcional: esconde a lista ao perder o foco
-               setServicosFiltrados([]);
-            }}
-          />
-          {servicosFiltrados.length > 0 && (
+          {!isViewOnly && (
+            <TextInput
+              placeholder="Buscar serviço"
+              value={servicoBusca}
+              onChangeText={setServicoBusca}
+              style={globalStyles.input}
+              onFocus={() => {
+                if (servicoBusca.trim() === '') setServicosFiltrados(servicos);
+              }}
+              onBlur={() => {
+                setServicosFiltrados([]);
+              }}
+              editable={!isViewOnly}
+            />
+          )}
+          {servicosFiltrados.length > 0 && !isViewOnly && (
             <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}>
               {servicosFiltrados.map(servico => (
                 <TouchableOpacity
@@ -452,19 +521,24 @@ export default function NovoFuncionario() {
                       backgroundColor: '#fafafa',
                       textAlign: 'center',
                     }}
-                    value={item.valor === 0 ? '' : formatMoneyNoSymbol(item.valor)}
+                    value={item.valor === 0 ? '' : String(item.valor)}
                     onChangeText={v => {
-                      // Aceita apenas números, vírgula e ponto
                       const clean = v.replace(/[^0-9.,]/g, '').replace(',', '.');
-                      const numeric = parseFloat(clean);
-                      handleValorServicoChange(idx, isNaN(numeric) ? '0' : numeric.toString());
+                      setServicosSelecionados(prev => {
+                        const arr = [...prev];
+                        arr[idx].valor = clean === '' ? 0 : parseFloat(clean);
+                        return arr;
+                      });
                     }}
                     keyboardType="numeric"
                     placeholder="0,00"
+                    editable={!isViewOnly}
                   />
-                  <TouchableOpacity onPress={() => handleRemoveServico(idx)} style={{ marginLeft: 8 }}>
-                    <MaterialCommunityIcons name="delete-outline" size={22} color="#B3261E" />
-                  </TouchableOpacity>
+                  {!isViewOnly && (
+                    <TouchableOpacity onPress={() => handleRemoveServico(idx)} style={{ marginLeft: 8 }}>
+                      <MaterialCommunityIcons name="delete-outline" size={22} color="#B3261E" />
+                    </TouchableOpacity>
+                  )}
                 </View>
               ))}
             </View>
@@ -473,20 +547,22 @@ export default function NovoFuncionario() {
           <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.text, marginBottom: 8 }}>
             <MaterialCommunityIcons name="cube-outline" size={22} color={colors.primary} /> Produtos
           </Text>
-          <TextInput
-            placeholder="Buscar produto"
-            value={produtoBusca}
-            onChangeText={setProdutoBusca}
-            style={globalStyles.input}
-            onFocus={() => {
-              if (produtoBusca.trim() === '') setProdutosFiltrados(produtos);
-            }}
-            onBlur={() => {
-              // Opcional: esconde a lista ao perder o foco
-               setProdutosFiltrados([]);
-            }}
-          />
-          {produtosFiltrados.length > 0 && (
+          {!isViewOnly && (
+            <TextInput
+              placeholder="Buscar produto"
+              value={produtoBusca}
+              onChangeText={setProdutoBusca}
+              style={globalStyles.input}
+              onFocus={() => {
+                if (produtoBusca.trim() === '') setProdutosFiltrados(produtos);
+              }}
+              onBlur={() => {
+                setProdutosFiltrados([]);
+              }}
+              editable={!isViewOnly}
+            />
+          )}
+          {produtosFiltrados.length > 0 && !isViewOnly && (
             <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}>
               {produtosFiltrados.map(produto => (
                 <TouchableOpacity
@@ -533,19 +609,23 @@ export default function NovoFuncionario() {
                       justifyContent: 'center',
                     }}
                   >
-                    <TouchableOpacity
-                      onPress={() => handleQuantidadeProdutoChange(idx, String(Math.max(1, item.quantidade - 1)))}
-                      style={{ paddingHorizontal: 8, paddingVertical: 4 }}
-                    >
-                      <MaterialCommunityIcons name="chevron-down" size={22} color={colors.text} />
-                    </TouchableOpacity>
+                    {!isViewOnly && (
+                      <TouchableOpacity
+                        onPress={() => handleQuantidadeProdutoChange(idx, String(Math.max(1, item.quantidade - 1)))}
+                        style={{ paddingHorizontal: 8, paddingVertical: 4 }}
+                      >
+                        <MaterialCommunityIcons name="chevron-down" size={22} color={colors.text} />
+                      </TouchableOpacity>
+                    )}
                     <Text style={{ minWidth: 24, textAlign: 'center', fontSize: 16 }}>{item.quantidade}</Text>
-                    <TouchableOpacity
-                      onPress={() => handleQuantidadeProdutoChange(idx, String(item.quantidade + 1))}
-                      style={{ paddingHorizontal: 8, paddingVertical: 4 }}
-                    >
-                      <MaterialCommunityIcons name="chevron-up" size={22} color={colors.text} />
-                    </TouchableOpacity>
+                    {!isViewOnly && (
+                      <TouchableOpacity
+                        onPress={() => handleQuantidadeProdutoChange(idx, String(item.quantidade + 1))}
+                        style={{ paddingHorizontal: 8, paddingVertical: 4 }}
+                      >
+                        <MaterialCommunityIcons name="chevron-up" size={22} color={colors.text} />
+                      </TouchableOpacity>
+                    )}
                   </View>
                   <Text style={{ flex: 1, color: colors.text, textAlign: 'center' }}>
                     {formatMoney(item.produto.valor)}
@@ -553,9 +633,11 @@ export default function NovoFuncionario() {
                   <Text style={{ flex: 1, color: colors.text, textAlign: 'center' }}>
                     {formatMoney(item.produto.valor * item.quantidade)}
                   </Text>
-                  <TouchableOpacity onPress={() => handleRemoveProduto(idx)} style={{ marginLeft: 8 }}>
-                    <MaterialCommunityIcons name="delete-outline" size={22} color="#B3261E" />
-                  </TouchableOpacity>
+                  {!isViewOnly && (
+                    <TouchableOpacity onPress={() => handleRemoveProduto(idx)} style={{ marginLeft: 8 }}>
+                      <MaterialCommunityIcons name="delete-outline" size={22} color="#B3261E" />
+                    </TouchableOpacity>
+                  )}
                 </View>
               ))}
             </View>
@@ -576,6 +658,7 @@ export default function NovoFuncionario() {
             onChangeText={v => setForm(prev => ({ ...prev, observacoes: v }))}
             style={[globalStyles.input, { minHeight: 80, textAlignVertical: 'top' }]}
             multiline
+            editable={!isViewOnly}
           />
 
           <View
@@ -613,17 +696,29 @@ export default function NovoFuncionario() {
         </View>
       </ScrollView>
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, backgroundColor: '#fff', borderTopWidth: 0.5, borderColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
-        <Button
-          mode="outlined"
-          onPress={() => router.replace('/ordens')} 
-          labelStyle={{ color: colors.primary }}
-          style={[globalStyles.secondaryButton, { flex: 1 }]}
-        >
-          Cancelar
-        </Button>
-        <Button mode="contained" onPress={handleSubmit} style={[globalStyles.primaryButton, { flex: 1 }]}>
-          Salvar
-        </Button>
+        {isViewOnly ? (
+          <Button
+            mode="contained"
+            onPress={() => router.replace('/ordens')}
+            style={[globalStyles.primaryButton, { flex: 1 }]}
+          >
+            Fechar
+          </Button>
+        ) : (
+          <>
+            <Button
+              mode="outlined"
+              onPress={() => router.replace('/ordens')} 
+              labelStyle={{ color: colors.primary }}
+              style={[globalStyles.secondaryButton, { flex: 1 }]}
+            >
+              Cancelar
+            </Button>
+            <Button mode="contained" onPress={handleSubmit} style={[globalStyles.primaryButton, { flex: 1 }]}>
+              Salvar
+            </Button>
+          </>
+        )}
       </View>
     </View>
   );

@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import api from "../services/api";
 import { Usuario } from '../models/usuario';
+import api from "../services/api";
 
 interface User {
   token: string;
@@ -16,6 +16,16 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+let globalLogout: (() => Promise<void>) | null = null;
+
+export const setGlobalLogout = (logoutFn: () => Promise<void>) => {
+  globalLogout = logoutFn;
+};
+
+export const triggerGlobalLogout = async () => {
+  if (globalLogout) await globalLogout();
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -58,6 +68,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await AsyncStorage.removeItem("usuario");
     setUser(null);
   };
+
+  // Registra o logout global para ser usado pelo interceptor do axios
+  useEffect(() => {
+    setGlobalLogout(logout);
+  }, [logout]);
 
   return (
     <AuthContext.Provider value={{ user, login, logout, register }}>

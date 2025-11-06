@@ -16,3 +16,8 @@ export async function listarFuncionariosPorEstabelecimento(estabelecimentoCpfCnp
   const response = await api.get(`/funcionario/${estabelecimentoCpfCnpj}`);
   return response.data;
 }
+
+export async function countFuncionarios(): Promise<number> {
+  const response = await api.get(`/funcionario/count`);
+  return response.data;
+}

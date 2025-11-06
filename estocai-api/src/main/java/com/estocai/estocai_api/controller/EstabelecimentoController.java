@@ -28,4 +28,9 @@ public class EstabelecimentoController {
             return estabelecimentoRepository.findByUsuarioCpfAndAtivo(cpf, true);
         return null;
     }
+
+    @GetMapping("/count/{cpf}")
+    public long totalCount(@PathVariable String cpf) {
+        return estabelecimentoRepository.countByUsuarioCpfAndAtivo(cpf,true);
+    }
 }

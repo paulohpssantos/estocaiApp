@@ -9,7 +9,7 @@ import colors from "../../../constants/colors";
 import globalStyles from '../../../constants/globalStyles';
 import { deletarOrdemServico, deletarProdutosOrdemServicoPorOrdem, deletarServicosOrdemServicoPorOrdem, listarOrdensServico, listarProdutosOrdemServico } from '../../../src/services/ordemServicoService';
 import { cadastrarProduto } from '../../../src/services/produtoService';
-import { formatCelular, formatDateBR, formatMoney } from '../../../src/utils/formatters';
+import { formatDateBR, formatMoney } from '../../../src/utils/formatters';
 
 export default function Ordens() {
   const router = useRouter();
@@ -109,53 +109,68 @@ export default function Ordens() {
 
     return (
       <Card style={{ marginBottom: 18, borderRadius: 18, backgroundColor: colors.background, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 18, paddingBottom: 10 , backgroundColor: colors.accent}}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 18, paddingBottom: 10, backgroundColor: colors.accent }}>
           <View style={{ backgroundColor: colors.primary, borderRadius: 16, padding: 12, marginRight: 14 }}>
             <MaterialCommunityIcons name="file-document-outline" size={32} color={colors.background} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.text, marginBottom: 2 }}>OS</Text>
-            <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.text, marginBottom: 2 }}>{ordem.numeroOS}</Text>
-            <TouchableOpacity activeOpacity={0.7}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <View>
+                <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.text, marginBottom: 0, lineHeight: 22 }}>OS</Text>
+                <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.text, marginBottom: 0, lineHeight: 22 }}>{ordem.numeroOS}</Text>
+              </View>
+              <View style={{ flexDirection: 'row', gap: 2 }}>
+                <IconButton
+                  icon="eye-outline"
+                  size={22}
+                  onPress={() => router.push({ pathname: '/(drawer)/ordens/novo', params: { ordem: JSON.stringify(ordem), viewOnly: 'true' } })}
+                />
+                <IconButton
+                  icon="pencil-outline"
+                  size={22}
+                  onPress={() => router.push({ pathname: '/(drawer)/ordens/novo', params: { ordem: JSON.stringify(ordem) } })}
+                />
+                <IconButton icon="delete-outline" size={22} onPress={handleDelete} />
+              </View>
+            </View>
+            {/* Status em uma linha só, abaixo do header */}
+            <TouchableOpacity activeOpacity={0.7} style={{ marginTop: 8 }}>
               <Text
                 style={{
                   color: statusFont,
                   fontWeight: '600',
                   fontSize: 15,
-                  marginBottom: 2,
                   borderColor: statusBorder,
                   borderWidth: 1,
-                  alignSelf: 'flex-start',
-                  paddingHorizontal: 8,
-                  paddingVertical: 2,
+                  alignSelf: 'flex-start', 
+                  paddingHorizontal: 18,
+                  paddingVertical: 4,
                   borderRadius: 12,
                   backgroundColor: statusBg,
+                  minWidth: 120,
+                  textAlign: 'center',
                 }}
               >
                 {ordem.status}
               </Text>
             </TouchableOpacity>
           </View>
-          <View style={{ flexDirection: 'row', gap: 2 }}>
-            <IconButton
-              icon="pencil-outline"
-              size={22}
-              onPress={() => router.push({ pathname: '/(drawer)/ordens/novo', params: { ordem: JSON.stringify(ordem) } })}
-            />
-            <IconButton icon="delete-outline" size={22} onPress={handleDelete} />
-          </View>
         </View>
         <View style={{ borderTopWidth: 1, borderColor: '#f0f0f0', padding: 16, paddingTop: 10 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
             <MaterialIcons name="person-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
-            <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">Cliente:</Text>
-            <Text style={{ color: colors.text, fontWeight: '600', fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">{ordem.cliente.nome}</Text>
+            <Text style={{ color: colors.text, fontSize: 15 }}>
+              Cliente: <Text style={{ fontWeight: '600' }}>{ordem.cliente.nome}</Text>
+            </Text>
           </View>
+
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
             <MaterialIcons name="people" size={18} color={colors.primary} style={{ marginRight: 6 }} />
-            <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">Funcionário:</Text>
-            <Text style={{ color: colors.text, fontWeight: '600', fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">{formatCelular(ordem.funcionario.nome)}</Text>
+            <Text style={{ color: colors.text, fontSize: 15 }}>
+              Funcionário: <Text style={{ fontWeight: '600' }}>{ordem.funcionario.nome}</Text>
+            </Text>
           </View>
+
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <MaterialCommunityIcons name="calendar-blank-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
             <Text style={{ color: colors.text, fontSize: 15 }}>Data:</Text>

@@ -8,4 +8,6 @@ import java.util.List;
 public interface ServicoRepository extends JpaRepository<Servico, Long> {
 
     List<Servico> findByAtivo(boolean ativo);
+
+    long countByAtivo(boolean ativo);
 }

@@ -29,5 +29,10 @@ public class ProdutoController {
     public List<Produto> getProdutos(){
         return produtoRepository.findAll(org.springframework.data.domain.Sort.by("id").ascending());
     }
+
+    @GetMapping("/count")
+    public long totalCount() {
+        return produtoRepository.count();
+    }
 }
 

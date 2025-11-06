@@ -9,4 +9,6 @@ import java.util.List;
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     List<Cliente> findByAtivo(boolean ativo);
+
+    long countByAtivo(boolean ativo);
 }

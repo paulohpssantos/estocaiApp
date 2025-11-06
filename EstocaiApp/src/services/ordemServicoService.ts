@@ -49,3 +49,8 @@ export async function deletarOrdemServico(ordemId: number) {
   const response = await api.delete(`/ordem-servico/${ordemId}`);
   return response.data;
 }
+
+export async function countOrdensServico(): Promise<number> {
+  const response = await api.get(`/ordem-servico/count`);
+  return response.data;
+}

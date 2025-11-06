@@ -100,7 +100,7 @@ export default function Clientes() {
             </Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <MaterialCommunityIcons name="email-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+            <MaterialCommunityIcons name="cake-variant-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
             <Text style={{ color: colors.text, fontSize: 15 }}>{formatDateBR(cliente.dataNascimento)}</Text>
           </View>
         </View>
