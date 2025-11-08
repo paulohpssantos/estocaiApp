@@ -303,6 +303,72 @@ const globalStyles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 17,
   },
+  // Report Styles
+  containerReport: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#f5f7fa",
+  },
+  headerCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.accent,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    justifyContent: "flex-start",
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 22,
+    fontWeight: "bold",
+    color: colors.primary,
+    marginLeft: 12,
+  },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    marginBottom: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  cardRow: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    marginBottom: 2,
+  },
+  cardCell: {
+    flex: 1,
+    alignItems: "flex-start",
+    marginVertical: 4,
+  },
+  cardCellFull: {
+    flex: 1,
+    alignItems: "flex-start",
+    marginVertical: 4,
+  },
+  cardLabel: {
+    fontWeight: "bold",
+    color: "#555",
+    fontSize: 13,
+    marginBottom: 2,
+    textAlign: "left",
+  },
+  cardValue: {
+    color: "#222",
+    fontSize: 15,
+    textAlign: "left",
+  },
+ 
+
 });
 
 export default globalStyles;

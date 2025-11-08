@@ -127,7 +127,7 @@ export default function Clientes() {
         )}
       </View>
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, backgroundColor: '#fff', borderTopWidth: 0.5, borderColor: '#eee', flexDirection: 'row', justifyContent: 'center', gap: 12 }}>
-      <Button
+        <Button
           mode="contained"
           icon="plus"
           onPress={() => router.push('/(drawer)/clientes/novo')}

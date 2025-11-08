@@ -8,6 +8,7 @@ import globalStyles from '../../../constants/globalStyles';
 import { Produto } from '../../../src/models/produto';
 import { listarProdutos } from '../../../src/services/produtoService';
 import { formatMoney } from '../../../src/utils/formatters';
+import { verifyIsLowStock } from '../../../src/utils/functions';
 
 export default function Estabelecimentos() {
   const router = useRouter();
@@ -37,8 +38,7 @@ export default function Estabelecimentos() {
   );
 
   function renderCard(prod: Produto) {
-    const estoqueRatio = prod.estoqueMinimo > 0 ? prod.qtdEstoque / prod.estoqueMinimo : 1;
-    const isLowStock = estoqueRatio <= 0.2;
+    const isLowStock = verifyIsLowStock(prod.qtdEstoque, prod.estoqueMinimo);
 
     //Verifica data de vencimento
     const parseDate = (str: string) => {
