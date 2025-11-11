@@ -30,6 +30,8 @@ export default function NovoProduto() {
   useEffect(() => {
     if (params.produto) {
       const prod = JSON.parse(params.produto as string);
+      prod.dataFabricacao = formatDateBR(prod.dataFabricacao);
+      prod.dataValidade = formatDateBR(prod.dataValidade);
       setForm(prod);
       setValorInput(formatMoneyNoSymbol(prod.valor));
     } else {
@@ -73,6 +75,13 @@ export default function NovoProduto() {
     }
   };
 
+  function parseDateBRtoDate(dateBR: string): Date {
+    if (!dateBR || dateBR.length !== 10) return new Date();
+    const [day, month, year] = dateBR.split('/');
+    const iso = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? new Date() : d;
+  }
   return (
     <View style={[globalStyles.centeredContainer, { paddingTop: 20 }, { paddingBottom: 80 }]}> 
       <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 32 }}>
@@ -175,7 +184,7 @@ export default function NovoProduto() {
           </TouchableOpacity>
           {showDatePickerVal && (
             <DateTimePicker
-              value={form.dataValidade ? new Date(form.dataValidade.split('/').reverse().join('-')) : new Date()}
+              value={parseDateBRtoDate(form.dataValidade)}
               mode="date"
               display="default"
               onChange={(event: any, date: Date | undefined) => {

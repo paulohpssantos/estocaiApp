@@ -7,7 +7,7 @@ import { ActivityIndicator, Button, Text } from "react-native-paper";
 import colors from "../../../constants/colors";
 import { Produto } from "../../../src/models/produto";
 import { listarProdutos } from "../../../src/services/produtoService";
-import { formatMoney } from "../../../src/utils/formatters";
+import { formatDateBR, formatMoney } from "../../../src/utils/formatters";
 import { verifyIsLowStock } from "../../../src/utils/functions";
 
 export default function RelatorioProdutos() {
@@ -80,6 +80,16 @@ export default function RelatorioProdutos() {
                     paddingVertical: 2,
                     borderRadius: 12
                     }}>{produto.qtdEstoque}</Text>
+                </View>
+              </View>
+              <View style={globalStyles.cardRow}>
+                <View style={[globalStyles.cardCellFull, { flex: 2 }]}>
+                  <Text style={globalStyles.cardLabel}>Data Fabricação</Text>
+                  <Text style={globalStyles.cardValue}>{formatDateBR(produto.dataFabricacao)}</Text>
+                </View>
+                <View style={[globalStyles.cardCellFull, { flex: 1, alignItems: "flex-end" }]}>
+                  <Text style={globalStyles.cardLabel}>Data Validade</Text>
+                  <Text style={globalStyles.cardValue}>{formatDateBR(produto.dataValidade)}</Text>
                 </View>
               </View>
             </View>

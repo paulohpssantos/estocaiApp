@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, View } from 'react-native';
 import { Button } from 'react-native-paper';
@@ -11,21 +11,45 @@ import { cadastrarEstabelecimento } from '../../../src/services/estabelecimentoS
 import { getEndereco } from '../../../src/services/viacepService';
 
 
+const initialForm: Estabelecimento = {
+  cpfCnpj: '',
+  nome: '',
+  logradouro: '',
+  cep: '',
+  uf: '',
+  municipio: '',
+  telefone: '',
+  email: '',
+  usuario: null as any,
+  ativo: true,
+};
+
 export default function NovoEstabelecimento() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const [form, setForm] = useState<Estabelecimento>({
-    cpfCnpj: '',
-    nome: '',
-    logradouro: '',
-    cep: '',
-    uf: '',
-    municipio: '',
-    telefone: '',
-    email: '',
-    usuario: null as any,
-    ativo: true,
-  });
+  const [form, setForm] = useState<Estabelecimento>(initialForm);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (params.estabelecimento) {
+        const est = JSON.parse(params.estabelecimento as string);
+        setForm(est);
+      } else {
+        setForm(initialForm);
+        const loadUsuario = async () => {
+          try {
+            const usuarioString = await AsyncStorage.getItem("usuario");
+            if (!usuarioString) return;
+            const usuario = JSON.parse(usuarioString) as Usuario;
+            setForm(prev => ({ ...prev, usuario: usuario as Usuario }));
+          } catch (e) {
+            console.warn('Erro ao carregar usuário do AsyncStorage', e);
+          }
+        };
+        loadUsuario();
+      }
+    }, [params.estabelecimento])
+  );
 
   
   useEffect(() => {

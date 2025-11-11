@@ -8,7 +8,7 @@ import globalStyles from '../../../constants/globalStyles';
 import { Produto } from '../../../src/models/produto';
 import { listarProdutos } from '../../../src/services/produtoService';
 import { formatMoney } from '../../../src/utils/formatters';
-import { verifyIsLowStock } from '../../../src/utils/functions';
+import { isExpired, isNearExpiration, verifyIsLowStock } from '../../../src/utils/functions';
 
 export default function Estabelecimentos() {
   const router = useRouter();
@@ -49,23 +49,10 @@ export default function Estabelecimentos() {
       return new Date(Number(ano), Number(mes) - 1, Number(dia));
     };
 
-    const validade = parseDate(prod.dataValidade);
-    const hoje = new Date();
-    let isVencido = false;
-    let isPertoVencimento = false;
+    
+    let isVencido = isExpired(prod.dataValidade);
+    let isPertoVencimento = isNearExpiration(prod.dataValidade);
 
-    if (validade) {
-      // Crie cópias para não alterar os objetos originais
-      const validadeCopy = new Date(validade.getTime());
-      const hojeCopy = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-      validadeCopy.setHours(0,0,0,0);
-
-      isVencido = validadeCopy < hojeCopy;
-
-      // Considera "perto" se faltar até 7 dias
-      const diff = validadeCopy.getTime() - hojeCopy.getTime();
-      isPertoVencimento = !isVencido && diff <= 7 * 24 * 60 * 60 * 1000 && diff >= 0;
-    }
 
     return (
       <Card style={{ marginBottom: 18, borderRadius: 18, backgroundColor: colors.background, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}>

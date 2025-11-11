@@ -37,3 +37,53 @@ export function verifyIsLowStock(qtdEstoque: number, estoqueMinimo: number): boo
     const estoqueRatio = estoqueMinimo > 0 ? qtdEstoque / estoqueMinimo : 1;
     return estoqueRatio <= 0.2;
 }
+
+//Validar datas de Vencimento
+const parseDate = (str: string) => {
+    if (!str) return null;
+    // Aceita tanto aaaa-mm-dd quanto aaaa/mm/dd
+    const clean = str.replace(/\//g, '-');
+    const [ano, mes, dia] = clean.split('-');
+    return new Date(Number(ano), Number(mes) - 1, Number(dia));
+};
+
+
+const hoje = new Date();
+let isVencido = false;
+let isPertoVencimento = false;
+
+//valida se a data de validade está vencida
+export function isExpired(dateStr: string): boolean {
+    const validade = parseDate(dateStr);
+    const hoje = new Date();
+    let isVencido = false;
+
+    if (validade) {
+      const validadeCopy = new Date(validade.getTime());
+      const hojeCopy = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+      validadeCopy.setHours(0,0,0,0);
+
+      isVencido = validadeCopy < hojeCopy;
+    }  
+    return isVencido;
+}
+
+//valida se a data de validade está perto do vencimento (30 dias)
+export function isNearExpiration(dateStr: string): boolean {
+    const validade = parseDate(dateStr);
+    const hoje = new Date();
+    let isPertoVencimento = false;
+
+    if (validade) {
+        const validadeCopy = new Date(validade.getTime());
+        const hojeCopy = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+        validadeCopy.setHours(0,0,0,0);
+
+      
+        const diff = validadeCopy.getTime() - hojeCopy.getTime();
+        isPertoVencimento = !isVencido && diff <= 30 * 24 * 60 * 60 * 1000 && diff >= 0;
+    }  
+    return isPertoVencimento;
+
+}
+    

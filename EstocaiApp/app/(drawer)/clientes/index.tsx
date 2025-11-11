@@ -7,7 +7,7 @@ import { Button, Card, IconButton, Provider as PaperProvider } from 'react-nativ
 import colors from "../../../constants/colors";
 import globalStyles from '../../../constants/globalStyles';
 import { cadastrarCliente, listarClientes } from '../../../src/services/clienteService';
-import { formatCpfCnpj, formatDateBR } from '../../../src/utils/formatters';
+import { formatCelular, formatCpfCnpj, formatDateBR } from '../../../src/utils/formatters';
 
 export default function Clientes() {
   const router = useRouter();
@@ -87,7 +87,7 @@ export default function Clientes() {
         <View style={{ borderTopWidth: 1, borderColor: '#f0f0f0', padding: 16, paddingTop: 10 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
             <MaterialCommunityIcons name="phone-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
-            <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">{cliente.telefone}</Text>
+            <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">{formatCelular(cliente.telefone)}</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
             <MaterialCommunityIcons name="email-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />

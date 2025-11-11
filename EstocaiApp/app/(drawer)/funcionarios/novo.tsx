@@ -1,10 +1,10 @@
 import { Funcionario } from "@/src/models/funcionario";
 import { Usuario } from "@/src/models/usuario";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Picker } from '@react-native-picker/picker';
+import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, Text, TextInput, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Button } from 'react-native-paper';
 import colors from '../../../constants/colors';
 import globalStyles from '../../../constants/globalStyles';
@@ -12,6 +12,15 @@ import { Estabelecimento } from '../../../src/models/estabelecimento';
 import { listarEstabelecimentosPorCpf } from '../../../src/services/estabelecimentoService';
 import { cadastrarFuncionario } from '../../../src/services/funcionarioService';
 
+const initialForm: Funcionario = {
+  cpf: '',
+  nome: '',
+  cargo: '',
+  telefone: '',
+  email: '',
+  estabelecimento: null as any,
+  ativo: true,
+};
 
 export default function NovoFuncionario() {
   const router = useRouter();
@@ -19,16 +28,21 @@ export default function NovoFuncionario() {
   const [estabelecimentos, setEstabelecimentos] = useState<Estabelecimento[]>([]);
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState<Funcionario>({
-    cpf: '',
-    nome: '',
-    cargo: '',
-    telefone: '',
-    email: '',
-    estabelecimento: null as any,
-    ativo: true,
-  });
+  const [form, setForm] = useState<Funcionario>(initialForm);
+  const [estabelecimentoBusca, setEstabelecimentoBusca] = useState('');
+  const [estabelecimentosFiltrados, setEstabelecimentosFiltrados] = useState<Estabelecimento[]>([]);
 
+  useEffect(() => {
+    if (estabelecimentoBusca.trim() === '') {
+      setEstabelecimentosFiltrados([]);
+    } else {
+      setEstabelecimentosFiltrados(
+        estabelecimentos.filter(e =>
+          e.nome.toLowerCase().includes(estabelecimentoBusca.toLowerCase())
+        )
+      );
+    }
+  }, [estabelecimentoBusca, estabelecimentos]);
 
   const fetchEstabelecimentos = async () => {
     setLoading(true);
@@ -46,16 +60,27 @@ export default function NovoFuncionario() {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     fetchEstabelecimentos();
   }, []);
-  
-  
+
+  useFocusEffect(
+    useCallback(() => {
+      if (params.funcionario) {
+        const funcionario = JSON.parse(params.funcionario as string) as Funcionario;
+        setForm(funcionario);
+        setEstabelecimentoBusca(funcionario.estabelecimento?.nome || '');
+      } else {
+        setForm(initialForm);
+        setEstabelecimentoBusca('');
+      }
+    }, [params.funcionario])
+  );
 
   const handleChange = (field: keyof Funcionario, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
   };
- 
+
   const handleSubmit = async () => {
     try {
       await cadastrarFuncionario(form);
@@ -66,37 +91,43 @@ export default function NovoFuncionario() {
     }
   };
 
-  const labelStyle = { marginBottom: 6, color: '#222', fontWeight: "600" };
-
   return (
-    <View style={[globalStyles.centeredContainer, { paddingTop: 20 }, { paddingBottom: 20 }]}> 
+    <View style={[globalStyles.centeredContainer, { paddingTop: 20 }, { paddingBottom: 20 }]}>
       <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 32 }}>
         <View style={globalStyles.formContainer}>
-
           <Text style={{ marginBottom: 4, color: colors.text }}>Estabelecimento</Text>
-          <View style={[globalStyles.input, { justifyContent: 'center', height: 70, overflow: 'hidden' }]}>
-            <Picker
-              selectedValue={form.estabelecimento?.cpfCnpj || ''}
-              onValueChange={(cpfCnpj: string) => {
-                const est = estabelecimentos.find(e => e.cpfCnpj === cpfCnpj);
-                if (est) {
-                  setForm(prev => ({ ...prev, estabelecimento: est }));
-                }
-              }}
-              style={{
-                color: colors.text,
-                fontSize: 16,
-                backgroundColor: 'transparent', 
-                width: '100%',
-              }}
-              dropdownIconColor={colors.primary}
-            >
-              <Picker.Item label="Selecione o estabelecimento" value="" />
-              {estabelecimentos.map(est => (
-                <Picker.Item key={est.cpfCnpj} label={est.nome} value={est.cpfCnpj} />
+          <TextInput
+            placeholder="Buscar estabelecimento"
+            value={estabelecimentoBusca}
+            onChangeText={v => {
+              setEstabelecimentoBusca(v);
+              setForm(prev => ({ ...prev, estabelecimento: null as any }));
+            }}
+            style={globalStyles.input}
+            onFocus={() => {
+              if (estabelecimentoBusca.trim() === '') setEstabelecimentosFiltrados(estabelecimentos);
+            }}
+            onBlur={() => {
+              setTimeout(() => setEstabelecimentosFiltrados([]), 200); // delay para permitir clique
+            }}
+          />
+          {estabelecimentosFiltrados.length > 0 && (
+            <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}>
+              {estabelecimentosFiltrados.map(est => (
+                <TouchableOpacity
+                  key={est.cpfCnpj}
+                  onPress={() => {
+                    setForm(prev => ({ ...prev, estabelecimento: est }));
+                    setEstabelecimentoBusca(est.nome);
+                    setEstabelecimentosFiltrados([]);
+                  }}
+                  style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: colors.border }}
+                >
+                  <Text style={{ color: colors.text }}>{est.nome}</Text>
+                </TouchableOpacity>
               ))}
-            </Picker>
-          </View>
+            </View>
+          )}
           <Text style={{ marginBottom: 4, color: colors.text }}>CPF</Text>
           <TextInput
             placeholder="CPF"
@@ -132,13 +163,12 @@ export default function NovoFuncionario() {
             onChangeText={v => handleChange('email', v)}
             style={globalStyles.input}
           />
-          
         </View>
       </ScrollView>
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, backgroundColor: '#fff', borderTopWidth: 0.5, borderColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
         <Button
           mode="outlined"
-          onPress={() => router.replace('/funcionarios')} 
+          onPress={() => router.replace('/funcionarios')}
           labelStyle={{ color: colors.primary }}
           style={[globalStyles.secondaryButton, { flex: 1 }]}
         >

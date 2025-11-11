@@ -6,7 +6,6 @@ import { ServicoOrdemServico } from "@/src/models/servicoOrdemServico";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -36,6 +35,13 @@ export default function NovaOrdemServico() {
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
+  const statusOptions = ["Aberta", "Em Andamento", "Finalizada", "Cancelada"];
+  const [statusBusca, setStatusBusca] = useState('');
+  const [statusFiltrados, setStatusFiltrados] = useState<string[]>([]);
+  const [estabelecimentoBusca, setEstabelecimentoBusca] = useState('');
+  const [estabelecimentosFiltrados, setEstabelecimentosFiltrados] = useState<Estabelecimento[]>([]);
+  const [funcionarioBusca, setFuncionarioBusca] = useState('');
+  const [funcionariosFiltrados, setFuncionariosFiltrados] = useState<Funcionario[]>([]);
   const [clienteBusca, setClienteBusca] = useState('');
   const [clientesFiltrados, setClientesFiltrados] = useState<Cliente[]>([]);
   const [servicoBusca, setServicoBusca] = useState('');
@@ -55,8 +61,6 @@ export default function NovaOrdemServico() {
     status: '',
     valorTotal: 0,
   });
-
-  
 
   const fetchEstabelecimentos = async () => {
     setLoading(true);
@@ -167,12 +171,82 @@ export default function NovaOrdemServico() {
     carregarDadosEdicao();
   }, [params.ordem]);
 
+  // Limpa o formulário ao abrir para nova ordem
+  useEffect(() => {
+    if (!params.ordem) {
+      setForm({
+        id: null,
+        numeroOS: '',
+        estabelecimento: null as any,
+        funcionario: null as any,
+        cliente: null as any,
+        dataAbertura: formatDateBR(new Date().toISOString().slice(0, 10)),
+        observacoes: null,
+        status: '',
+        valorTotal: 0,
+      });
+      setStatusBusca('');
+      setEstabelecimentoBusca('');
+      setFuncionarioBusca('');
+      setClienteBusca('');
+      setServicoBusca('');
+      setProdutoBusca('');
+      setServicosSelecionados([]);
+      setProdutosSelecionados([]);
+      setStatusFiltrados([]);
+      setEstabelecimentosFiltrados([]);
+      setFuncionariosFiltrados([]);
+      setClientesFiltrados([]);
+      setServicosFiltrados([]);
+      setProdutosFiltrados([]);
+    }
+  }, [params.ordem]);
+
   useEffect(() => {
     fetchEstabelecimentos();
     fetchProdutos();
     fetchServicos();
     fetchClientes();
   }, []);
+
+  //Filtra status
+  useEffect(() => {
+    if (statusBusca.trim() === '') {
+      setStatusFiltrados([]);
+    } else {
+      setStatusFiltrados(
+        statusOptions.filter(s =>
+          s.toLowerCase().includes(statusBusca.toLowerCase())
+        )
+      );
+    }
+  }, [statusBusca]);
+
+  //Filtra estabelecimentos
+  useEffect(() => {
+    if (estabelecimentoBusca.trim() === '') {
+      setEstabelecimentosFiltrados([]);
+    } else {
+      setEstabelecimentosFiltrados(
+        estabelecimentos.filter(e =>
+          e.nome.toLowerCase().includes(estabelecimentoBusca.toLowerCase())
+        )
+      );
+    }
+  }, [estabelecimentoBusca, estabelecimentos]);
+
+  //Filtra funcionarios
+  useEffect(() => {
+    if (funcionarioBusca.trim() === '') {
+      setFuncionariosFiltrados([]);
+    } else {
+      setFuncionariosFiltrados(
+        funcionarios.filter(f =>
+          f.nome.toLowerCase().includes(funcionarioBusca.toLowerCase())
+        )
+      );
+    }
+  }, [funcionarioBusca, funcionarios]);
   
   //filtra clientes
   useEffect(() => {
@@ -322,81 +396,116 @@ export default function NovaOrdemServico() {
           {isEditing && (
             <>
               <Text style={{ marginBottom: 4, color: colors.text }}>Status</Text>
-              <View style={[globalStyles.input, { justifyContent: 'center', height: 70, overflow: 'hidden' }]}>
-                <Picker
-                  selectedValue={form.status}
-                  onValueChange={(status: string) => setForm(prev => ({ ...prev, status }))}
-                  style={{
-                    color: colors.text,
-                    fontSize: 16,
-                    backgroundColor: 'transparent',
-                    width: '100%',
-                  }}
-                  dropdownIconColor={colors.primary}
-                  enabled={!isViewOnly}
-                >
-                  <Picker.Item label="Selecione o status" value="" />
-                  <Picker.Item label="Aberta" value="Aberta" />
-                  <Picker.Item label="Em Andamento" value="Em Andamento" />
-                  <Picker.Item label="Finalizada" value="Finalizada" />
-                  <Picker.Item label="Cancelada" value="Cancelada" />
-                </Picker>
-              </View>
+              <TextInput
+                placeholder="Buscar status"
+                value={statusBusca || form.status || ''}
+                onChangeText={v => {
+                  setStatusBusca(v);
+                  setForm(prev => ({ ...prev, status: '' }));
+                }}
+                style={globalStyles.input}
+                onFocus={() => {
+                  if (statusBusca.trim() === '') setStatusFiltrados(statusOptions);
+                }}
+                onBlur={() => {
+                  setTimeout(() => setStatusFiltrados([]), 200); // delay para permitir clique
+                }}
+                editable={!isViewOnly}
+              />
+              {statusFiltrados.length > 0 && !isViewOnly && (
+                <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}>
+                  {statusFiltrados.map(status => (
+                    <TouchableOpacity
+                      key={status}
+                      onPress={() => {
+                        setForm(prev => ({ ...prev, status }));
+                        setStatusBusca(status);
+                        setStatusFiltrados([]);
+                      }}
+                      style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: colors.border }}
+                    >
+                      <Text style={{ color: colors.text }}>{status}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
             </>
           )}
 
           <Text style={{ marginBottom: 4, color: colors.text }}>Estabelecimento</Text>
-          <View style={[globalStyles.input, { justifyContent: 'center', height: 70, overflow: 'hidden' }]}>
-            <Picker
-              selectedValue={form.estabelecimento?.cpfCnpj || ''}
-              onValueChange={(cpfCnpj: string) => {
-                const est = estabelecimentos.find(e => e.cpfCnpj === cpfCnpj);
-                if (est) {
-                  setForm(prev => ({ ...prev, estabelecimento: est }));
-                  fetchFuncionarios(est.cpfCnpj);
-                }
-              }}
-              style={{
-                color: colors.text,
-                fontSize: 16,
-                backgroundColor: 'transparent', 
-                width: '100%',
-              }}
-              dropdownIconColor={colors.primary}
-              enabled={!isViewOnly}
-            >
-              <Picker.Item label="Selecione o estabelecimento" value="" />
-              {estabelecimentos.map(est => (
-                <Picker.Item key={est.cpfCnpj} label={est.nome} value={est.cpfCnpj} />
+          <TextInput
+            placeholder="Buscar estabelecimento"
+            value={estabelecimentoBusca || form.estabelecimento?.nome || ''}
+            onChangeText={v => {
+              setEstabelecimentoBusca(v);
+              setForm(prev => ({ ...prev, estabelecimento: null as any, funcionario: null as any }));
+              setFuncionarioBusca('');
+              setFuncionariosFiltrados([]);
+            }}
+            style={globalStyles.input}
+            onFocus={() => {
+              if (estabelecimentoBusca.trim() === '') setEstabelecimentosFiltrados(estabelecimentos);
+            }}
+            onBlur={() => {
+              setTimeout(() => setEstabelecimentosFiltrados([]), 200);
+            }}
+            editable={!isViewOnly}
+          />
+          {estabelecimentosFiltrados.length > 0 && !isViewOnly && (
+            <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}>
+              {estabelecimentosFiltrados.map(est => (
+                <TouchableOpacity
+                  key={est.cpfCnpj}
+                  onPress={async () => {
+                    setForm(prev => ({ ...prev, estabelecimento: est, funcionario: null as any }));
+                    setEstabelecimentoBusca(est.nome);
+                    setEstabelecimentosFiltrados([]);
+                    setFuncionarioBusca('');
+                    setFuncionariosFiltrados([]);
+                    await fetchFuncionarios(est.cpfCnpj);
+                  }}
+                  style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: colors.border }}
+                >
+                  <Text style={{ color: colors.text }}>{est.nome}</Text>
+                </TouchableOpacity>
               ))}
-            </Picker>
-          </View>
+            </View>
+          )}
 
           <Text style={{ marginBottom: 4, color: colors.text }}>Funcionário</Text>
-          <View style={[globalStyles.input, { justifyContent: 'center', height: 70, overflow: 'hidden' }]}>
-            <Picker
-              selectedValue={form.funcionario?.cpf || ''}
-              onValueChange={(cpf: string) => {
-                const func = funcionarios.find(f => f.cpf === cpf);
-                if (func) {
-                  setForm(prev => ({ ...prev, funcionario: func }));
-                }
-              }}
-              style={{
-                color: colors.text,
-                fontSize: 16,
-                backgroundColor: 'transparent', 
-                width: '100%',
-              }}
-              dropdownIconColor={colors.primary}
-              enabled={!isViewOnly}
-            >
-              <Picker.Item label="Selecione o funcionário" value="" />
-              {funcionarios.map(func => (
-                <Picker.Item key={func.cpf} label={func.nome} value={func.cpf} />
+          <TextInput
+            placeholder="Buscar funcionário"
+            value={funcionarioBusca || form.funcionario?.nome || ''}
+            onChangeText={v => {
+              setFuncionarioBusca(v);
+              setForm(prev => ({ ...prev, funcionario: null as any }));
+            }}
+            style={globalStyles.input}
+            onFocus={() => {
+              if (funcionarioBusca.trim() === '') setFuncionariosFiltrados(funcionarios);
+            }}
+            onBlur={() => {
+              setTimeout(() => setFuncionariosFiltrados([]), 200);
+            }}
+            editable={!isViewOnly || !!form.estabelecimento}
+          />
+          {funcionariosFiltrados.length > 0 && !isViewOnly && (
+            <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}>
+              {funcionariosFiltrados.map(func => (
+                <TouchableOpacity
+                  key={func.cpf}
+                  onPress={() => {
+                    setForm(prev => ({ ...prev, funcionario: func }));
+                    setFuncionarioBusca(func.nome);
+                    setFuncionariosFiltrados([]);
+                  }}
+                  style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: colors.border }}
+                >
+                  <Text style={{ color: colors.text }}>{func.nome}</Text>
+                </TouchableOpacity>
               ))}
-            </Picker>
-          </View>
+            </View>
+          )}
 
           <Text style={{ marginBottom: 4, color: colors.text }}>Cliente</Text>
           <TextInput
@@ -611,7 +720,7 @@ export default function NovaOrdemServico() {
                   >
                     {!isViewOnly && (
                       <TouchableOpacity
-                        onPress={() => handleQuantidadeProdutoChange(idx, String(Math.max(1, item.quantidade - 1)))}
+                        onPress={() => handleQuantidadeProdutoChange(idx, String(Math.max(0, item.quantidade - 1)))}
                         style={{ paddingHorizontal: 8, paddingVertical: 4 }}
                       >
                         <MaterialCommunityIcons name="chevron-down" size={22} color={colors.text} />

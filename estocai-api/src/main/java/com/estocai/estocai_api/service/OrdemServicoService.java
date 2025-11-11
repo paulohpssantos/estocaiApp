@@ -19,8 +19,10 @@ public class OrdemServicoService {
 
     @Transactional
     public OrdemServico criar(OrdemServico ordem) {
-        Long next = jdbc.queryForObject("SELECT nextval('ordem_servico_seq')", Long.class);
-        ordem.setNumeroOS("OS" + next);
+        if (ordem.getNumeroOS() == null || ordem.getNumeroOS().isBlank()) {
+            Long next = jdbc.queryForObject("SELECT nextval('ordem_servico_seq')", Long.class);
+            ordem.setNumeroOS("OS" + next);
+        }
         return repo.save(ordem);
     }
 }

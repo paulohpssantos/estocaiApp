@@ -3,7 +3,6 @@ import { Usuario } from "@/src/models/usuario";
 import { formatDateBR, formatISODate } from "@/src/utils/formatters";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -37,6 +36,51 @@ export default function NovoCliente() {
     ativo: true,
     estabelecimento: null as any,
   });
+
+  const [estabelecimentoBusca, setEstabelecimentoBusca] = useState('');
+  const [estabelecimentosFiltrados, setEstabelecimentosFiltrados] = useState<Estabelecimento[]>([]);
+
+  useEffect(() => {
+    if (estabelecimentoBusca.trim() === '') {
+      setEstabelecimentosFiltrados([]);
+    } else {
+      setEstabelecimentosFiltrados(
+        estabelecimentos.filter(e =>
+          e.nome.toLowerCase().includes(estabelecimentoBusca.toLowerCase())
+        )
+      );
+    }
+  }, [estabelecimentoBusca, estabelecimentos]);
+
+  // Adicione este useEffect para carregar dados ao editar
+  useEffect(() => {
+    if (params.cliente) {
+      const cliente = JSON.parse(params.cliente as string) as Cliente;
+      setForm({
+        ...cliente,
+        dataNascimento: cliente.dataNascimento ? formatDateBR(cliente.dataNascimento) : '',
+        estabelecimento: cliente.estabelecimento || null,
+      });
+      setEstabelecimentoBusca(cliente.estabelecimento?.nome || '');
+    } else {
+      setForm({
+        cpf: '',
+        nome: '',
+        telefone: '',
+        email: '',
+        logradouro: '',
+        numero: '',
+        bairro: '',
+        cep: '',
+        uf: '',
+        municipio: '',
+        dataNascimento: '',
+        ativo: true,
+        estabelecimento: null as any,
+      });
+      setEstabelecimentoBusca('');
+    }
+  }, [params.cliente]);
 
 
   const fetchEstabelecimentos = async () => {
@@ -85,29 +129,38 @@ export default function NovoCliente() {
         <View style={globalStyles.formContainer}>
 
           <Text style={{ marginBottom: 4, color: colors.text }}>Estabelecimento</Text>
-          <View style={[globalStyles.input, { justifyContent: 'center', height: 70, overflow: 'hidden' }]}>
-            <Picker
-              selectedValue={form.estabelecimento?.cpfCnpj || ''}
-              onValueChange={(cpfCnpj: string) => {
-                const est = estabelecimentos.find(e => e.cpfCnpj === cpfCnpj);
-                if (est) {
-                  setForm(prev => ({ ...prev, estabelecimento: est }));
-                }
-              }}
-              style={{
-                color: colors.text,
-                fontSize: 16,
-                backgroundColor: 'transparent', 
-                width: '100%',
-              }}
-              dropdownIconColor={colors.primary}
-            >
-              <Picker.Item label="Selecione o estabelecimento" value="" />
-              {estabelecimentos.map(est => (
-                <Picker.Item key={est.cpfCnpj} label={est.nome} value={est.cpfCnpj} />
+          <TextInput
+            placeholder="Buscar estabelecimento"
+            value={estabelecimentoBusca}
+            onChangeText={v => {
+              setEstabelecimentoBusca(v);
+              setForm(prev => ({ ...prev, estabelecimento: null as any }));
+            }}
+            style={globalStyles.input}
+            onFocus={() => {
+              if (estabelecimentoBusca.trim() === '') setEstabelecimentosFiltrados(estabelecimentos);
+            }}
+            onBlur={() => {
+              setTimeout(() => setEstabelecimentosFiltrados([]), 200); // delay para permitir clique
+            }}
+          />
+          {estabelecimentosFiltrados.length > 0 && (
+            <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}>
+              {estabelecimentosFiltrados.map(est => (
+                <TouchableOpacity
+                  key={est.cpfCnpj}
+                  onPress={() => {
+                    setForm(prev => ({ ...prev, estabelecimento: est }));
+                    setEstabelecimentoBusca(est.nome);
+                    setEstabelecimentosFiltrados([]);
+                  }}
+                  style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: colors.border }}
+                >
+                  <Text style={{ color: colors.text }}>{est.nome}</Text>
+                </TouchableOpacity>
               ))}
-            </Picker>
-          </View>
+            </View>
+          )}
           <Text style={{ marginBottom: 4, color: colors.text }}>CPF</Text>
           <TextInput
             placeholder="CPF"
@@ -219,7 +272,7 @@ export default function NovoCliente() {
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, backgroundColor: '#fff', borderTopWidth: 0.5, borderColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
         <Button
           mode="outlined"
-          onPress={() => router.replace('/funcionarios')} 
+          onPress={() => router.replace('/clientes')} 
           labelStyle={{ color: colors.primary }}
           style={[globalStyles.secondaryButton, { flex: 1 }]}
         >

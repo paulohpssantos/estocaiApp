@@ -1,13 +1,16 @@
 import globalStyles from "@/constants/globalStyles";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 import React, { useCallback, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 import { ActivityIndicator, Button, Text } from "react-native-paper";
 import colors from "../../../constants/colors";
 import { Cliente } from "../../../src/models/cliente";
 import { listarClientes } from "../../../src/services/clienteService";
 import { formatCelular, formatCpfCnpj, formatDateBR } from "../../../src/utils/formatters";
+
 
 export default function RelatorioClientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -33,6 +36,33 @@ export default function RelatorioClientes() {
       };
     }, [])
   );
+
+  const exportarCSV = async () => {
+    if (!clientes.length) return;
+    Alert.alert('Exportando', 'Gerando arquivo CSV, aguarde...');
+    // Cabeçalho
+    const header = [
+        'Nome',
+        'Data Nascimento',
+        'CPF',
+        'Telefone',
+        'Email'
+    ];
+    // Linhas
+    const rows = clientes.map(cliente => [
+        `"${cliente.nome}"`,
+        `"${formatDateBR(cliente.dataNascimento)}"`,
+        `"${formatCpfCnpj(cliente.cpf)}"`,
+        `"${formatCelular(cliente.telefone)}"`,
+        `"${cliente.email}"`
+    ].join(','));
+
+    const csv = [header.join(','), ...rows].join('\n');
+    const fileUri = (FileSystem as any).documentDirectory + `relatorio_clientes_${Date.now()}.csv`;
+    await FileSystem.writeAsStringAsync(fileUri, csv, { encoding: 'utf8' });
+    await Sharing.shareAsync(fileUri, { mimeType: 'text/csv', dialogTitle: 'Exportar CSV' });
+    Alert.alert('Arquivo gerado', `Arquivo salvo em:\n${fileUri}`);
+};
 
   return (
     <View style={globalStyles.containerReport}>
@@ -84,7 +114,7 @@ export default function RelatorioClientes() {
         <Button
           mode="contained"
           icon="download"
-          onPress={() => {}}
+          onPress={exportarCSV}
           style={globalStyles.primaryButton}
         >
           Exportar CSV

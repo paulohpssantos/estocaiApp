@@ -13,45 +13,25 @@ import { countFuncionarios } from '../../src/services/funcionarioService';
 import { listarOrdensServico } from '../../src/services/ordemServicoService';
 import { countProdutos, listarProdutos } from '../../src/services/produtoService';
 import { countServicos } from '../../src/services/servicoService';
-import { formatMoney } from '../../src/utils/formatters';
+import { formatDateBR, formatMoney } from '../../src/utils/formatters';
+import { isExpired, isNearExpiration } from '../../src/utils/functions';
 
 
 
 const CARD_DATA = [
-  { key: 'estabelecimentos', label: 'Estabelecimentos', icon: 'office-building', color: '#E74C3C' },
-  { key: 'funcionarios', label: 'Funcionários', icon: 'account-group', color: '#2980D9' },
-  { key: 'clientes', label: 'Clientes', icon: 'account', color: '#27AE60' },
-  { key: 'produtos', label: 'Produtos', icon: 'cube-outline', color: '#F39C12' },
-  { key: 'servicos', label: 'Serviços', icon: 'cog-outline', color: '#8E44AD' },
-  { key: 'ordens', label: 'Ordens de serviço', icon: 'file-document-outline', color: '#16A085' },
+  { key: 'estabelecimentos', label: 'Estabelecimentos', icon: 'office-building', color: colors.primary },
+  { key: 'funcionarios', label: 'Funcionários', icon: 'account-group', color: colors.primary },
+  { key: 'clientes', label: 'Clientes', icon: 'account', color: colors.primary },
+  { key: 'produtos', label: 'Produtos', icon: 'cube-outline', color: colors.primary },
+  { key: 'servicos', label: 'Serviços', icon: 'cog-outline', color: colors.primary },
+  { key: 'ordens', label: 'Ordens de serviço', icon: 'file-document-outline', color: colors.primary },
 ];
 
-function parseDate(dateStr: string) {
-  if (!dateStr) return null;
-  // Aceita tanto yyyy-mm-dd quanto yyyy/mm/dd
-  const clean = dateStr.replace(/\//g, '-');
-  const [year, month, day] = clean.split('-').map(Number);
-  if (!year || !month || !day) return null;
-  const d = new Date(year, month - 1, day);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
 
-function getValidadeStatus(dateStr: string, diasPerto = 30) {
-  const validade = parseDate(dateStr);
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
 
-  let isVencido = false;
-  let isPertoVencimento = false;
-
-  if (validade) {
-    isVencido = validade.getTime() < hoje.getTime();
-
-    // Considera "perto" se faltar até X dias
-    const diff = validade.getTime() - hoje.getTime();
-    isPertoVencimento = !isVencido && diff <= diasPerto * 24 * 60 * 60 * 1000 && diff >= 0;
-  }
+function getValidadeStatus(dateStr: string) {
+  let isVencido = isExpired(dateStr);
+  let isPertoVencimento = isNearExpiration(dateStr);
 
   return { isVencido, isPertoVencimento };
 }
@@ -122,7 +102,7 @@ export default function Dashboard() {
           const isLowStock = estoqueRatio <= 0.2;
           if (isLowStock) baixoEstoque.push(p);
 
-          const { isVencido, isPertoVencimento } = getValidadeStatus(p.validade);
+          const { isVencido, isPertoVencimento } = getValidadeStatus(p.dataValidade);
           if (isVencido) vencidos.push(p);
           else if (isPertoVencimento) pertoVencer.push(p);
         });
@@ -159,12 +139,12 @@ export default function Dashboard() {
           {/* Card de Produtos com Estoque Baixo */}
           <View style={globalStyles.lowStockCard}>
             <View style={globalStyles.lowStockHeader}>
-              <MaterialCommunityIcons name="alert-outline" size={26} color="#B3471C" style={{ marginRight: 8 }} />
+              <MaterialCommunityIcons name="alert-outline" size={26} color={colors.primary} style={{ marginRight: 8 }} />
               <Text style={globalStyles.lowStockTitle}>Produtos com Estoque Baixo</Text>
             </View>
             <View style={{ height: 16 }} />
             {produtosBaixoEstoque.length === 0 ? (
-              <Text style={{ color: '#B3471C', marginTop: 12, marginLeft: 8 }}>Nenhum produto com estoque baixo.</Text>
+              <Text style={{ color: colors.primary, marginTop: 12, marginLeft: 8 }}>Nenhum produto com estoque baixo.</Text>
             ) : (
               produtosBaixoEstoque.map(produto => (
                 <View key={produto.id} style={globalStyles.lowStockItem}>
@@ -184,12 +164,12 @@ export default function Dashboard() {
           {/* Card de Produtos Perto de Vencer */}
           <View style={globalStyles.lowStockCard}>
             <View style={globalStyles.lowStockHeader}>
-              <MaterialCommunityIcons name="calendar-alert-outline" size={26} color="#B3471C" style={{ marginRight: 8 }} />
+              <MaterialCommunityIcons name="calendar-alert-outline" size={26} color={colors.primary} style={{ marginRight: 8 }} />
               <Text style={globalStyles.lowStockTitle}>Produtos Perto de Vencer</Text>
             </View>
             <View style={{ height: 16 }} />
             {produtosPertoVencer.length === 0 ? (
-              <Text style={{ color: '#B3471C', marginTop: 12, marginLeft: 8 }}>Nenhum produto perto de vencer.</Text>
+              <Text style={{ color: colors.primary, marginTop: 12, marginLeft: 8 }}>Nenhum produto perto de vencer.</Text>
             ) : (
               produtosPertoVencer.map(produto => (
                 <View key={produto.id} style={globalStyles.lowStockItem}>
@@ -199,7 +179,7 @@ export default function Dashboard() {
                     <Text style={globalStyles.lowStockProductInfo}>Validade: {produto.validade}</Text>
                   </View>
                   <View style={globalStyles.lowStockQtdBox}>
-                    <Text style={globalStyles.lowStockQtdText}>{produto.qtdEstoque} unidades</Text>
+                    <Text style={globalStyles.lowStockQtdText}>{formatDateBR(produto.dataValidade)}</Text>
                   </View>
                 </View>
               ))
@@ -209,12 +189,12 @@ export default function Dashboard() {
           {/* Card de Produtos Vencidos */}
           <View style={globalStyles.lowStockCard}>
             <View style={globalStyles.lowStockHeader}>
-              <MaterialCommunityIcons name="calendar-remove-outline" size={26} color="#B3471C" style={{ marginRight: 8 }} />
+              <MaterialCommunityIcons name="calendar-remove-outline" size={26} color={colors.primary} style={{ marginRight: 8 }} />
               <Text style={globalStyles.lowStockTitle}>Produtos Vencidos</Text>
             </View>
             <View style={{ height: 16 }} />
             {produtosVencidos.length === 0 ? (
-              <Text style={{ color: '#B3471C', marginTop: 12, marginLeft: 8 }}>Nenhum produto vencido.</Text>
+              <Text style={{ color: colors.primary, marginTop: 12, marginLeft: 8 }}>Nenhum produto vencido.</Text>
             ) : (
               produtosVencidos.map(produto => (
                 <View key={produto.id} style={globalStyles.lowStockItem}>
@@ -224,7 +204,7 @@ export default function Dashboard() {
                     <Text style={globalStyles.lowStockProductInfo}>Validade: {produto.validade}</Text>
                   </View>
                   <View style={globalStyles.lowStockQtdBox}>
-                    <Text style={globalStyles.lowStockQtdText}>{produto.qtdEstoque} unidades</Text>
+                    <Text style={globalStyles.lowStockQtdText}>{formatDateBR(produto.dataValidade)}</Text>
                   </View>
                 </View>
               ))
@@ -232,12 +212,12 @@ export default function Dashboard() {
           </View>
           <View style={globalStyles.osCard}>
             <View style={globalStyles.osHeader}>
-              <MaterialCommunityIcons name="file-document-outline" size={26} color="#B3471C" style={{ marginRight: 8 }} />
+              <MaterialCommunityIcons name="file-document-outline" size={26} color={colors.primary} style={{ marginRight: 8 }} />
               <Text style={globalStyles.osTitle}>Ordens de Serviço Abertas</Text>
             </View>
             <View style={{ height: 16 }} />
             {ordensAbertas.length === 0 ? (
-              <Text style={{ color: '#B3471C', marginTop: 12, marginLeft: 8 }}>Nenhuma ordem aberta.</Text>
+              <Text style={{ color: colors.primary, marginTop: 12, marginLeft: 8 }}>Nenhuma ordem aberta.</Text>
             ) : (
               ordensAbertas.map(ordem => (
                 <View key={ordem.id} style={globalStyles.osItem}>
