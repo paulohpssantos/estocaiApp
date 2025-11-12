@@ -1,7 +1,7 @@
 
 Conectar via terminal do EC2 AWS 
 Na pasta do projeto abrir o terminal e digitar:
-ssh -i "estocai-key.pem" ec2-user@34.210.83.46
+ssh -i "estocai-key.pem" ec2-user@18.230.144.70
 
 Base estocai-db
 End-point: estocai-postgres.cluster-ctyg6coqg7ld.us-west-2.rds.amazonaws.com
