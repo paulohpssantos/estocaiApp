@@ -9,6 +9,7 @@ User: estocai_admin
 Password: KkW4dQsyWYgjeRJ9ONjz
 
 
+
 psql -h estocai.cfuqk2u2u1rx.sa-east-1.rds.amazonaws.com -U postgres -d postgres
 
 criar tunel de acesso ssh 
