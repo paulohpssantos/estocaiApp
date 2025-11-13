@@ -4,14 +4,15 @@ Na pasta do projeto abrir o terminal e digitar:
 ssh -i "estocai-key.pem" ec2-user@18.230.144.70
 
 Base estocai-db
-End-point: estocai-postgres.cluster-ctyg6coqg7ld.us-west-2.rds.amazonaws.com
+End-point: estocai.cfuqk2u2u1rx.sa-east-1.rds.amazonaws.com
 User: estocai_admin
 Password: KkW4dQsyWYgjeRJ9ONjz
 
 
+psql -h estocai.cfuqk2u2u1rx.sa-east-1.rds.amazonaws.com -U postgres -d postgres
 
 criar tunel de acesso ssh 
-ssh -i "estocai-key.pem" -L 5432:estocai-postgres.cluster-ctyg6coqg7ld.us-west-2.rds.amazonaws.com:5432 ec2-user@34.210.83.46
+ssh -i "estocai-key.pem" -L 5432:estocai.cfuqk2u2u1rx.sa-east-1.rds.amazonaws.com:5432 ec2-user@18.230.144.70
 
 
 reiniciar serviço via terminal
