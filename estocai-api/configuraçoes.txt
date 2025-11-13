@@ -9,11 +9,17 @@ User: estocai_admin
 Password: KkW4dQsyWYgjeRJ9ONjz
 
 
-
+//Conectar via terminal psql
 psql -h estocai.cfuqk2u2u1rx.sa-east-1.rds.amazonaws.com -U postgres -d postgres
 
 criar tunel de acesso ssh 
 ssh -i "estocai-key.pem" -L 5432:estocai.cfuqk2u2u1rx.sa-east-1.rds.amazonaws.com:5432 ec2-user@18.230.144.70
+
+//Dar permissao:
+GRANT ALL PRIVILEGES ON SCHEMA public TO estocai_admin;
+ALTER SCHEMA public OWNER TO estocai_admin;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO estocai_admin;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO estocai_admin;
 
 
 reiniciar serviço via terminal
