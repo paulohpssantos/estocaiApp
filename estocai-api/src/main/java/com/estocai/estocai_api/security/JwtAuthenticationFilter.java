@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 
 @Component
@@ -24,6 +25,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        //  Libera Actuator, Swagger e Auth do filtro JWT
+        String path = request.getServletPath();
+        if (path.startsWith("/actuator") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/auth")) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Continua validação normal do JWT
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
