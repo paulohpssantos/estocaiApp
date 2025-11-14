@@ -2,34 +2,34 @@ name: CI/CD Spring Boot to AWS EC2
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ] # dispara o deploy quando há push na branch main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1 Checkout
+      # 1 Faz o checkout do código-fonte
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2 Java 17
+      # 2 Configura o Java 17
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3 Build
+      # 3 Compila o projeto e gera o .jar
       - name: Build with Maven
         run: mvn clean package -DskipTests
         working-directory: estocai-api
 
-      # 4 Print target folder
+      # Mostra o conteúdo da pasta target para depuração
       - name: Show target folder
         run: ls -l estocai-api/target
 
-      # 5 Copia o .jar
+      # 4 Copia o .jar para a instância EC2 via SSH
       - name: Copy jar to EC2
         uses: appleboy/scp-action@v0.1.6
         with:
@@ -40,28 +40,25 @@ jobs:
           target: "/home/ec2-user/app"
           strip_components: 2
 
-      # 6 Reinicia o serviço
-      - name: Restart estocai-api systemd service
+      # 5 Reinicia a aplicação no servidor EC2 com variáveis de ambiente
+      - name: Restart Spring Boot App on EC2
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Parando serviço..."
-            sudo systemctl stop estocai-api || true
+            echo "Limpando instâncias antigas..."
+            sudo fuser -k 8080/tcp || true
 
-            echo "Atualizando variáveis de ambiente..."
-            sudo sed -i "s|Environment=DB_URL=.*|Environment=DB_URL=${{ secrets.DB_URL }}|" /etc/systemd/system/estocai-api.service
-            sudo sed -i "s|Environment=DB_USERNAME=.*|Environment=DB_USERNAME=${{ secrets.DB_USERNAME }}|" /etc/systemd/system/estocai-api.service
-            sudo sed -i "s|Environment=DB_PASSWORD=.*|Environment=DB_PASSWORD=${{ secrets.DB_PASSWORD }}|" /etc/systemd/system/estocai-api.service
-            sudo sed -i "s|Environment=JWT_SECRET_KEY=.*|Environment=JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}|" /etc/systemd/system/estocai-api.service
+            echo "Iniciando nova versão..."
+            cd /home/ec2-user/app
 
-            echo "Recarregando systemd..."
-            sudo systemctl daemon-reload
+            # Exporta variáveis de ambiente necessárias para o Spring Boot
+            export DB_URL=${{ secrets.DB_URL }}
+            export DB_USERNAME=${{ secrets.DB_USERNAME }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
 
-            echo "Iniciando serviço..."
-            sudo systemctl start estocai-api
-
-            echo "Status final:"
-            sudo systemctl status estocai-api --no-pager
+            nohup java -jar -Dspring.profiles.active=prod *.jar > app.log 2>&1 &
+            echo "Aplicação reiniciada com sucesso!"
