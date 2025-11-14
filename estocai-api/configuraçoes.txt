@@ -22,10 +22,11 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO estocai_admin;
 
 
 reiniciar serviço via terminal
-sudo systemctl status estocai-api
+cd /home/ec2-user/app
+nohup java -jar estocai-api-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
 
 exibir logs:
-tail -n 100 /home/ec2-user/app/app.log
+tail -f /home/ec2-user/app/app.log
 
 JWT Key:
 7k6IlVH7+vrTyGCKwobOyxYOuyf4hfR+soZAe74yUdw+gUyC6exWPjwIE1xCTDZf

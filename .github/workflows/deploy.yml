@@ -60,5 +60,5 @@ jobs:
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
 
-            nohup java -jar -Dspring.profiles.active=prod *.jar > app.log 2>&1 &
+            nohup java -Dspring.profiles.active=prod -jar *.jar > app.log 2>&1 &
             echo "Aplicação reiniciada com sucesso!"
