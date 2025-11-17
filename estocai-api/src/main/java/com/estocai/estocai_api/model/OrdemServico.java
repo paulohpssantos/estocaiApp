@@ -51,4 +51,9 @@ public class OrdemServico {
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal valorTotal;
 
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "usuario_cpf", nullable = false, referencedColumnName = "cpf")
+    private Usuario usuario;
+
 }

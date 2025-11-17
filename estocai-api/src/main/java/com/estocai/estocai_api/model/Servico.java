@@ -39,4 +39,9 @@ public class Servico {
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean ativo = true;
 
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "usuario_cpf", nullable = false, referencedColumnName = "cpf")
+    private Usuario usuario;
+
 }

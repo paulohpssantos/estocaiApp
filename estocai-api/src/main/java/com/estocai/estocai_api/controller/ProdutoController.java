@@ -1,9 +1,8 @@
 package com.estocai.estocai_api.controller;
 
 import com.estocai.estocai_api.model.Produto;
-import com.estocai.estocai_api.model.Usuario;
 import com.estocai.estocai_api.repository.ProdutoRepository;
-import com.estocai.estocai_api.repository.UsuarioRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,14 +24,17 @@ public class ProdutoController {
         return produtoRepository.save(produto);
     }
 
+
     @GetMapping
-    public List<Produto> getProdutos(){
-        return produtoRepository.findAll(org.springframework.data.domain.Sort.by("id").ascending());
+    public List<Produto> getProdutos(@RequestParam String cpf) {
+        if (cpf != null)
+            return produtoRepository.findByUsuarioCpf(cpf, Sort.by("id").ascending());
+        return null;
     }
 
-    @GetMapping("/count")
-    public long totalCount() {
-        return produtoRepository.count();
+    @GetMapping("/count/{cpf}")
+    public long totalCount(@PathVariable String cpf) {
+        return produtoRepository.countByUsuarioCpf(cpf);
     }
 }
 

@@ -1,9 +1,10 @@
 const ENV = {
   dev: {
-    API_URL: "http://localhost:8080",
+    //API_URL: "http://localhost:8080",
+    API_URL: "http://18.230.144.70:8080",
   },
   prod: {
-    API_URL: "https://34.210.83.46:8080",
+    API_URL: "http://18.230.144.70:8080",
   },
 };
 

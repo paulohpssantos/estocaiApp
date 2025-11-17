@@ -25,12 +25,14 @@ public class ServicoController {
 
 
     @GetMapping
-    public List<Servico> listar() {
-        return servicoRepository.findByAtivo(true);
+    public List<Servico> listar(@RequestParam String cpf) {
+        if (cpf != null)
+            return servicoRepository.findByUsuarioCpfAndAtivo(cpf,true);
+        return null;
     }
 
-    @GetMapping("/count")
-    public long totalCount() {
-        return servicoRepository.countByAtivo(true);
+    @GetMapping("/count/{cpf}")
+    public long totalCount(@PathVariable String cpf) {
+        return servicoRepository.countByUsuarioCpfAndAtivo(cpf, true);
     }
 }

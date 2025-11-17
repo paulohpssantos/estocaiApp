@@ -9,7 +9,7 @@ User: estocai_admin
 Password: KkW4dQsyWYgjeRJ9ONjz
 
 //Conectar via terminal psql
-psql -h estocai.cfuqk2u2u1rx.sa-east-1.rds.amazonaws.com -U postgres -d postgres
+psql -h estocai.cfuqk2u2u1rx.sa-east-1.rds.amazonaws.com -U postgres -d estocai_db
 
 criar tunel de acesso ssh 
 ssh -i "estocai-key.pem" -L 5432:estocai.cfuqk2u2u1rx.sa-east-1.rds.amazonaws.com:5432 ec2-user@18.230.144.70
@@ -20,10 +20,16 @@ ALTER SCHEMA public OWNER TO estocai_admin;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO estocai_admin;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO estocai_admin;
 
+GRANT CREATE, USAGE ON SCHEMA public TO estocai_admin;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO estocai_admin;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO estocai_admin;
+
+sair do postgres no EC2:
+\q
 
 reiniciar serviço via terminal
 cd /home/ec2-user/app
-nohup java -jar estocai-api-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+nohup java -jar -Dspring.profiles.active=prod *.jar > app.log 2>&1 &
 
 exibir logs:
 tail -f /home/ec2-user/app/app.log

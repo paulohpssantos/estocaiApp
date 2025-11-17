@@ -25,12 +25,14 @@ public class ClienteController {
 
 
     @GetMapping
-    public List<Cliente> listar() {
-        return clienteRepository.findByAtivo(true);
+    public List<Cliente> listar(@RequestParam String cpf) {
+        if (cpf != null)
+            return clienteRepository.findByUsuarioCpfAndAtivo(cpf,true);
+        return null;
     }
 
-    @GetMapping("/count")
-    public long totalCount() {
-        return clienteRepository.countByAtivo(true);
+    @GetMapping("/count/{cpf}")
+    public long totalCount(@PathVariable String cpf) {
+        return clienteRepository.countByUsuarioCpfAndAtivo(cpf, true);
     }
 }

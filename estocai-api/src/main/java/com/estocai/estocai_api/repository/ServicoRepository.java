@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ServicoRepository extends JpaRepository<Servico, Long> {
 
-    List<Servico> findByAtivo(boolean ativo);
+    List<Servico> findByUsuarioCpfAndAtivo(String cpf, boolean ativo);
 
-    long countByAtivo(boolean ativo);
+    long countByUsuarioCpfAndAtivo(String cpf,boolean ativo);
 }

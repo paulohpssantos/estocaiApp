@@ -1,8 +1,6 @@
 package com.estocai.estocai_api.controller;
 
-import com.estocai.estocai_api.model.Estabelecimento;
 import com.estocai.estocai_api.model.Funcionario;
-import com.estocai.estocai_api.repository.EstabelecimentoRepository;
 import com.estocai.estocai_api.repository.FuncionarioRepository;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +23,10 @@ public class FuncionarioController {
 
 
     @GetMapping
-    public List<Funcionario> listar() {
-        return funcionarioRepository.findByAtivo(true);
+    public List<Funcionario> listar(@RequestParam String cpf) {
+        if (cpf != null)
+            return funcionarioRepository.findByUsuarioCpfAndAtivo(cpf,true);
+        return null;
     }
 
     @GetMapping("/{estabelecimentoCpfCnpj}")
@@ -34,8 +34,8 @@ public class FuncionarioController {
         return funcionarioRepository.findByEstabelecimentoCpfCnpjAndAtivo(estabelecimentoCpfCnpj, true);
     }
 
-    @GetMapping("/count")
-    public long totalCount() {
-        return funcionarioRepository.countByAtivo(true);
+    @GetMapping("/count/{cpf}")
+    public long totalCount(@PathVariable String cpf) {
+        return funcionarioRepository.countByUsuarioCpfAndAtivo(cpf, true);
     }
 }

@@ -6,6 +6,7 @@ import com.estocai.estocai_api.model.Usuario;
 import com.estocai.estocai_api.repository.OrdemServicoRepository;
 import com.estocai.estocai_api.repository.UsuarioRepository;
 import com.estocai.estocai_api.service.OrdemServicoService;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,8 +34,10 @@ public class OrdemServicoController {
     }
 
     @GetMapping
-    public List<OrdemServico> getOrdens(){
-        return ordemServicoRepository.findAll(org.springframework.data.domain.Sort.by("id").descending());
+    public List<OrdemServico> getOrdens(@RequestParam String cpf){
+        if (cpf != null)
+            return ordemServicoRepository.findByUsuarioCpf(cpf, Sort.by("id").descending());
+        return null;
     }
 
     @DeleteMapping("/{id}")
@@ -47,11 +50,9 @@ public class OrdemServicoController {
         }
     }
 
-    @GetMapping("/count")
-    public long totalCount() {
-
-        return ordemServicoRepository.count();
-
+    @GetMapping("/count/{cpf}")
+    public long totalCount(@PathVariable String cpf) {
+        return ordemServicoRepository.countByUsuarioCpf(cpf);
     }
 }
 
