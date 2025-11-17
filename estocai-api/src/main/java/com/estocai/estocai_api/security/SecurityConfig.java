@@ -1,6 +1,5 @@
 package com.estocai.estocai_api.security;
 
-import com.estocai.estocai_api.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,18 +11,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtRequestFilter jwtRequestFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          JwtRequestFilter jwtRequestFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.jwtRequestFilter = jwtRequestFilter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Desativa CSRF (necessário para APIs REST)
                 .csrf(csrf -> csrf.disable())
-
-                // Configura rotas públicas e protegidas
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -33,7 +32,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // Adiciona o filtro JWT antes do filtro padrão de autenticação
+                // verifica blacklist antes de qualquer validação JWT/autenticação
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                // valida e popula SecurityContext com o username
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
