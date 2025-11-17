@@ -7,12 +7,13 @@ export async function cadastrarProduto(produto: Produto) {
   return response.data;
 }
 
-export async function listarProdutos(): Promise<Produto[]> {
-  const response = await api.get(`/produto`);
+export async function listarProdutos(cpf: string): Promise<Produto[]> {
+  const response = await api.get(`/produto?cpf=${encodeURIComponent(cpf)}`);
   return response.data;
 }
 
-export async function countProdutos(): Promise<number> {
-  const response = await api.get(`/produto/count`);
+export async function countProdutos(cpf: string): Promise<number> {
+  const response = await api.get(`/produto/count/${encodeURIComponent(cpf)}`);
   return response.data;
 }
+

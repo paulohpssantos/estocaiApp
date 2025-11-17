@@ -19,8 +19,8 @@ export async function cadastrarServicoOrdemServico(servicoOrdemServico: ServicoO
   return response.data;
 }
 
-export async function listarOrdensServico(): Promise<OrdemServico[]> {
-  const response = await api.get(`/ordem-servico`);
+export async function listarOrdensServico(cpf: string): Promise<OrdemServico[]> {
+  const response = await api.get(`/ordem-servico?cpf=${encodeURIComponent(cpf)}`);
   return response.data;
 }
 
@@ -50,7 +50,9 @@ export async function deletarOrdemServico(ordemId: number) {
   return response.data;
 }
 
-export async function countOrdensServico(): Promise<number> {
-  const response = await api.get(`/ordem-servico/count`);
+export async function countOrdensServico(cpf: string): Promise<number> {
+  const response = await api.get(`/ordem-servico/count/${encodeURIComponent(cpf)}`);
   return response.data;
 }
+
+

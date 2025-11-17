@@ -7,12 +7,12 @@ export async function cadastrarServico(servico: Servico) {
   return response.data;
 }
 
-export async function listarServicos(): Promise<Servico[]> {
-  const response = await api.get(`/servico`);
+export async function listarServicos(cpf: string): Promise<Servico[]> {
+  const response = await api.get(`/servico?cpf=${encodeURIComponent(cpf)}`);
   return response.data;
 }
 
-export async function countServicos(): Promise<number> {
-  const response = await api.get(`/servico/count`);
+export async function countServicos(cpf: string): Promise<number> {
+  const response = await api.get(`/servico/count/${encodeURIComponent(cpf)}`);
   return response.data;
 }

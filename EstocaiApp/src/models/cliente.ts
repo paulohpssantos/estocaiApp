@@ -1,4 +1,5 @@
 import { Estabelecimento } from './estabelecimento';
+import { Usuario } from './usuario';
 
 export interface Cliente {
   cpf: string;
@@ -14,4 +15,5 @@ export interface Cliente {
   dataNascimento: string;
   ativo: boolean;
   estabelecimento: Estabelecimento;
+  usuario: Usuario;
 }

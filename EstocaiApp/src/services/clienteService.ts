@@ -7,12 +7,14 @@ export async function cadastrarCliente(cliente: Cliente) {
   return response.data;
 }
 
-export async function listarClientes(): Promise<Cliente[]> {
-  const response = await api.get(`/cliente`);
+export async function listarClientes(cpf: string): Promise<Cliente[]> {
+  const response = await api.get(`/cliente?cpf=${encodeURIComponent(cpf)}`);
   return response.data;
 }
 
-export async function countClientes(): Promise<number> {
-  const response = await api.get(`/cliente/count`);
+export async function countClientes(cpf: string): Promise<number> {
+  const response = await api.get(`/cliente/count/${encodeURIComponent(cpf)}`);
   return response.data;
 }
+
+

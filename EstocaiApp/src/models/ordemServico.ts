@@ -1,6 +1,7 @@
 import { Cliente } from './cliente';
 import { Estabelecimento } from './estabelecimento';
 import { Funcionario } from './funcionario';
+import { Usuario } from './usuario';
 
 
 export interface OrdemServico {
@@ -13,4 +14,5 @@ export interface OrdemServico {
   observacoes?: string | null;
   status: string;
   valorTotal: number; 
+  usuario: Usuario;
 }

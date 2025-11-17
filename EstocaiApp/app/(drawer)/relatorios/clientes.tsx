@@ -1,5 +1,7 @@
 import globalStyles from "@/constants/globalStyles";
+import { Usuario } from "@/src/models/usuario";
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
@@ -15,6 +17,7 @@ import { formatCelular, formatCpfCnpj, formatDateBR } from "../../../src/utils/f
 export default function RelatorioClientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -22,7 +25,11 @@ export default function RelatorioClientes() {
       async function fetchClientes() {
         setLoading(true);
         try {
-          const data = await listarClientes();
+          const usuarioString = await AsyncStorage.getItem("usuario");
+          if (!usuarioString) return;
+          const usuario = JSON.parse(usuarioString) as Usuario;
+          setUsuario(usuario);
+          const data = await listarClientes(usuario.cpf);
           if (isActive) setClientes(data);
         } catch (e) {
           console.error("Erro ao listar clientes:", e);

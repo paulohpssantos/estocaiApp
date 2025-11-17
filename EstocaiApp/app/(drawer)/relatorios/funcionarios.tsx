@@ -1,5 +1,7 @@
 import globalStyles from "@/constants/globalStyles";
+import { Usuario } from "@/src/models/usuario";
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useState } from "react";
 import { ScrollView, View } from "react-native";
@@ -12,6 +14,7 @@ import { formatCelular, formatCpfCnpj } from "../../../src/utils/formatters";
 export default function RelatorioFuncionarios() {
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -19,7 +22,11 @@ export default function RelatorioFuncionarios() {
       async function fetchFuncionarios() {
         setLoading(true);
         try {
-          const data = await listarFuncionarios();
+          const usuarioString = await AsyncStorage.getItem("usuario");
+          if (!usuarioString) return;
+          const usuario = JSON.parse(usuarioString) as Usuario;
+          setUsuario(usuario);
+          const data = await listarFuncionarios(usuario.cpf);
           if (isActive) setFuncionarios(data);
         } catch (e) {
           console.error("Erro ao listar funcionários:", e);

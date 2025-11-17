@@ -1,4 +1,5 @@
 import { Estabelecimento } from './estabelecimento';
+import { Usuario } from './usuario';
 
 export interface Funcionario {
   cpf: string;
@@ -8,4 +9,5 @@ export interface Funcionario {
   email: string;
   ativo: boolean;
   estabelecimento: Estabelecimento;
+  usuario: Usuario;
 }

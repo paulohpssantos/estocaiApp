@@ -7,7 +7,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import React, { useState } from "react";
-import { Alert, Button, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import colors from "../../constants/colors";
 import { useAuth } from "../../src/context/AuthContext";
 
@@ -332,8 +332,11 @@ function CustomDrawerContent(props: any) {
               </View>
             )}
           </View>
-          <Button title="Sair" onPress={handleLogout} color={colors.primary} />
+          
         </DrawerContentScrollView>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
+  <Text style={styles.logoutText}>Sair</Text>
+</TouchableOpacity>
       </LinearGradient>
 
       <View style={styles.footer}>
@@ -434,4 +437,6 @@ const styles = StyleSheet.create({
     color: colors.mediumGray,
     fontSize: 12,
   },
+  
+
 });

@@ -37,6 +37,7 @@ export default function LoginScreen() {
           value={username}
           onChangeText={setUsername}
           style={globalStyles.input}
+          keyboardType="numeric"
         />
         <TextInput
           placeholder="Senha"

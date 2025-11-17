@@ -1,5 +1,7 @@
 import { Cliente } from '@/src/models/cliente';
+import { Usuario } from '@/src/models/usuario';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
@@ -13,12 +15,16 @@ export default function Clientes() {
   const router = useRouter();
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
-  
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
 
   const fetchClientes = async () => {
     setLoading(true);
     try {
-      const data = await listarClientes();
+      const usuarioString = await AsyncStorage.getItem("usuario");
+      if (!usuarioString) return;
+      const usuario = JSON.parse(usuarioString) as Usuario;
+      setUsuario(usuario);
+      const data = await listarClientes(usuario.cpf);
       setClientes(data);
     } catch (e) {
       setClientes([]);

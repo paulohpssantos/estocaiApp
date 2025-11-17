@@ -1,4 +1,6 @@
 import { Produto } from "@/src/models/produto";
+import { Usuario } from "@/src/models/usuario";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -9,23 +11,41 @@ import globalStyles from '../../../constants/globalStyles';
 import { cadastrarProduto } from '../../../src/services/produtoService';
 import { formatDateBR, formatISODate, formatMoneyNoSymbol } from '../../../src/utils/formatters';
 
+const initialForm: Produto = {
+  id: null,
+  nome: '',
+  descricao: '',
+  valor: 0,
+  qtdEstoque: 0,
+  estoqueMinimo: 0,
+  dataFabricacao: '',
+  dataValidade: '',
+  usuario: null as any,
+}
+
 export default function NovoProduto() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const [form, setForm] = useState<Produto>({
-    id: null,
-    nome: '',
-    descricao: '',
-    valor: 0,
-    qtdEstoque: 0,
-    estoqueMinimo: 0,
-    dataFabricacao: '',
-    dataValidade: '',
-  });
-
+  const [form, setForm] = useState<Produto>(initialForm);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [valorInput, setValorInput] = useState(formatMoneyNoSymbol(0));
   const [showDatePickerFab, setShowDatePickerFab] = useState(false);
   const [showDatePickerVal, setShowDatePickerVal] = useState(false);
+
+  useEffect(() => {
+    const loadUsuario = async () => {
+      try {
+        const usuarioString = await AsyncStorage.getItem("usuario");
+        if (!usuarioString) return;
+        const usuario = JSON.parse(usuarioString) as Usuario;
+        setUsuario(usuario);
+        setForm(prev => ({ ...prev, usuario }));
+      } catch (e) {
+        console.warn('Erro ao carregar usuário do AsyncStorage', e);
+      }
+    };
+    loadUsuario();
+  }, []);
 
   useEffect(() => {
     if (params.produto) {
@@ -44,6 +64,7 @@ export default function NovoProduto() {
         estoqueMinimo: 0,
         dataFabricacao: '',
         dataValidade: '',
+        usuario: null as any,
       });
       setValorInput(formatMoneyNoSymbol(0));
     }

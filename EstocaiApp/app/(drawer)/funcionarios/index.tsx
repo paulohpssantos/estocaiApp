@@ -1,5 +1,7 @@
 import { Funcionario } from '@/src/models/funcionario';
+import { Usuario } from '@/src/models/usuario';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
@@ -13,12 +15,17 @@ export default function Funcionarios() {
   const router = useRouter();
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
   
 
   const fetchFuncionarios = async () => {
     setLoading(true);
     try {
-      const data = await listarFuncionarios();
+      const usuarioString = await AsyncStorage.getItem("usuario");
+      if (!usuarioString) return;
+      const usuario = JSON.parse(usuarioString) as Usuario;
+      setUsuario(usuario);
+      const data = await listarFuncionarios(usuario.cpf);
       setFuncionarios(data);
     } catch (e) {
       setFuncionarios([]);

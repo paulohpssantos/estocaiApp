@@ -3,7 +3,7 @@ import { Usuario } from "@/src/models/usuario";
 import { formatDateBR, formatISODate } from "@/src/utils/formatters";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Button } from 'react-native-paper';
@@ -15,13 +15,7 @@ import { listarEstabelecimentosPorCpf } from '../../../src/services/estabelecime
 import { getEndereco } from '../../../src/services/viacepService';
 
 
-export default function NovoCliente() {
-  const router = useRouter();
-  const params = useLocalSearchParams();
-  const [estabelecimentos, setEstabelecimentos] = useState<Estabelecimento[]>([]);
-  const [usuario, setUsuario] = useState<Usuario | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState<Cliente>({
+const initialForm: Cliente = {
     cpf: '',
     nome: '',
     telefone: '',
@@ -35,10 +29,41 @@ export default function NovoCliente() {
     dataNascimento: '',
     ativo: true,
     estabelecimento: null as any,
-  });
+    usuario: null as any,
+};
+
+export default function NovoCliente() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const [estabelecimentos, setEstabelecimentos] = useState<Estabelecimento[]>([]);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState<Cliente>(initialForm);
 
   const [estabelecimentoBusca, setEstabelecimentoBusca] = useState('');
   const [estabelecimentosFiltrados, setEstabelecimentosFiltrados] = useState<Estabelecimento[]>([]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (params.cliente) {
+        const est = JSON.parse(params.cliente as string);
+        setForm(est);
+      } else {
+        setForm(initialForm);
+        const loadUsuario = async () => {
+          try {
+            const usuarioString = await AsyncStorage.getItem("usuario");
+            if (!usuarioString) return;
+            const usuario = JSON.parse(usuarioString) as Usuario;
+            setForm(prev => ({ ...prev, usuario: usuario as Usuario }));
+          } catch (e) {
+            console.warn('Erro ao carregar usuário do AsyncStorage', e);
+          }
+        };
+        loadUsuario();
+      }
+    }, [params.cliente])
+  );
 
   useEffect(() => {
     if (estabelecimentoBusca.trim() === '') {
@@ -77,6 +102,7 @@ export default function NovoCliente() {
         dataNascimento: '',
         ativo: true,
         estabelecimento: null as any,
+        usuario: null as any,
       });
       setEstabelecimentoBusca('');
     }
@@ -178,6 +204,7 @@ export default function NovoCliente() {
               value={form.cpf}
               onChangeText={v => handleChange('cpf', v)}
               style={globalStyles.input}
+              keyboardType="numeric"
             />
             <Text style={{ marginBottom: 4, color: colors.text }}>Nome</Text>
             <TextInput
@@ -192,6 +219,7 @@ export default function NovoCliente() {
               value={form.telefone}
               onChangeText={v => handleChange('telefone', v)}
               style={globalStyles.input}
+              keyboardType="numeric"
             />
             <Text style={{ marginBottom: 4, color: colors.text }}>Email</Text>
             <TextInput
@@ -222,6 +250,7 @@ export default function NovoCliente() {
                 }
               }}
               style={globalStyles.input}
+              keyboardType="numeric"
             />
             <Text style={{ marginBottom: 4, color: colors.text }}>Logradouro</Text>
             <TextInput
@@ -259,6 +288,7 @@ export default function NovoCliente() {
                 style={globalStyles.input}
                 editable={false}
                 pointerEvents="none"
+                keyboardType="numeric"
               />
             </TouchableOpacity>
             {showDatePicker && (

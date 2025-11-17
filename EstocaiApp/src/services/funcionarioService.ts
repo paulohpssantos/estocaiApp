@@ -7,8 +7,8 @@ export async function cadastrarFuncionario(funcionario: Funcionario) {
   return response.data;
 }
 
-export async function listarFuncionarios(): Promise<Funcionario[]> {
-  const response = await api.get(`/funcionario`);
+export async function listarFuncionarios(cpf: string): Promise<Funcionario[]> {
+  const response = await api.get(`/funcionario?cpf=${encodeURIComponent(cpf)}`);
   return response.data;
 }
 
@@ -17,7 +17,8 @@ export async function listarFuncionariosPorEstabelecimento(estabelecimentoCpfCnp
   return response.data;
 }
 
-export async function countFuncionarios(): Promise<number> {
-  const response = await api.get(`/funcionario/count`);
+export async function countFuncionarios(cpf: string): Promise<number> {
+  const response = await api.get(`/funcionario/count/${encodeURIComponent(cpf)}`);
   return response.data;
 }
+

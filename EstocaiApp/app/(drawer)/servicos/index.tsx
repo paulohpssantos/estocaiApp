@@ -1,4 +1,6 @@
+import { Usuario } from '@/src/models/usuario';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
@@ -13,11 +15,16 @@ export default function Estabelecimentos() {
   const router = useRouter();
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
 
   const fetchServicos = async () => {
     setLoading(true);
     try {
-      const data = await listarServicos();
+      const usuarioString = await AsyncStorage.getItem("usuario");
+      if (!usuarioString) return;
+      const usuario = JSON.parse(usuarioString) as Usuario;
+      setUsuario(usuario);
+      const data = await listarServicos(usuario.cpf);
       setServicos(data);
     } catch (e) {
       setServicos([]);

@@ -1,5 +1,7 @@
 import globalStyles from "@/constants/globalStyles";
+import { Usuario } from "@/src/models/usuario";
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useState } from "react";
 import { ScrollView, View } from "react-native";
@@ -13,6 +15,7 @@ import { setStatusBackgroundColor, setStatusBorderColor, setStatusFontColor } fr
 export default function RelatorioOrdens() {
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -20,7 +23,11 @@ export default function RelatorioOrdens() {
       async function fetchOrdens() {
         setLoading(true);
         try {
-          const data = await listarOrdensServico();
+          const usuarioString = await AsyncStorage.getItem("usuario");
+          if (!usuarioString) return;
+          const usuario = JSON.parse(usuarioString) as Usuario;
+          setUsuario(usuario);
+          const data = await listarOrdensServico(usuario.cpf);
           if (isActive) setOrdens(data);
         } catch (e) {
           console.error("Erro ao listar ordens de serviço:", e);

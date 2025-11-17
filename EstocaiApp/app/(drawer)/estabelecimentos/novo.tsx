@@ -98,6 +98,7 @@ export default function NovoEstabelecimento() {
             value={form.cpfCnpj}
             onChangeText={v => handleChange('cpfCnpj', v)}
             style={globalStyles.input}
+            keyboardType="numeric"
           />
           <Text style={{ marginBottom: 4, color: colors.text }}>Nome</Text>
           <TextInput
@@ -127,6 +128,7 @@ export default function NovoEstabelecimento() {
               }
             }}
             style={globalStyles.input}
+            keyboardType="numeric"
           />
           <Text style={{ marginBottom: 4, color: colors.text }}>Logradouro</Text>
           <TextInput
@@ -155,6 +157,7 @@ export default function NovoEstabelecimento() {
             value={form.telefone}
             onChangeText={v => handleChange('telefone', v)}
             style={globalStyles.input}
+            keyboardType="numeric"
           />
           <Text style={{ marginBottom: 4, color: colors.text }}>Email</Text>
           <TextInput

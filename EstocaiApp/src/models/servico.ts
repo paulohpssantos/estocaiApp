@@ -1,3 +1,5 @@
+import { Usuario } from "./usuario";
+
 export interface Servico {
   id: number | null;
   nome: string;
@@ -5,5 +7,5 @@ export interface Servico {
   valor: number;
   duracao: string;
   ativo: boolean;
-  
+  usuario: Usuario;
 }

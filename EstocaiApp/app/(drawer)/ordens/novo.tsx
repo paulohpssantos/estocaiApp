@@ -25,6 +25,19 @@ import { formatDateBR, formatISODate, formatMoney } from "@/src/utils/formatters
 import { listarEstabelecimentosPorCpf } from '../../../src/services/estabelecimentoService';
 import { listarFuncionariosPorEstabelecimento } from '../../../src/services/funcionarioService';
 
+const initialForm: OrdemServico = {
+  id: null,
+  numeroOS: '',
+  estabelecimento: null as any,
+  funcionario: null as any,
+  cliente: null as any,
+  dataAbertura: '',
+  observacoes: null,
+  status: '',
+  valorTotal: 0,
+  usuario: null as any,
+}
+
 export default function NovaOrdemServico() {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -50,17 +63,22 @@ export default function NovaOrdemServico() {
   const [produtoBusca, setProdutoBusca] = useState('');
   const [produtosFiltrados, setProdutosFiltrados] = useState<Produto[]>([]);
   const [produtosSelecionados, setProdutosSelecionados] = useState<{ id?: number, produto: Produto, quantidade: number }[]>([]);
-  const [form, setForm] = useState<OrdemServico>({
-    id: null,
-    numeroOS: '',
-    estabelecimento: null as any,
-    funcionario: null as any,
-    cliente: null as any,
-    dataAbertura: '',
-    observacoes: null,
-    status: '',
-    valorTotal: 0,
-  });
+  const [form, setForm] = useState<OrdemServico>(initialForm);
+
+  useEffect(() => {
+    const loadUsuario = async () => {
+      try {
+        const usuarioString = await AsyncStorage.getItem("usuario");
+        if (!usuarioString) return;
+        const usuario = JSON.parse(usuarioString) as Usuario;
+        setUsuario(usuario);
+        setForm(prev => ({ ...prev, usuario }));
+      } catch (e) {
+        console.warn('Erro ao carregar usuário do AsyncStorage', e);
+      }
+    };
+    loadUsuario();
+  }, []);
 
   const fetchEstabelecimentos = async () => {
     setLoading(true);
@@ -93,7 +111,11 @@ export default function NovaOrdemServico() {
   const fetchClientes = async () => {
     setLoading(true);
     try {
-      const data = await listarClientes();
+      const usuarioString = await AsyncStorage.getItem("usuario");
+      if (!usuarioString) return;
+      const usuario = JSON.parse(usuarioString) as Usuario;
+      setUsuario(usuario);
+      const data = await listarClientes(usuario.cpf);
       setClientes(data);
     } catch (e) {
       setClientes([]);
@@ -105,7 +127,11 @@ export default function NovaOrdemServico() {
   const fetchProdutos = async () => {
     setLoading(true);
     try {
-      const data = await listarProdutos();
+      const usuarioString = await AsyncStorage.getItem("usuario");
+      if (!usuarioString) return;
+      const usuario = JSON.parse(usuarioString) as Usuario;
+      setUsuario(usuario);
+      const data = await listarProdutos(usuario.cpf);
       setProdutos(data);
     } catch (e) {
       setProdutos([]);
@@ -117,7 +143,11 @@ export default function NovaOrdemServico() {
   const fetchServicos = async () => {
     setLoading(true);
     try {
-      const data = await listarServicos();
+      const usuarioString = await AsyncStorage.getItem("usuario");
+      if (!usuarioString) return;
+      const usuario = JSON.parse(usuarioString) as Usuario;
+      setUsuario(usuario);
+      const data = await listarServicos(usuario.cpf);
       setServicos(data);
     } catch (e) {
       setServicos([]);
@@ -184,6 +214,7 @@ export default function NovaOrdemServico() {
         observacoes: null,
         status: '',
         valorTotal: 0,
+        usuario: null as any,
       });
       setStatusBusca('');
       setEstabelecimentoBusca('');

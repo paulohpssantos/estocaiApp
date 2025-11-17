@@ -20,6 +20,7 @@ const initialForm: Funcionario = {
   email: '',
   estabelecimento: null as any,
   ativo: true,
+  usuario: null as any,
 };
 
 export default function NovoFuncionario() {
@@ -31,6 +32,21 @@ export default function NovoFuncionario() {
   const [form, setForm] = useState<Funcionario>(initialForm);
   const [estabelecimentoBusca, setEstabelecimentoBusca] = useState('');
   const [estabelecimentosFiltrados, setEstabelecimentosFiltrados] = useState<Estabelecimento[]>([]);
+
+  useEffect(() => {
+    const loadUsuario = async () => {
+      try {
+        const usuarioString = await AsyncStorage.getItem("usuario");
+        if (!usuarioString) return;
+        const usuario = JSON.parse(usuarioString) as Usuario;
+        setUsuario(usuario);
+        setForm(prev => ({ ...prev, usuario }));
+      } catch (e) {
+        console.warn('Erro ao carregar usuário do AsyncStorage', e);
+      }
+    };
+    loadUsuario();
+  }, []);
 
   useEffect(() => {
     if (estabelecimentoBusca.trim() === '') {
@@ -145,6 +161,7 @@ export default function NovoFuncionario() {
               value={form.cpf}
               onChangeText={v => handleChange('cpf', v)}
               style={globalStyles.input}
+              keyboardType="numeric"
             />
             <Text style={{ marginBottom: 4, color: colors.text }}>Nome</Text>
             <TextInput
@@ -166,6 +183,7 @@ export default function NovoFuncionario() {
               value={form.telefone}
               onChangeText={v => handleChange('telefone', v)}
               style={globalStyles.input}
+              keyboardType="numeric"
             />
             <Text style={{ marginBottom: 4, color: colors.text }}>Email</Text>
             <TextInput

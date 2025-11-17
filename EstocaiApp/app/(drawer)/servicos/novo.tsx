@@ -1,5 +1,7 @@
 import { Servico } from "@/src/models/servico";
+import { Usuario } from "@/src/models/usuario";
 import { cadastrarServico } from "@/src/services/servicoService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, View } from 'react-native';
@@ -8,20 +10,38 @@ import colors from '../../../constants/colors';
 import globalStyles from '../../../constants/globalStyles';
 import { formatMoneyNoSymbol } from '../../../src/utils/formatters';
 
+const initialForm: Servico = {
+  id: null,
+  nome: '',
+  descricao: '',
+  valor: 0,
+  duracao: '',
+  ativo: true,
+  usuario: null as any,
+}
+
 export default function NovoServico() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const [form, setForm] = useState<Servico>({
-    id: null,
-    nome: '',
-    descricao: '',
-    valor: 0,
-    duracao: '',
-    ativo: true,
-  });
-
+  const [form, setForm] = useState<Servico>(initialForm);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [valorInput, setValorInput] = useState(formatMoneyNoSymbol(0));
   const [duracaoInput, setDuracaoInput] = useState('00:00');
+
+  useEffect(() => {
+    const loadUsuario = async () => {
+      try {
+        const usuarioString = await AsyncStorage.getItem("usuario");
+        if (!usuarioString) return;
+        const usuario = JSON.parse(usuarioString) as Usuario;
+        setUsuario(usuario);
+        setForm(prev => ({ ...prev, usuario }));
+      } catch (e) {
+        console.warn('Erro ao carregar usuário do AsyncStorage', e);
+      }
+    };
+    loadUsuario();
+  }, []);
 
   useEffect(() => {
     if (params.servico) {
@@ -38,6 +58,7 @@ export default function NovoServico() {
         valor: 0,
         duracao: '',
         ativo: true,
+        usuario: null as any,
       });
       setValorInput(formatMoneyNoSymbol(0));
       setDuracaoInput('00:00');

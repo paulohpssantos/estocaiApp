@@ -1,6 +1,8 @@
 import { OrdemServico } from '@/src/models/ordemServico';
 import { Produto } from '@/src/models/produto';
+import { Usuario } from '@/src/models/usuario';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
@@ -15,6 +17,7 @@ export default function Ordens() {
   const router = useRouter();
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
   
   const produtosDaOrdem = async (idOrdemSelecionada: number): Promise<Produto[]> => {
     const produtosOrdem = await listarProdutosOrdemServico(idOrdemSelecionada);
@@ -24,7 +27,11 @@ export default function Ordens() {
   const fetchOrdens = async () => {
     setLoading(true);
     try {
-      const data = await listarOrdensServico();
+      const usuarioString = await AsyncStorage.getItem("usuario");
+      if (!usuarioString) return;
+      const usuario = JSON.parse(usuarioString) as Usuario;
+      setUsuario(usuario);
+      const data = await listarOrdensServico(usuario.cpf);
       setOrdens(data);
     } catch (e) {
       setOrdens([]);

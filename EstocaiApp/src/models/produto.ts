@@ -1,3 +1,5 @@
+import { Usuario } from "./usuario";
+
 export interface Produto {
   id: number | null;
   nome: string;
@@ -7,5 +9,6 @@ export interface Produto {
   estoqueMinimo: number;
   dataFabricacao: string;
   dataValidade: string;
+  usuario: Usuario;
   
 }

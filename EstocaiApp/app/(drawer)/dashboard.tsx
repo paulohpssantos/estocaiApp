@@ -71,12 +71,12 @@ export default function Dashboard() {
           produtos
         ] = await Promise.all([
           countEstabelecimentos(cpfUsuario),
-          countFuncionarios(),
-          countClientes(),
-          countProdutos(),
-          countServicos(),
-          listarOrdensServico(),
-          listarProdutos()
+          countFuncionarios(cpfUsuario),
+          countClientes(cpfUsuario),
+          countProdutos(cpfUsuario),
+          countServicos(cpfUsuario),
+          listarOrdensServico(cpfUsuario),
+          listarProdutos(cpfUsuario)
         ]);
 
         if (!isActive) return; // evita atualizar se o componente foi desmontado

@@ -1,5 +1,7 @@
 import globalStyles from "@/constants/globalStyles";
+import { Usuario } from "@/src/models/usuario";
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useState } from "react";
 import { ScrollView, View } from "react-native";
@@ -13,6 +15,7 @@ import { verifyIsLowStock } from "../../../src/utils/functions";
 export default function RelatorioProdutos() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -20,7 +23,11 @@ export default function RelatorioProdutos() {
       async function fetchProdutos() {
         setLoading(true);
         try {
-          const data = await listarProdutos();
+          const usuarioString = await AsyncStorage.getItem("usuario");
+          if (!usuarioString) return;
+          const usuario = JSON.parse(usuarioString) as Usuario;
+          setUsuario(usuario);
+          const data = await listarProdutos(usuario.cpf);
           if (isActive) setProdutos(data);
         } catch (e) {
           console.error("Erro ao listar produtos:", e);
