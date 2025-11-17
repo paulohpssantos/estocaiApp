@@ -86,8 +86,8 @@ public class AuthController {
         String token = authHeader.substring(7);
         try {
             Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-            Date exp = claims.getExpiration();
-            blacklistService.blacklistToken(token, exp);
+            String username = claims.getSubject(); // obter username (String) do token
+            blacklistService.blacklistToken(token, username);
             return ResponseEntity.ok(Map.of("mensagem", "Logout realizado"));
         } catch (JwtException e) {
             return ResponseEntity.badRequest().body(Map.of("erro", "Token inválido"));
