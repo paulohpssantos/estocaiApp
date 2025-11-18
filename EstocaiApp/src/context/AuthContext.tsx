@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { Usuario } from '../models/usuario';
 import api from "../services/api";
@@ -29,6 +30,7 @@ export const triggerGlobalLogout = async () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -67,6 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("usuario");
     setUser(null);
+    router.replace("/(auth)/login"); 
   };
 
   // Registra o logout global para ser usado pelo interceptor do axios

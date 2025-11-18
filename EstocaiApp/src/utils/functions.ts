@@ -34,8 +34,8 @@ export function setStatusFontColor(status: string) {
 
 //Verifica estoque mínimo
 export function verifyIsLowStock(qtdEstoque: number, estoqueMinimo: number): boolean {
-    const estoqueRatio = estoqueMinimo > 0 ? qtdEstoque / estoqueMinimo : 1;
-    return estoqueRatio <= 0.2;
+    return  qtdEstoque >= estoqueMinimo ? false : true;
+    
 }
 
 //Validar datas de Vencimento

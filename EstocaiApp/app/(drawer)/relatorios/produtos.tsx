@@ -57,20 +57,20 @@ export default function RelatorioProdutos() {
             <View key={idx} style={globalStyles.card}>
               {/* Linha 1: Código (esquerda) e Nome(direita) */}
               <View style={globalStyles.cardRow}>
-                <View style={[globalStyles.cardCellFull, { flex: 1 }]}>
-                  <Text style={globalStyles.cardLabel}>Código</Text>
-                  <Text style={globalStyles.cardValue}>{produto.id}</Text>
-                </View>
                 <View style={[globalStyles.cardCellFull, { flex: 2 }]}>
                   <Text style={globalStyles.cardLabel}>Nome</Text>
                   <Text style={globalStyles.cardValue}>{produto.nome}</Text>
                 </View>
               </View>
-              {/* Linha 2: valor, estoque */}
+              {/* Linha 2: valor, estoque min e estoque */}
               <View style={globalStyles.cardRow}>
                 <View style={globalStyles.cardCell}>
                   <Text style={globalStyles.cardLabel}>Valor Un.</Text>
                   <Text style={globalStyles.cardValue}>{formatMoney(produto.valor)}</Text>
+                </View>
+                <View style={[globalStyles.cardCellFull, { flex: 1, alignItems: "center" }]}>
+                  <Text style={globalStyles.cardLabel}>Estoque Min.</Text>
+                  <Text style={globalStyles.cardValue}>{produto.estoqueMinimo}</Text>
                 </View>
                 <View style={[globalStyles.cardCellFull, { flex: 1, alignItems: "flex-end" }]}>
                   <Text style={globalStyles.cardLabel}>Estoque</Text>

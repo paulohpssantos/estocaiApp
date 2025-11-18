@@ -772,23 +772,24 @@ export default function NovaOrdemServico() {
                         justifyContent: 'center',
                       }}
                     >
-                      {!isViewOnly && (
-                        <TouchableOpacity
-                          onPress={() => handleQuantidadeProdutoChange(idx, String(Math.max(0, item.quantidade - 1)))}
-                          style={{ paddingHorizontal: 8, paddingVertical: 4 }}
-                        >
-                          <MaterialCommunityIcons name="chevron-down" size={22} color={colors.text} />
-                        </TouchableOpacity>
-                      )}
-                      <Text style={{ minWidth: 24, textAlign: 'center', fontSize: 16 }}>{item.quantidade}</Text>
-                      {!isViewOnly && (
-                        <TouchableOpacity
-                          onPress={() => handleQuantidadeProdutoChange(idx, String(item.quantidade + 1))}
-                          style={{ paddingHorizontal: 8, paddingVertical: 4 }}
-                        >
-                          <MaterialCommunityIcons name="chevron-up" size={22} color={colors.text} />
-                        </TouchableOpacity>
-                      )}
+                      <TextInput
+                        style={{
+                          minWidth: 40,
+                          textAlign: 'center',
+                          fontSize: 16,
+                          paddingVertical: 0,
+                          paddingHorizontal: 0,
+                          color: colors.text,
+                          backgroundColor: 'transparent',
+                        }}
+                        value={String(item.quantidade)}
+                        onChangeText={v => {
+                          const onlyNums = v.replace(/\D/g, '');
+                          handleQuantidadeProdutoChange(idx, onlyNums === '' ? '0' : onlyNums);
+                        }}
+                        keyboardType="numeric"
+                        editable={!isViewOnly}
+                      />
                     </View>
                     <Text style={{ flex: 1, color: colors.text, textAlign: 'center' }}>
                       {formatMoney(item.produto.valor)}

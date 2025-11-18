@@ -2,7 +2,7 @@ import { Servico } from "@/src/models/servico";
 import { Usuario } from "@/src/models/usuario";
 import { cadastrarServico } from "@/src/services/servicoService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, View } from 'react-native';
 import { Button } from 'react-native-paper';
@@ -42,6 +42,19 @@ export default function NovoServico() {
     };
     loadUsuario();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!params.servico) {
+        setForm(prev => ({
+        ...initialForm,
+          usuario: prev.usuario // mantém o usuário já carregado
+        }));
+        setValorInput(formatMoneyNoSymbol(0));
+        setDuracaoInput('00:00');
+      }
+    }, [params.servico])
+  );
 
   useEffect(() => {
     if (params.servico) {

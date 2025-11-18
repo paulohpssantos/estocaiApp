@@ -14,7 +14,7 @@ import { listarOrdensServico } from '../../src/services/ordemServicoService';
 import { countProdutos, listarProdutos } from '../../src/services/produtoService';
 import { countServicos } from '../../src/services/servicoService';
 import { formatDateBR, formatMoney } from '../../src/utils/formatters';
-import { isExpired, isNearExpiration } from '../../src/utils/functions';
+import { isExpired, isNearExpiration, verifyIsLowStock } from '../../src/utils/functions';
 
 
 
@@ -95,11 +95,10 @@ export default function Dashboard() {
         const baixoEstoque: any[] = [];
         const pertoVencer: any[] = [];
         const vencidos: any[] = [];
-        
+
 
         produtos.forEach((p: any) => {
-          const estoqueRatio = p.estoqueMinimo > 0 ? p.qtdEstoque / p.estoqueMinimo : 1;
-          const isLowStock = estoqueRatio <= 0.2;
+          const isLowStock = verifyIsLowStock(p.qtdEstoque, p.estoqueMinimo);
           if (isLowStock) baixoEstoque.push(p);
 
           const { isVencido, isPertoVencimento } = getValidadeStatus(p.dataValidade);
@@ -147,14 +146,16 @@ export default function Dashboard() {
               <Text style={{ color: colors.primary, marginTop: 12, marginLeft: 8 }}>Nenhum produto com estoque baixo.</Text>
             ) : (
               produtosBaixoEstoque.map(produto => (
+
                 <View key={produto.id} style={globalStyles.lowStockItem}>
                   <View>
                     <Text style={globalStyles.lowStockProductName}>{produto.nome}</Text>
-                    <Text style={globalStyles.lowStockProductInfo}>Código: {produto.id}</Text>
-                    <Text style={globalStyles.lowStockProductInfo}>Mín: {produto.estoqueMinimo}</Text>
-                  </View>
-                  <View style={globalStyles.lowStockQtdBox}>
-                    <Text style={globalStyles.lowStockQtdText}>{produto.qtdEstoque} unidades</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                      <Text style={globalStyles.lowStockProductInfo}>Mín: {produto.estoqueMinimo}</Text>
+                      <View style={globalStyles.lowStockQtdBox}>
+                        <Text style={globalStyles.lowStockQtdText}>{produto.qtdEstoque} unidades</Text>
+                      </View>
+                    </View>
                   </View>
                 </View>
               ))
@@ -175,11 +176,12 @@ export default function Dashboard() {
                 <View key={produto.id} style={globalStyles.lowStockItem}>
                   <View>
                     <Text style={globalStyles.lowStockProductName}>{produto.nome}</Text>
-                    <Text style={globalStyles.lowStockProductInfo}>Código: {produto.id}</Text>
-                    <Text style={globalStyles.lowStockProductInfo}>Validade: {produto.validade}</Text>
-                  </View>
-                  <View style={globalStyles.lowStockQtdBox}>
-                    <Text style={globalStyles.lowStockQtdText}>{formatDateBR(produto.dataValidade)}</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                      <Text style={globalStyles.lowStockProductInfo}>Validade:</Text>
+                      <View style={globalStyles.lowStockQtdBox}>
+                        <Text style={globalStyles.lowStockQtdText}>{formatDateBR(produto.dataValidade)}</Text>
+                      </View>
+                    </View>
                   </View>
                 </View>
               ))
@@ -200,11 +202,12 @@ export default function Dashboard() {
                 <View key={produto.id} style={globalStyles.lowStockItem}>
                   <View>
                     <Text style={globalStyles.lowStockProductName}>{produto.nome}</Text>
-                    <Text style={globalStyles.lowStockProductInfo}>Código: {produto.id}</Text>
-                    <Text style={globalStyles.lowStockProductInfo}>Validade: {produto.validade}</Text>
-                  </View>
-                  <View style={globalStyles.lowStockQtdBox}>
-                    <Text style={globalStyles.lowStockQtdText}>{formatDateBR(produto.dataValidade)}</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' , width: '100%'}}>
+                      <Text style={globalStyles.lowStockProductInfo}>Validade:</Text>
+                      <View style={globalStyles.lowStockQtdBox}>
+                        <Text style={globalStyles.lowStockQtdText}>{formatDateBR(produto.dataValidade)}</Text>
+                      </View>
+                    </View>
                   </View>
                 </View>
               ))

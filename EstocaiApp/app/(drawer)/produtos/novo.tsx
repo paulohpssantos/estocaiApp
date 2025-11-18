@@ -2,6 +2,7 @@ import { Produto } from "@/src/models/produto";
 import { Usuario } from "@/src/models/usuario";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -46,6 +47,20 @@ export default function NovoProduto() {
     };
     loadUsuario();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!params.produto) {
+        setForm(prev => ({
+          ...initialForm,
+          usuario: prev.usuario // mantém o usuário já carregado
+        }));
+        setValorInput(formatMoneyNoSymbol(0));
+        setShowDatePickerFab(false);
+        setShowDatePickerVal(false);
+      }
+    }, [params.produto])
+  );
 
   useEffect(() => {
     if (params.produto) {
