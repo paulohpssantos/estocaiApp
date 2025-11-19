@@ -20,9 +20,20 @@ public class OrdemServicoService {
     @Transactional
     public OrdemServico criar(OrdemServico ordem) {
         if (ordem.getNumeroOS() == null || ordem.getNumeroOS().isBlank()) {
-            Long next = jdbc.queryForObject("SELECT nextval('ordem_servico_seq')", Long.class);
+            Long next = nextSequenciaPorUsuario(ordem.getUsuario().getCpf());
             ordem.setNumeroOS("OS" + next);
         }
         return repo.save(ordem);
+    }
+
+    @Transactional
+    protected Long nextSequenciaPorUsuario(String usuarioCpf) {
+        String sql =
+                "WITH upsert AS ( " +
+                        "  INSERT INTO ordem_servico_user_seq(usuario_cpf, last_value) VALUES (?, 1) " +
+                        "  ON CONFLICT (usuario_cpf) DO UPDATE SET last_value = ordem_servico_user_seq.last_value + 1 " +
+                        "  RETURNING last_value " +
+                        ") SELECT last_value FROM upsert";
+        return jdbc.queryForObject(sql, Long.class, usuarioCpf);
     }
 }

@@ -3,11 +3,17 @@ import { Estabelecimento } from "@/src/models/estabelecimento";
 import { Funcionario } from "@/src/models/funcionario";
 import { ProdutoOrdemServico } from "@/src/models/produtoOrdemServico";
 import { ServicoOrdemServico } from "@/src/models/servicoOrdemServico";
+import { listarClientes } from "@/src/services/clienteService";
+import { cadastrarOrdemServico, cadastrarProdutosOrdemServico, cadastrarServicoOrdemServico, listarProdutosOrdemServico, listarServicosOrdemServico } from "@/src/services/ordemServicoService";
+import { listarProdutos } from "@/src/services/produtoService";
+import { listarServicos } from "@/src/services/servicoService";
+import { formatDateBR, formatISODate, formatMoney } from "@/src/utils/formatters";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Button } from 'react-native-paper';
 import colors from '../../../constants/colors';
@@ -16,14 +22,9 @@ import { OrdemServico } from '../../../src/models/ordemServico';
 import { Produto } from '../../../src/models/produto';
 import { Servico } from '../../../src/models/servico';
 import { Usuario } from '../../../src/models/usuario';
-
-import { listarClientes } from "@/src/services/clienteService";
-import { cadastrarOrdemServico, cadastrarProdutosOrdemServico, cadastrarServicoOrdemServico, listarProdutosOrdemServico, listarServicosOrdemServico } from "@/src/services/ordemServicoService";
-import { listarProdutos } from "@/src/services/produtoService";
-import { listarServicos } from "@/src/services/servicoService";
-import { formatDateBR, formatISODate, formatMoney } from "@/src/utils/formatters";
 import { listarEstabelecimentosPorCpf } from '../../../src/services/estabelecimentoService';
 import { listarFuncionariosPorEstabelecimento } from '../../../src/services/funcionarioService';
+import { cadastrarProduto } from '../../../src/services/produtoService';
 
 const initialForm: OrdemServico = {
   id: null,
@@ -64,6 +65,7 @@ export default function NovaOrdemServico() {
   const [produtosFiltrados, setProdutosFiltrados] = useState<Produto[]>([]);
   const [produtosSelecionados, setProdutosSelecionados] = useState<{ id?: number, produto: Produto, quantidade: number }[]>([]);
   const [form, setForm] = useState<OrdemServico>(initialForm);
+  const quantidadeRefs = useRef<Array<TextInput | null>>([]);
 
   useEffect(() => {
     const loadUsuario = async () => {
@@ -202,36 +204,32 @@ export default function NovaOrdemServico() {
   }, [params.ordem]);
 
   // Limpa o formulário ao abrir para nova ordem
-  useEffect(() => {
-    if (!params.ordem) {
-      setForm({
-        id: null,
-        numeroOS: '',
-        estabelecimento: null as any,
-        funcionario: null as any,
-        cliente: null as any,
-        dataAbertura: formatDateBR(new Date().toISOString().slice(0, 10)),
-        observacoes: null,
-        status: '',
-        valorTotal: 0,
-        usuario: null as any,
-      });
-      setStatusBusca('');
-      setEstabelecimentoBusca('');
-      setFuncionarioBusca('');
-      setClienteBusca('');
-      setServicoBusca('');
-      setProdutoBusca('');
-      setServicosSelecionados([]);
-      setProdutosSelecionados([]);
-      setStatusFiltrados([]);
-      setEstabelecimentosFiltrados([]);
-      setFuncionariosFiltrados([]);
-      setClientesFiltrados([]);
-      setServicosFiltrados([]);
-      setProdutosFiltrados([]);
-    }
-  }, [params.ordem]);
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!params.ordem) {
+        setForm(prev => ({
+          ...initialForm,
+          dataAbertura: formatDateBR(new Date().toISOString().slice(0, 10)),
+          usuario: prev.usuario // mantém o usuário já carregado
+        }));
+
+        setStatusBusca('');
+        setEstabelecimentoBusca('');
+        setFuncionarioBusca('');
+        setClienteBusca('');
+        setServicoBusca('');
+        setProdutoBusca('');
+        setServicosSelecionados([]);
+        setProdutosSelecionados([]);
+        setStatusFiltrados([]);
+        setEstabelecimentosFiltrados([]);
+        setFuncionariosFiltrados([]);
+        setClientesFiltrados([]);
+        setServicosFiltrados([]);
+        setProdutosFiltrados([]);
+      }
+    }, [params.ordem])
+  );
 
   useEffect(() => {
     fetchEstabelecimentos();
@@ -325,6 +323,22 @@ export default function NovaOrdemServico() {
   };
 
   const handleSubmit = async () => {
+    if (!form.estabelecimento) {
+      Alert.alert('Atenção', 'Selecione um estabelecimento.');
+      return;
+    }
+    if (!form.funcionario) {
+      Alert.alert('Atenção', 'Selecione um funcionário.');
+      return;
+    }
+    if (!form.cliente) {
+      Alert.alert('Atenção', 'Selecione um cliente.');
+      return;
+    }
+    if (!form.dataAbertura || form.dataAbertura.trim() === '') {
+      Alert.alert('Atenção', 'Informe a data de abertura.');
+      return;
+    }
     try {
       const ordemServicoData: OrdemServico = {
         ...form,
@@ -356,7 +370,14 @@ export default function NovaOrdemServico() {
         await cadastrarServicoOrdemServico(servicoOrdem);
       }
 
+      //Somente depois de cadastrar a ordem,  atualizar o estoque
+      for (const item of produtosSelecionados) {
+        const novoEstoque = (item.produto.qtdEstoque || 0) - (item.quantidade || 0);
+        await cadastrarProduto({ ...item.produto, qtdEstoque: novoEstoque });
+      }
+
       Alert.alert('Sucesso', 'Ordem de serviço cadastrada com sucesso!');
+
       router.replace('/ordens');
     } catch (error) {
       Alert.alert('Erro', 'Falha ao cadastrar ordem de serviço');
@@ -386,10 +407,18 @@ export default function NovaOrdemServico() {
   };
 
   const handleAddProduto = (produto: Produto) => {
-    setProdutosSelecionados(prev => [
-      ...prev,
-      { id: undefined, produto, quantidade: 1 }
-    ]);
+    setProdutosSelecionados(prev => {
+      const novoArr = [
+        ...prev,
+        { id: undefined, produto, quantidade: 1 }
+      ];
+      // Após adicionar, foca no campo de quantidade do novo item
+      setTimeout(() => {
+        const idx = novoArr.length - 1;
+        quantidadeRefs.current[idx]?.focus();
+      }, 100);
+      return novoArr;
+    });
     setProdutoBusca('');
     setProdutosFiltrados([]);
   };
@@ -592,7 +621,7 @@ export default function NovaOrdemServico() {
               </View>
             )}
 
-
+            {/* Data de Abertura */}
             <Text style={{ marginBottom: 4, color: colors.text }}>Data de Abertura</Text>
             <TouchableOpacity onPress={() => !isViewOnly && setShowDatePicker(true)}>
               <TextInput
@@ -608,11 +637,14 @@ export default function NovaOrdemServico() {
                 value={form.dataAbertura ? new Date(form.dataAbertura) : new Date()}
                 mode="date"
                 display="default"
+
                 onChange={(event: any, date: Date | undefined) => {
                   setShowDatePicker(false);
                   if (date) {
-                    const d = date.toISOString().slice(0, 10);
-                    const formatted = formatDateBR(d);
+                    const dia = String(date.getDate()).padStart(2, '0');
+                    const mes = String(date.getMonth() + 1).padStart(2, '0');
+                    const ano = date.getFullYear();
+                    const formatted = `${dia}/${mes}/${ano}`;
                     handleChange('dataAbertura', formatted);
                   }
                 }}
@@ -626,6 +658,7 @@ export default function NovaOrdemServico() {
                 marginVertical: 12,
               }}
             />
+            {/* Serviços */}
             <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.text, marginBottom: 8 }}>
               <MaterialCommunityIcons name="cog-outline" size={22} color={colors.primary} /> Serviços
             </Text>
@@ -707,6 +740,7 @@ export default function NovaOrdemServico() {
               </View>
             )}
 
+            {/* Produtos */}
             <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.text, marginBottom: 8 }}>
               <MaterialCommunityIcons name="cube-outline" size={22} color={colors.primary} /> Produtos
             </Text>
@@ -773,6 +807,7 @@ export default function NovaOrdemServico() {
                       }}
                     >
                       <TextInput
+                        ref={ref => { quantidadeRefs.current[idx] = ref; }}
                         style={{
                           minWidth: 40,
                           textAlign: 'center',

@@ -119,7 +119,7 @@ export default function NovoProduto() {
     return isNaN(d.getTime()) ? new Date() : d;
   }
   return (
-    <View style={[globalStyles.centeredContainer, { paddingTop: 20 }, { paddingBottom: 80 }]}> 
+    <View style={[globalStyles.centeredContainer, { paddingTop: 20 }, { paddingBottom: 80 }]}>
       <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 32 }}>
         <View style={globalStyles.formContainer}>
           {form.id !== null && (
@@ -149,7 +149,7 @@ export default function NovoProduto() {
             onChangeText={v => handleChange('descricao', v)}
             style={globalStyles.input}
           />
-          
+
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <View style={{ flex: 1 }}>
               <Text style={{ marginBottom: 4, color: colors.text }}>Valor</Text>
@@ -200,8 +200,10 @@ export default function NovoProduto() {
               onChange={(event: any, date: Date | undefined) => {
                 setShowDatePickerFab(false);
                 if (date) {
-                  const d = date.toISOString().slice(0, 10);
-                  const formatted = formatDateBR(d);
+                  const dia = String(date.getDate()).padStart(2, '0');
+                  const mes = String(date.getMonth() + 1).padStart(2, '0');
+                  const ano = date.getFullYear();
+                  const formatted = `${dia}/${mes}/${ano}`;
                   handleChange('dataFabricacao', formatted);
                 }
               }}
@@ -226,8 +228,10 @@ export default function NovoProduto() {
               onChange={(event: any, date: Date | undefined) => {
                 setShowDatePickerVal(false);
                 if (date) {
-                  const d = date.toISOString().slice(0, 10);
-                  const formatted = formatDateBR(d);
+                  const dia = String(date.getDate()).padStart(2, '0');
+                  const mes = String(date.getMonth() + 1).padStart(2, '0');
+                  const ano = date.getFullYear();
+                  const formatted = `${dia}/${mes}/${ano}`;
                   handleChange('dataValidade', formatted);
                 }
               }}
@@ -238,7 +242,7 @@ export default function NovoProduto() {
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, backgroundColor: '#fff', borderTopWidth: 0.5, borderColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
         <Button
           mode="outlined"
-          onPress={() => router.replace('/produtos')} 
+          onPress={() => router.replace('/produtos')}
           labelStyle={{ color: colors.primary }}
           style={[globalStyles.secondaryButton, { flex: 1 }]}
         >

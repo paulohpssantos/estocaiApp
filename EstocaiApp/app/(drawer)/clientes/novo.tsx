@@ -16,20 +16,20 @@ import { getEndereco } from '../../../src/services/viacepService';
 
 
 const initialForm: Cliente = {
-    cpf: '',
-    nome: '',
-    telefone: '',
-    email: '',
-    logradouro: '',
-    numero: '',
-    bairro: '',
-    cep: '',
-    uf: '',
-    municipio: '',
-    dataNascimento: '',
-    ativo: true,
-    estabelecimento: null as any,
-    usuario: null as any,
+  cpf: '',
+  nome: '',
+  telefone: '',
+  email: '',
+  logradouro: '',
+  numero: '',
+  bairro: '',
+  cep: '',
+  uf: '',
+  municipio: '',
+  dataNascimento: '',
+  ativo: true,
+  estabelecimento: null as any,
+  usuario: null as any,
 };
 
 export default function NovoCliente() {
@@ -125,22 +125,22 @@ export default function NovoCliente() {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     fetchEstabelecimentos();
   }, []);
-  
+
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleChange = (field: keyof Cliente, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
   };
- 
+
   const handleSubmit = async () => {
     try {
       const dataToSend = {
         ...form,
         dataNascimento: formatISODate(form.dataNascimento),
-        
+
       };
       await cadastrarCliente(dataToSend);
       Alert.alert('Sucesso', 'Cliente cadastrado com sucesso!');
@@ -197,7 +197,7 @@ export default function NovoCliente() {
                 </ScrollView>
               </View>
             )}
-            {}
+            { }
             <Text style={{ marginBottom: 4, color: colors.text }}>CPF</Text>
             <TextInput
               placeholder="CPF"
@@ -234,7 +234,7 @@ export default function NovoCliente() {
               value={form.cep}
               onChangeText={async v => {
                 handleChange('cep', v);
-                if (v.length === 8) { 
+                if (v.length === 8) {
                   try {
                     const endereco = await getEndereco(v);
                     if (endereco && !endereco.erro) {
@@ -246,7 +246,7 @@ export default function NovoCliente() {
                         bairro: endereco.bairro || ''
                       }));
                     }
-                  } catch (e) {}
+                  } catch (e) { }
                 }
               }}
               style={globalStyles.input}
@@ -299,8 +299,10 @@ export default function NovoCliente() {
                 onChange={(event: any, date: Date | undefined) => {
                   setShowDatePicker(false);
                   if (date) {
-                    const d = date.toISOString().slice(0, 10);
-                    const formatted = formatDateBR(d);
+                    const dia = String(date.getDate()).padStart(2, '0');
+                    const mes = String(date.getMonth() + 1).padStart(2, '0');
+                    const ano = date.getFullYear();
+                    const formatted = `${dia}/${mes}/${ano}`;
                     handleChange('dataNascimento', formatted);
                   }
                 }}
@@ -312,7 +314,7 @@ export default function NovoCliente() {
         <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, backgroundColor: '#fff', borderTopWidth: 0.5, borderColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
           <Button
             mode="outlined"
-            onPress={() => router.replace('/clientes')} 
+            onPress={() => router.replace('/clientes')}
             labelStyle={{ color: colors.primary }}
             style={[globalStyles.secondaryButton, { flex: 1 }]}
           >
