@@ -24,8 +24,8 @@ public class ClienteController {
     }
 
 
-    @GetMapping
-    public List<Cliente> listar(@RequestParam String usuarioCpf) {
+    @GetMapping("/{usuarioCpf}")
+    public List<Cliente> listar(@PathVariable String usuarioCpf) {
         if (usuarioCpf != null)
             return clienteRepository.findByUsuarioCpfAndAtivo(usuarioCpf,true);
         return null;

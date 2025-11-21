@@ -8,12 +8,12 @@ export async function cadastrarCliente(cliente: Cliente) {
 }
 
 export async function listarClientes(usuarioCpf: string): Promise<Cliente[]> {
-  const response = await api.get(`/cliente?cpf=${encodeURIComponent(usuarioCpf)}`);
+  const response = await api.get(`/cliente/${usuarioCpf}`);
   return response.data;
 }
 
 export async function countClientes(usuarioCpf: string): Promise<number> {
-  const response = await api.get(`/cliente/count/${encodeURIComponent(usuarioCpf)}`);
+  const response = await api.get(`/cliente/count/${usuarioCpf}`);
   return response.data;
 }
 
