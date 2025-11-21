@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class OrdemServicoService {
@@ -32,10 +33,23 @@ public class OrdemServicoService {
 
     @Transactional
     public OrdemServico criar(OrdemServico ordem) {
+        if (ordem == null) throw new IllegalArgumentException("OrdemServico é obrigatória");
+
         if (ordem.getNumeroOS() == null || ordem.getNumeroOS().isBlank()) {
-            Long next = nextSequenciaPorUsuario(ordem.getUsuario().getCpf());
-            ordem.setNumeroOS("OS" + next);
+            if (ordem.getUsuario() != null && ordem.getUsuario().getCpf() != null) {
+                Long next = nextSequenciaPorUsuario(ordem.getUsuario().getCpf());
+                ordem.setNumeroOS("OS" + next);
+            }
         }
+
+        // Se for uma atualização (já tem id), verificar itens existentes e restaurar estoque primeiro
+        if (ordem.getId() != null) {
+            List<ProdutoOrdemServico> existentes = produtoOrdemServicoRepo.findByOrdemServicoId(ordem.getId());
+            if (existentes != null && !existentes.isEmpty()) {
+                restaurarEstoqueAoExcluir(ordem.getId());
+            }
+        }
+
         OrdemServico saved = repo.save(ordem);
         ajustarEstoqueAoSalvar(saved);
         return saved;
@@ -58,9 +72,15 @@ public class OrdemServicoService {
         List<ProdutoOrdemServico> itens = produtoOrdemServicoRepo.findByOrdemServicoId(ordem.getId());
         if (itens == null || itens.isEmpty()) return;
         for (ProdutoOrdemServico item : itens) {
+            if (item == null) continue;
             Produto produto = item.getProduto();
             if (produto == null) continue;
-            long novaQtd = produto.getQtdEstoque() - item.getQuantidade();
+
+            Long estoqueAtual = produto.getQtdEstoque() != null ? produto.getQtdEstoque() : 0L;
+            Long quantidade = item.getQuantidade() != null ? item.getQuantidade() : 0L;
+
+            long novaQtd = estoqueAtual - quantidade;
+
             produto.setQtdEstoque(novaQtd);
             produtoRepo.save(produto);
         }
@@ -72,9 +92,14 @@ public class OrdemServicoService {
         List<ProdutoOrdemServico> itens = produtoOrdemServicoRepo.findByOrdemServicoId(ordemId);
         if (itens != null && !itens.isEmpty()) {
             for (ProdutoOrdemServico item : itens) {
+                if (item == null) continue;
                 Produto produto = item.getProduto();
                 if (produto == null) continue;
-                produto.setQtdEstoque(produto.getQtdEstoque() + item.getQuantidade());
+
+                Long estoqueAtual = produto.getQtdEstoque() != null ? produto.getQtdEstoque() : 0L;
+                Long quantidade = item.getQuantidade() != null ? item.getQuantidade() : 0L;
+
+                produto.setQtdEstoque(estoqueAtual + quantidade);
                 produtoRepo.save(produto);
             }
             produtoOrdemServicoRepo.deleteByOrdemServicoId(ordemId);

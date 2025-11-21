@@ -820,7 +820,7 @@ export default function NovaOrdemServico() {
                           handleQuantidadeProdutoChange(idx, onlyNums === '' ? '0' : onlyNums);
                         }}
                         keyboardType="numeric"
-                        editable={!isViewOnly && !item.id}
+                        editable={!isViewOnly}
                       />
                     </View>
                     <Text style={{ flex: 1, color: colors.text, textAlign: 'center' }}>
