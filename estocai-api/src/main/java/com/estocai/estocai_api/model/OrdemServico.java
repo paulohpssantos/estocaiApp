@@ -33,7 +33,7 @@ public class OrdemServico {
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "cliente_cpf", nullable = false, referencedColumnName = "cpf")
+    @JoinColumn(name = "cliente_id", nullable = false, referencedColumnName = "id")
     private Cliente cliente;
 
     @NotNull

@@ -31,7 +31,7 @@ public class ClienteController {
         return null;
     }
 
-    @GetMapping("/count/{cpf}")
+    @GetMapping("/count/{usuarioCpf}")
     public long totalCount(@PathVariable String usuarioCpf) {
         return clienteRepository.countByUsuarioCpfAndAtivo(usuarioCpf, true);
     }
