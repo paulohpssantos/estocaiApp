@@ -8,7 +8,7 @@ export async function cadastrarCliente(cliente: Cliente) {
 }
 
 export async function listarClientes(usuarioCpf: string): Promise<Cliente[]> {
-  const response = await api.get(`/cliente/${usuarioCpf}`);
+  const response = await api.get(`/cliente/listar/${usuarioCpf}`);
   return response.data;
 }
 
