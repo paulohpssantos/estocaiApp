@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
-    List<Cliente> findByUsuarioCpfAndAtivo(String cpf, boolean ativo);
+    List<Cliente> findByUsuarioCpfAndAtivo(String usuarioCpf, boolean ativo);
 
-    long countByUsuarioCpfAndAtivo(String cpf,boolean ativo);
+    long countByUsuarioCpfAndAtivo(String usuarioCpf,boolean ativo);
 }

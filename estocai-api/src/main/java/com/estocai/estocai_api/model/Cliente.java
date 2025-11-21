@@ -12,7 +12,10 @@ import java.time.LocalDate;
 public class Cliente {
 
     @Id
-    @Column(nullable = false, length = 14, unique = true)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(length = 14, unique = true)
     private String cpf;
 
     @NotNull

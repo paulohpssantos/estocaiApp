@@ -77,7 +77,7 @@ export default function NovoCliente() {
     }
   }, [estabelecimentoBusca, estabelecimentos]);
 
-  // Adicione este useEffect para carregar dados ao editar
+  
   useEffect(() => {
     if (params.cliente) {
       const cliente = JSON.parse(params.cliente as string) as Cliente;
@@ -136,6 +136,18 @@ export default function NovoCliente() {
   };
 
   const handleSubmit = async () => {
+    if (!form.nome) {
+      Alert.alert('Atenção', 'Informe o nome do Cliente.');
+      return;
+    }
+    if (!form.estabelecimento) {
+      Alert.alert('Atenção', 'Informe o estabelecimento do Cliente.');
+      return;
+    }
+    if (!form.telefone) {
+      Alert.alert('Atenção', 'Informe o telefone do Cliente.');
+      return;
+    }
     try {
       const dataToSend = {
         ...form,

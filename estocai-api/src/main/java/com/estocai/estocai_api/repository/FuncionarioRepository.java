@@ -11,7 +11,7 @@ public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> 
 
     List<Funcionario> findByUsuarioCpfAndAtivo(String cpf, boolean ativo);
 
-    List<Funcionario> findByEstabelecimentoCpfCnpjAndAtivo(String cpfCnpj, boolean ativo);
+    List<Funcionario> findByUsuarioCpfAndEstabelecimentoCpfCnpjAndAtivo(String usuarioCpf, String cpfCnpj, boolean ativo);
 
     long countByUsuarioCpfAndAtivo(String cpf,boolean ativo);
 }

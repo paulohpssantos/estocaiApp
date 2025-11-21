@@ -79,6 +79,14 @@ export default function NovoEstabelecimento() {
     setForm(prev => ({ ...prev, usuario: { ...((prev.usuario as Usuario) || {}), [field]: value } }));
   };
   const handleSubmit = async () => {
+    if (!form.cpfCnpj) {
+      Alert.alert('Atenção', 'Informe o CPF/CNPJ do Estabelecimento.');
+      return;
+    }
+    if (!form.nome) {
+      Alert.alert('Atenção', 'Informe o nome do Estabelecimento.');
+      return;
+    }
     try {
       await cadastrarEstabelecimento(form);
       Alert.alert('Sucesso', 'Estabelecimento cadastrado com sucesso!');

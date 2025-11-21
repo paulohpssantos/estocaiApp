@@ -104,8 +104,15 @@ export default function NovoServico() {
   };
 
   const handleSubmit = async () => {
+    if (!form.nome) {
+      Alert.alert('Atenção', 'Informe o nome do Serviço.');
+      return;
+    }
+    if (!form.valor) {
+      Alert.alert('Atenção', 'Informe o valor do Serviço.');
+      return;
+    }
     try {
-
       await cadastrarServico(form);
       Alert.alert('Sucesso', 'Serviço cadastrado com sucesso!');
       router.replace('/servicos');

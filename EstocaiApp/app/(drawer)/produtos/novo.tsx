@@ -97,11 +97,32 @@ export default function NovoProduto() {
   };
 
   const handleSubmit = async () => {
+    if (!form.estoqueMinimo) {
+      Alert.alert('Atenção', 'Informe o estoque mínimo do Produto.');
+      return;
+    }
+    if (!form.nome) {
+      Alert.alert('Atenção', 'Informe o nome do Produto.');
+      return;
+    }
+    if (!form.qtdEstoque) {
+      Alert.alert('Atenção', 'Informe a quantidade em estoque do Produto.');
+      return;
+    }
+    if (!form.valor) {
+      Alert.alert('Atenção', 'Informe o valor do Produto.');
+      return;
+    }
     try {
+      const usuarioString = await AsyncStorage.getItem("usuario");
+      if (!usuarioString) return;
+      const usuario = JSON.parse(usuarioString) as Usuario;
+      setUsuario(usuario);
       const dataToSend = {
         ...form,
         dataFabricacao: formatISODate(form.dataFabricacao),
         dataValidade: formatISODate(form.dataValidade),
+        usuario: usuario,
       };
       await cadastrarProduto(dataToSend);
       Alert.alert('Sucesso', 'Produto cadastrado com sucesso!');

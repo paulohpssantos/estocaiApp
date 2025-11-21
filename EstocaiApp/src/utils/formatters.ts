@@ -22,6 +22,14 @@ export function formatDateBR(date: string) {
   return `${dia}/${mes}/${ano}`;
 }
 
+export function parseDateBRtoDate(dateBR: string): Date {
+  if (!dateBR || dateBR.length !== 10) return new Date();
+  const [day, month, year] = dateBR.split('/');
+  const iso = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? new Date() : d;
+}
+
 export function formatISODate(dateStr: string) {
   if (!dateStr) return '';
   const [dia, mes, ano] = dateStr.split('/');

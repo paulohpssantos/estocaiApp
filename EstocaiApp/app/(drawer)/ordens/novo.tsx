@@ -24,7 +24,7 @@ import { Servico } from '../../../src/models/servico';
 import { Usuario } from '../../../src/models/usuario';
 import { listarEstabelecimentosPorCpf } from '../../../src/services/estabelecimentoService';
 import { listarFuncionariosPorEstabelecimento } from '../../../src/services/funcionarioService';
-import { cadastrarProduto } from '../../../src/services/produtoService';
+import { parseDateBRtoDate } from '../../../src/utils/formatters';
 
 const initialForm: OrdemServico = {
   id: null,
@@ -101,7 +101,11 @@ export default function NovaOrdemServico() {
   const fetchFuncionarios = async (estabelecimentoCpfCnpj: string) => {
     setLoading(true);
     try {
-      const data = await listarFuncionariosPorEstabelecimento(estabelecimentoCpfCnpj);
+      const usuarioString = await AsyncStorage.getItem("usuario");
+      if (!usuarioString) return;
+      const usuario = JSON.parse(usuarioString) as Usuario;
+      setUsuario(usuario);
+      const data = await listarFuncionariosPorEstabelecimento(usuario.cpf, estabelecimentoCpfCnpj);
       setFuncionario(data);
     } catch (e) {
       setFuncionario([]);
@@ -370,12 +374,6 @@ export default function NovaOrdemServico() {
         await cadastrarServicoOrdemServico(servicoOrdem);
       }
 
-      //Somente depois de cadastrar a ordem,  atualizar o estoque
-      for (const item of produtosSelecionados) {
-        const novoEstoque = (item.produto.qtdEstoque || 0) - (item.quantidade || 0);
-        await cadastrarProduto({ ...item.produto, qtdEstoque: novoEstoque });
-      }
-
       Alert.alert('Sucesso', 'Ordem de serviço cadastrada com sucesso!');
 
       router.replace('/ordens');
@@ -634,10 +632,9 @@ export default function NovaOrdemServico() {
             </TouchableOpacity>
             {showDatePicker && (
               <DateTimePicker
-                value={form.dataAbertura ? new Date(form.dataAbertura) : new Date()}
+                value={parseDateBRtoDate(form.dataAbertura)}
                 mode="date"
                 display="default"
-
                 onChange={(event: any, date: Date | undefined) => {
                   setShowDatePicker(false);
                   if (date) {
@@ -823,7 +820,7 @@ export default function NovaOrdemServico() {
                           handleQuantidadeProdutoChange(idx, onlyNums === '' ? '0' : onlyNums);
                         }}
                         keyboardType="numeric"
-                        editable={!isViewOnly}
+                        editable={!isViewOnly && !item.id}
                       />
                     </View>
                     <Text style={{ flex: 1, color: colors.text, textAlign: 'center' }}>

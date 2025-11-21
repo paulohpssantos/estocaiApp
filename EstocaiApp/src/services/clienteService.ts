@@ -7,13 +7,13 @@ export async function cadastrarCliente(cliente: Cliente) {
   return response.data;
 }
 
-export async function listarClientes(cpf: string): Promise<Cliente[]> {
-  const response = await api.get(`/cliente?cpf=${encodeURIComponent(cpf)}`);
+export async function listarClientes(usuarioCpf: string): Promise<Cliente[]> {
+  const response = await api.get(`/cliente?cpf=${encodeURIComponent(usuarioCpf)}`);
   return response.data;
 }
 
-export async function countClientes(cpf: string): Promise<number> {
-  const response = await api.get(`/cliente/count/${encodeURIComponent(cpf)}`);
+export async function countClientes(usuarioCpf: string): Promise<number> {
+  const response = await api.get(`/cliente/count/${encodeURIComponent(usuarioCpf)}`);
   return response.data;
 }
 

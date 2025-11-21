@@ -12,8 +12,8 @@ export async function listarFuncionarios(cpf: string): Promise<Funcionario[]> {
   return response.data;
 }
 
-export async function listarFuncionariosPorEstabelecimento(estabelecimentoCpfCnpj: string): Promise<Funcionario[]> {
-  const response = await api.get(`/funcionario/${estabelecimentoCpfCnpj}`);
+export async function listarFuncionariosPorEstabelecimento(usuarioCpf: string, estabelecimentoCpfCnpj: string): Promise<Funcionario[]> {
+  const response = await api.get(`/funcionario/${usuarioCpf}/${estabelecimentoCpfCnpj}`);
   return response.data;
 }
 

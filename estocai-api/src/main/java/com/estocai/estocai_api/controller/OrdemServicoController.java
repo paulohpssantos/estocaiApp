@@ -1,10 +1,7 @@
 package com.estocai.estocai_api.controller;
 
 import com.estocai.estocai_api.model.OrdemServico;
-import com.estocai.estocai_api.model.Produto;
-import com.estocai.estocai_api.model.Usuario;
 import com.estocai.estocai_api.repository.OrdemServicoRepository;
-import com.estocai.estocai_api.repository.UsuarioRepository;
 import com.estocai.estocai_api.service.OrdemServicoService;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +23,6 @@ public class OrdemServicoController {
         this.ordemServicoRepository = ordemServicoRepository;
     }
 
-
-
     @PostMapping
     public OrdemServico salvar(@RequestBody OrdemServico ordemServico){
         return ordemServicoService.criar(ordemServico);
@@ -43,6 +38,7 @@ public class OrdemServicoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         if (ordemServicoRepository.existsById(id)) {
+            ordemServicoService.restaurarEstoqueAoExcluir(id);
             ordemServicoRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         } else {
@@ -55,4 +51,3 @@ public class OrdemServicoController {
         return ordemServicoRepository.countByUsuarioCpf(cpf);
     }
 }
-

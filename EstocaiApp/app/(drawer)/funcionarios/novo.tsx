@@ -98,6 +98,23 @@ export default function NovoFuncionario() {
   };
 
   const handleSubmit = async () => {
+    if (!form.cpf) {
+      Alert.alert('Atenção', 'Informe o CPF do Funcionário.');
+      return;
+    }
+    if (!form.cargo) {
+      Alert.alert('Atenção', 'Informe o cargo do Funcionário.');
+      return;
+    }
+    if (!form.nome) {
+      Alert.alert('Atenção', 'Informe o nome do Funcionário.');
+      return;
+    }
+    if (!form.estabelecimento) {
+      Alert.alert('Atenção', 'Informe o estabelecimento do Funcionário.');
+      return;
+    }
+    
     try {
       await cadastrarFuncionario(form);
       Alert.alert('Sucesso', 'Funcionário cadastrado com sucesso!');

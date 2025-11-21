@@ -29,9 +29,9 @@ public class FuncionarioController {
         return null;
     }
 
-    @GetMapping("/{estabelecimentoCpfCnpj}")
-    public List<Funcionario> listarPorEstabelecimento(@PathVariable String estabelecimentoCpfCnpj) {
-        return funcionarioRepository.findByEstabelecimentoCpfCnpjAndAtivo(estabelecimentoCpfCnpj, true);
+    @GetMapping("/{usuarioCpf}/{estabelecimentoCpfCnpj}")
+    public List<Funcionario> listarPorEstabelecimento(@PathVariable String usuarioCpf, @PathVariable String estabelecimentoCpfCnpj) {
+        return funcionarioRepository.findByUsuarioCpfAndEstabelecimentoCpfCnpjAndAtivo(usuarioCpf, estabelecimentoCpfCnpj, true);
     }
 
     @GetMapping("/count/{cpf}")
