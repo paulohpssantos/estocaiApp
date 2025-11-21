@@ -57,6 +57,5 @@ public class Cliente {
     @ManyToOne
     @JoinColumn(name = "usuario_cpf", nullable = false, referencedColumnName = "cpf")
     private Usuario usuario;
-
-
+    
 }
