@@ -14,7 +14,6 @@ public interface ProdutoOrdemServicoRepository extends JpaRepository<ProdutoOrde
     List<ProdutoOrdemServico> findByOrdemServicoId(Long ordemServicoId);
 
     @Modifying
-    @Transactional
     @Query("delete from ProdutoOrdemServico p where p.ordemServico.id = :ordemId")
     int deleteByOrdemServicoId(@Param("ordemId") Long ordemId);
 }
