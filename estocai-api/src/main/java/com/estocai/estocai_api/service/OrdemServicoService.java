@@ -102,7 +102,7 @@ public class OrdemServicoService {
                 produto.setQtdEstoque(estoqueAtual + quantidade);
                 produtoRepo.save(produto);
             }
-            produtoOrdemServicoRepo.deleteByOrdemServicoId(ordemId);
+           // produtoOrdemServicoRepo.deleteByOrdemServicoId(ordemId);
         }
     }
 }
