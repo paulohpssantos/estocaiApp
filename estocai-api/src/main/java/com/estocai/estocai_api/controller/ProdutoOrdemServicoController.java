@@ -25,7 +25,7 @@ public class ProdutoOrdemServicoController {
 
     @PostMapping
     public ProdutoOrdemServico salvar(@RequestBody ProdutoOrdemServico produtoOrdemServico){
-        return produtoOrdemServicoRepository.save(produtoOrdemServico);
+        return produtoOrdemServicoService.salvar(produtoOrdemServico);
     }
 
     @GetMapping
@@ -36,14 +36,14 @@ public class ProdutoOrdemServicoController {
         return produtoOrdemServicoRepository.findAll();
     }
 
-    @DeleteMapping("/por-ordem/{ordemId}")
-    public ResponseEntity<Void> deletarPorOrdem(@PathVariable Long ordemId) {
-        int deleted = produtoOrdemServicoService.deleteByOrdemId(ordemId);
-        if (deleted > 0) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+//    @DeleteMapping("/por-ordem/{ordemId}")
+//    public ResponseEntity<Void> deletarPorOrdem(@PathVariable Long ordemId) {
+//        int deleted = produtoOrdemServicoRepository.deleteByOrdemServicoId(ordemId);
+//        if (deleted > 0) {
+//            return ResponseEntity.noContent().build();
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
 }
 

@@ -6,28 +6,42 @@ import com.estocai.estocai_api.model.ProdutoOrdemServico;
 import com.estocai.estocai_api.repository.OrdemServicoRepository;
 import com.estocai.estocai_api.repository.ProdutoOrdemServicoRepository;
 import com.estocai.estocai_api.repository.ProdutoRepository;
+import com.estocai.estocai_api.repository.ServicoOrdemServicoRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class OrdemServicoService {
 
+    private static final Logger log = LoggerFactory.getLogger(OrdemServicoService.class);
     private final JdbcTemplate jdbc;
     private final OrdemServicoRepository repo;
     private final ProdutoOrdemServicoRepository produtoOrdemServicoRepo;
+    private final ServicoOrdemServicoRepository servicoOrdemServicoRepo;
     private final ProdutoRepository produtoRepo;
+
+    @PersistenceContext
+    private EntityManager em;
 
     public OrdemServicoService(JdbcTemplate jdbc,
                                OrdemServicoRepository repo,
                                ProdutoOrdemServicoRepository produtoOrdemServicoRepo,
+                               ServicoOrdemServicoRepository servicoOrdemServicoRepo,
                                ProdutoRepository produtoRepo) {
         this.jdbc = jdbc;
         this.repo = repo;
         this.produtoOrdemServicoRepo = produtoOrdemServicoRepo;
+        this.servicoOrdemServicoRepo = servicoOrdemServicoRepo;
         this.produtoRepo = produtoRepo;
     }
 
@@ -51,7 +65,6 @@ public class OrdemServicoService {
         }
 
         OrdemServico saved = repo.save(ordem);
-        ajustarEstoqueAoSalvar(saved);
         return saved;
     }
 
@@ -66,25 +79,7 @@ public class OrdemServicoService {
         return jdbc.queryForObject(sql, Long.class, usuarioCpf);
     }
 
-    @Transactional
-    protected void ajustarEstoqueAoSalvar(OrdemServico ordem) {
-        if (ordem == null || ordem.getId() == null) return;
-        List<ProdutoOrdemServico> itens = produtoOrdemServicoRepo.findByOrdemServicoId(ordem.getId());
-        if (itens == null || itens.isEmpty()) return;
-        for (ProdutoOrdemServico item : itens) {
-            if (item == null) continue;
-            Produto produto = item.getProduto();
-            if (produto == null) continue;
 
-            Long estoqueAtual = produto.getQtdEstoque() != null ? produto.getQtdEstoque() : 0L;
-            Long quantidade = item.getQuantidade() != null ? item.getQuantidade() : 0L;
-
-            long novaQtd = estoqueAtual - quantidade;
-
-            produto.setQtdEstoque(novaQtd);
-            produtoRepo.save(produto);
-        }
-    }
 
     @Transactional
     public void restaurarEstoqueAoExcluir(Long ordemId) {
@@ -93,16 +88,68 @@ public class OrdemServicoService {
         if (itens != null && !itens.isEmpty()) {
             for (ProdutoOrdemServico item : itens) {
                 if (item == null) continue;
-                Produto produto = item.getProduto();
-                if (produto == null) continue;
+                Long produtoId = null;
+                if (item.getProduto() != null) {
+                    produtoId = item.getProduto().getId();
+                }
+                Long quantidade = item.getQuantidade() != null ? item.getQuantidade() : 0L;
+                if (produtoId == null) continue;
+
+                em.flush();
+                em.clear();
+
+                // carregar o Produto separadamente para evitar cascades através de ProdutoOrdemServico
+                Optional<Produto> optProduto = produtoRepo.findById(produtoId);
+                if (optProduto.isEmpty()) continue;
+                Produto produto = optProduto.get();
 
                 Long estoqueAtual = produto.getQtdEstoque() != null ? produto.getQtdEstoque() : 0L;
-                Long quantidade = item.getQuantidade() != null ? item.getQuantidade() : 0L;
+                long novaQtd = estoqueAtual + quantidade;
+                produto.setQtdEstoque(novaQtd);
+                try {
+                    System.out.println("Restaurando produto id=" + produto.getId() +
+                            " estoqueAnterior=" + estoqueAtual +
+                            " adicionar=" + quantidade +
+                            " novo=" + novaQtd);
 
-                produto.setQtdEstoque(estoqueAtual + quantidade);
-                produtoRepo.save(produto);
+                    produtoRepo.saveAndFlush(produto); // força o flush imediato
+                    System.out.println("Gravado produto id=" + produto.getId() + " com sucesso");
+
+                    em.flush();
+                    em.clear();
+
+                } catch (Exception e) {
+                    log.error("Erro ao salvar produto id={}", produto.getId(), e);
+                    throw e;
+                }
             }
-           // produtoOrdemServicoRepo.deleteByOrdemServicoId(ordemId);
+
         }
+    }
+
+    @Transactional
+    public void excluir(Long ordemId) {
+        Optional<OrdemServico> opt = repo.findById(ordemId);
+        if (opt.isEmpty()) {
+            return; // ou lançar EntityNotFoundException se preferir
+        }
+
+
+        restaurarEstoqueAoExcluir(ordemId);
+        System.out.println("1 - Produtos restaurados");
+        produtoOrdemServicoRepo.deleteByOrdemServicoId(ordemId);
+        System.out.println("ProdutosServiços  Apagados");
+        servicoOrdemServicoRepo.deleteByOrdemServicoId(ordemId);
+        System.out.println("Serviços  Apagados");
+
+        em.flush();
+        em.clear();
+
+        System.out.println("Iniciando exclusão da OrdemServico id=" + ordemId);
+        repo.delete(opt.get());
+
+        System.out.println("OrdemServico id=" + ordemId + " excluída com sucesso");
+
+
     }
 }

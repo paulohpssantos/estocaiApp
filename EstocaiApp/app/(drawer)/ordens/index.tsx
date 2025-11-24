@@ -9,8 +9,7 @@ import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Button, Card, IconButton, Provider as PaperProvider } from 'react-native-paper';
 import colors from "../../../constants/colors";
 import globalStyles from '../../../constants/globalStyles';
-import { deletarOrdemServico, deletarProdutosOrdemServicoPorOrdem, deletarServicosOrdemServicoPorOrdem, listarOrdensServico, listarProdutosOrdemServico } from '../../../src/services/ordemServicoService';
-import { cadastrarProduto } from '../../../src/services/produtoService';
+import { deletarOrdemServico, listarOrdensServico, listarProdutosOrdemServico } from '../../../src/services/ordemServicoService';
 import { formatDateBR, formatMoney } from '../../../src/utils/formatters';
 
 export default function Ordens() {
@@ -64,21 +63,10 @@ export default function Ordens() {
             onPress: async () => {
               try {
                 if (ordem.id != null) {
-                  // 1. Buscar produtos da ordem
-                  const produtosOrdem = await listarProdutosOrdemServico(ordem.id);
-
-                  // 2. Atualizar estoque de cada produto
-                  for (const pos of produtosOrdem) {
-                    const produtoAtualizado = {
-                      ...pos.produto,
-                      qtdEstoque: pos.produto.qtdEstoque + pos.quantidade
-                    };
-                    await cadastrarProduto(produtoAtualizado);
-                  }
-
+                  
                   // 3. Deletar vínculos e ordem
-                  await deletarProdutosOrdemServicoPorOrdem(ordem.id);
-                  await deletarServicosOrdemServicoPorOrdem(ordem.id);
+                  //await deletarProdutosOrdemServicoPorOrdem(ordem.id);
+                  //await deletarServicosOrdemServicoPorOrdem(ordem.id);
                   await deletarOrdemServico(ordem.id);
                   await fetchOrdens();
                 }

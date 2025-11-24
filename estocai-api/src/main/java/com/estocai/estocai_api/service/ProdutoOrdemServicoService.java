@@ -1,26 +1,94 @@
 package com.estocai.estocai_api.service;
 
+import com.estocai.estocai_api.model.OrdemServico;
+import com.estocai.estocai_api.model.Produto;
+import com.estocai.estocai_api.model.ProdutoOrdemServico;
 import com.estocai.estocai_api.repository.ProdutoOrdemServicoRepository;
+import com.estocai.estocai_api.repository.ProdutoRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProdutoOrdemServicoService {
 
-    private final ProdutoOrdemServicoRepository repo;
-    private final EntityManager em;
+    private static final Logger log = LoggerFactory.getLogger(ProdutoOrdemServicoService.class);
 
-    public ProdutoOrdemServicoService(ProdutoOrdemServicoRepository repo, EntityManager em) {
+    @PersistenceContext
+    private EntityManager em;
+
+    private final ProdutoOrdemServicoRepository repo;
+    private final ProdutoRepository produtoRepo;
+
+    public ProdutoOrdemServicoService(ProdutoOrdemServicoRepository repo, ProdutoRepository produtoRepo) {
         this.repo = repo;
-        this.em = em;
+        this.produtoRepo = produtoRepo;
     }
 
     @Transactional
-    public int deleteByOrdemId(Long ordemId) {
-        int deleted = repo.deleteByOrdemServicoId(ordemId);
-        em.flush();   // garante execução no DB
-        em.clear();   // evita entidades gerenciadas obsoletas no persistence context
-        return deleted;
+    public ProdutoOrdemServico salvar(ProdutoOrdemServico item) {
+        if (item == null) throw new IllegalArgumentException("ProdutoOrdemServico é obrigatório");
+        ProdutoOrdemServico saved = repo.saveAndFlush(item);
+        Long ordemId = null;
+        if (saved.getOrdemServico() != null) {
+            ordemId = saved.getOrdemServico().getId();
+        }
+        log.debug("ProdutoOrdemServico salvo id={} ordemId={}", saved.getId(), ordemId);
+        ajustarEstoqueAoSalvar(ordemId);
+        return saved;
+    }
+
+    @Transactional
+    protected void ajustarEstoqueAoSalvar(Long ordemId) {
+        if (ordemId == null) return;
+        List<ProdutoOrdemServico> itens = repo.findByOrdemServicoId(ordemId);
+        if (itens == null || itens.isEmpty()) return;
+        for (ProdutoOrdemServico item : itens) {
+            if (item == null) continue;
+
+            Long produtoId = null;
+            if (item.getProduto() != null) {
+                produtoId = item.getProduto().getId();
+            }
+
+            em.flush();
+            em.clear();
+
+            Optional<Produto> optProduto = produtoRepo.findById(produtoId);
+            if (optProduto.isEmpty()) continue;
+            Produto produto = optProduto.get();
+
+            if (produto == null) continue;
+            System.out.println("Produto: id=" + produto.getId() + " nome=" + produto.getNome()+" qtdEstoque=" + produto.getQtdEstoque());
+
+            Long estoqueAtual = produto.getQtdEstoque() != null ? produto.getQtdEstoque() : 0L;
+            Long quantidade = item.getQuantidade() != null ? item.getQuantidade() : 0L;
+
+            long novaQtd = estoqueAtual - quantidade;
+
+            produto.setQtdEstoque(novaQtd);
+            try {
+                System.out.println("Gravando produto id=" + produto.getId() +
+                        " estoqueAnterior=" + estoqueAtual +
+                        " subtrair=" + quantidade +
+                        " novo=" + novaQtd);
+
+                produtoRepo.save(produto);
+                System.out.println("Gravado produto id=" + produto.getId() + " com sucesso");
+
+                em.flush();
+                em.clear();
+
+            } catch (Exception e) {
+                System.out.println("Erro ao salvar produto id=" + produto.getId() + ": " + e.getMessage());
+                throw e;
+            }
+        }
     }
 }

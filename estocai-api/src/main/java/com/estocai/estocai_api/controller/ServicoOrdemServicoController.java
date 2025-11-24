@@ -5,6 +5,7 @@ import com.estocai.estocai_api.model.ServicoOrdemServico;
 import com.estocai.estocai_api.repository.ProdutoOrdemServicoRepository;
 import com.estocai.estocai_api.repository.ServicoOrdemServicoRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class ServicoOrdemServicoController {
     }
 
     @DeleteMapping("/por-ordem/{ordemId}")
+    @Transactional
     public ResponseEntity<Void> deletarPorOrdem(@PathVariable Long ordemId) {
         int deleted = servicoOrdemServicoRepository.deleteByOrdemServicoId(ordemId);
         if (deleted > 0) {

@@ -2,6 +2,7 @@ package com.estocai.estocai_api.controller;
 
 import com.estocai.estocai_api.model.OrdemServico;
 import com.estocai.estocai_api.repository.OrdemServicoRepository;
+import com.estocai.estocai_api.repository.ServicoOrdemServicoRepository;
 import com.estocai.estocai_api.service.OrdemServicoService;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +17,14 @@ public class OrdemServicoController {
 
     private final OrdemServicoRepository ordemServicoRepository;
     private final OrdemServicoService ordemServicoService;
+    private final ServicoOrdemServicoRepository servicoOrdemServicoRepository;
 
     public OrdemServicoController(OrdemServicoService ordemServicoService,
-                                  OrdemServicoRepository ordemServicoRepository) {
+                                  OrdemServicoRepository ordemServicoRepository,
+                                  ServicoOrdemServicoRepository servicoOrdemServicoRepository) {
         this.ordemServicoService = ordemServicoService;
         this.ordemServicoRepository = ordemServicoRepository;
+        this.servicoOrdemServicoRepository = servicoOrdemServicoRepository;
     }
 
     @PostMapping
@@ -38,8 +42,7 @@ public class OrdemServicoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         if (ordemServicoRepository.existsById(id)) {
-            ordemServicoService.restaurarEstoqueAoExcluir(id);
-            ordemServicoRepository.deleteById(id);
+            ordemServicoService.excluir(id);
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();

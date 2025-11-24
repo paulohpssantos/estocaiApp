@@ -14,4 +14,5 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
     long countByUsuarioCpf(String cpf);
 
+
 }
