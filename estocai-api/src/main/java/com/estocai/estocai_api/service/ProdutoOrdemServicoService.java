@@ -40,55 +40,40 @@ public class ProdutoOrdemServicoService {
             ordemId = saved.getOrdemServico().getId();
         }
         log.debug("ProdutoOrdemServico salvo id={} ordemId={}", saved.getId(), ordemId);
-        ajustarEstoqueAoSalvar(ordemId);
+        ajustarEstoqueAoSalvar(saved);
         return saved;
     }
 
     @Transactional
-    protected void ajustarEstoqueAoSalvar(Long ordemId) {
-        if (ordemId == null) return;
-        List<ProdutoOrdemServico> itens = repo.findByOrdemServicoId(ordemId);
-        if (itens == null || itens.isEmpty()) return;
-        for (ProdutoOrdemServico item : itens) {
-            if (item == null) continue;
+    protected void ajustarEstoqueAoSalvar(ProdutoOrdemServico item) {
+        if (item == null) return;
 
-            Long produtoId = null;
-            if (item.getProduto() != null) {
-                produtoId = item.getProduto().getId();
-            }
+        Produto produto = item.getProduto();
+        if (produto == null) return;
+        System.out.println("Produto: id=" + produto.getId() + " nome=" + produto.getNome()+" qtdEstoque=" + produto.getQtdEstoque());
+
+        Long estoqueAtual = produto.getQtdEstoque() != null ? produto.getQtdEstoque() : 0L;
+        Long quantidade = item.getQuantidade() != null ? item.getQuantidade() : 0L;
+
+        long novaQtd = estoqueAtual - quantidade;
+
+        produto.setQtdEstoque(novaQtd);
+        try {
+            System.out.println("Gravando produto id=" + produto.getId() +
+                    " estoqueAnterior=" + estoqueAtual +
+                    " subtrair=" + quantidade +
+                    " novo=" + novaQtd);
+
+            produtoRepo.save(produto);
+            System.out.println("Gravado produto id=" + produto.getId() + " com sucesso");
 
             em.flush();
             em.clear();
 
-            Optional<Produto> optProduto = produtoRepo.findById(produtoId);
-            if (optProduto.isEmpty()) continue;
-            Produto produto = optProduto.get();
-
-            if (produto == null) continue;
-            System.out.println("Produto: id=" + produto.getId() + " nome=" + produto.getNome()+" qtdEstoque=" + produto.getQtdEstoque());
-
-            Long estoqueAtual = produto.getQtdEstoque() != null ? produto.getQtdEstoque() : 0L;
-            Long quantidade = item.getQuantidade() != null ? item.getQuantidade() : 0L;
-
-            long novaQtd = estoqueAtual - quantidade;
-
-            produto.setQtdEstoque(novaQtd);
-            try {
-                System.out.println("Gravando produto id=" + produto.getId() +
-                        " estoqueAnterior=" + estoqueAtual +
-                        " subtrair=" + quantidade +
-                        " novo=" + novaQtd);
-
-                produtoRepo.save(produto);
-                System.out.println("Gravado produto id=" + produto.getId() + " com sucesso");
-
-                em.flush();
-                em.clear();
-
-            } catch (Exception e) {
-                System.out.println("Erro ao salvar produto id=" + produto.getId() + ": " + e.getMessage());
-                throw e;
-            }
+        } catch (Exception e) {
+            System.out.println("Erro ao salvar produto id=" + produto.getId() + ": " + e.getMessage());
+            throw e;
         }
+
     }
 }

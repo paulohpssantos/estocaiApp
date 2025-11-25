@@ -88,20 +88,10 @@ public class OrdemServicoService {
         if (itens != null && !itens.isEmpty()) {
             for (ProdutoOrdemServico item : itens) {
                 if (item == null) continue;
-                Long produtoId = null;
-                if (item.getProduto() != null) {
-                    produtoId = item.getProduto().getId();
-                }
                 Long quantidade = item.getQuantidade() != null ? item.getQuantidade() : 0L;
-                if (produtoId == null) continue;
 
-                em.flush();
-                em.clear();
-
-                // carregar o Produto separadamente para evitar cascades através de ProdutoOrdemServico
-                Optional<Produto> optProduto = produtoRepo.findById(produtoId);
-                if (optProduto.isEmpty()) continue;
-                Produto produto = optProduto.get();
+                Produto produto = item.getProduto();
+                if (produto == null) continue;
 
                 Long estoqueAtual = produto.getQtdEstoque() != null ? produto.getQtdEstoque() : 0L;
                 long novaQtd = estoqueAtual + quantidade;
