@@ -129,7 +129,7 @@ const globalStyles = StyleSheet.create({
   cardWrapper: {
     flex: 1,
     minWidth: 150,
-    maxWidth: 180,
+    maxWidth: 200,
     marginHorizontal: 6,
     marginBottom: 20,
     borderRadius: 16,

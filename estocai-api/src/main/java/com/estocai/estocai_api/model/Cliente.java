@@ -15,7 +15,7 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 14, unique = true)
+    @Column(length = 14)
     private String cpf;
 
     @NotNull
