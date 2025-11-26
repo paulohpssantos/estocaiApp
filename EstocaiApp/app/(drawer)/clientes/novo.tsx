@@ -48,8 +48,10 @@ export default function NovoCliente() {
       if (params.cliente) {
         const est = JSON.parse(params.cliente as string);
         setForm(est);
+        setEstabelecimentoBusca(est.estabelecimento?.nome || '');
       } else {
         setForm(initialForm);
+        setEstabelecimentoBusca('');
         const loadUsuario = async () => {
           try {
             const usuarioString = await AsyncStorage.getItem("usuario");

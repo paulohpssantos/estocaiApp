@@ -8,4 +8,6 @@ import java.util.List;
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Usuario findByCpf(String cpf);
+
+    Usuario findByEmail(String email);
 }

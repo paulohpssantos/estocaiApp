@@ -37,3 +37,14 @@ tail -n 100 /home/ec2-user/app/app.log
 
 JWT Key:
 7k6IlVH7+vrTyGCKwobOyxYOuyf4hfR+soZAe74yUdw+gUyC6exWPjwIE1xCTDZf
+
+Client ID (conexão da conta de email)
+39511219322-3arlu8clpmcedrl9ns3619iiut50mkgf.apps.googleusercontent.com
+
+Client Secret (conexão da conta de email)
+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
+
+refresh token (conexão da conta de email)
+1//04fW4DNm9iPTgCgYIARAAGAQSNwF-L9Ir_g4SFWrBE3zM8ngdN8Da8V98m0y7FaV88L6XQt8Ug3edAw_7eDu_SQJyyoN3Il96jbw
+
+estocaisistema@gmail.com

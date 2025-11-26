@@ -27,7 +27,7 @@ public class Servico {
 
     @NotNull
     @Digits(integer = 17, fraction = 2)
-    @Column(nullable = false, precision = 19, scale = 2)
+    @Column(precision = 19, scale = 2)
     private BigDecimal valor;
 
     @Column(name = "duracao", columnDefinition = "TIME")

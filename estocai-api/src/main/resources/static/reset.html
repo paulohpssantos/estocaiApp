@@ -1,0 +1,228 @@
+<!-- html
+File: src/main/resources/static/reset.html
+-->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Redefinir senha</title>
+    <style>
+        :root{
+          --card-bg: #fdecec; /* tom rosado suave */
+          --card-inner: #fff;
+          --accent: #d6443e;
+          --muted: #666;
+        }
+
+        html,body {
+          height: 100%;
+          margin: 0;
+          font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+          background: #ffffff;
+          color: #222;
+        }
+
+        /* centraliza todo o conteúdo na viewport */
+        .wrap {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 16px;
+        }
+
+        .box {
+          width: 360px;
+          max-width: 92%;
+          text-align: center;
+          position: relative;
+        }
+
+        /* logo acima e sobrepondo o card */
+        .logo {
+          width: 120px;
+          height: auto;
+          display: block;
+          margin: 0 auto;
+          position: relative;
+          z-index: 2;
+          margin-bottom: -48px; /* sobrepõe o card */
+        }
+
+        /* card principal */
+        .card {
+          background: linear-gradient(180deg, var(--card-bg) 0%, var(--card-bg) 100%);
+          border-radius: 14px;
+          padding: 56px 20px 28px; /* espaço extra no topo para receber o logo sobreposto */
+          box-shadow: 0 10px 30px rgba(13,13,13,0.08);
+          position: relative;
+        }
+
+        .card h2 {
+          margin: 0 0 8px;
+          font-size: 18px;
+          text-align: left;
+          padding-left: 10px;
+          color: #111;
+        }
+
+        #info {
+          margin: 0 0 12px;
+          font-size: 14px;
+          color: var(--muted);
+          text-align: left;
+          padding-left: 10px;
+        }
+
+        #form {
+          margin-top: 8px;
+          display:block;
+        }
+
+        input[type="password"], input[type="text"] {
+          width: 100%;
+          box-sizing: border-box;
+          padding: 12px 14px;
+          margin: 8px 0;
+          border: 1px solid rgba(0,0,0,0.08);
+          border-radius: 8px;
+          font-size: 15px;
+          background: var(--card-inner);
+        }
+
+        .error, #msg {
+          margin-top: 8px;
+          font-size: 14px;
+          text-align: center;
+        }
+
+        .error { color: #b00020; display:none; }
+        .success { color: #0a7a2b; }
+
+        /* botão já existente estilizado para ocupar toda largura */
+        .btn-cta {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          width: 100%;
+          padding: 14px 18px;
+          background-color: var(--accent);
+          color: #ffffff;
+          border: none;
+          border-radius: 12px;
+          font-size: 18px;
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+          justify-content: center;
+          margin-top: 12px;
+        }
+        .btn-cta .icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 34px;
+          height: 34px;
+          background: rgba(255,255,255,0.12);
+          border-radius: 8px;
+          flex: 0 0 34px;
+        }
+        .btn-cta .text { line-height: 1; color: #fff; }
+
+        /* links / ações abaixo do botão (se necessário) */
+        .actions {
+          margin-top: 14px;
+          font-size: 14px;
+          color: var(--accent);
+        }
+        .actions a { color: inherit; text-decoration: none; display:block; margin:6px 0; }
+
+        /* responsivo */
+        @media (max-width: 420px) {
+          .card { padding: 64px 14px 22px; }
+          .logo { width: 100px; margin-bottom: -42px; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="box">
+        <img src="/img/estocai.png"   alt="estocai" class="logo">
+        <br><br><br>
+        <div class="card">
+            <h2>Redefinir senha</h2>
+            <p id="info">Carregando...</p>
+
+            <div id="form" style="display:none">
+                <input id="password" type="password" placeholder="Nova senha" />
+                <input id="password2" type="password" placeholder="Confirme a nova senha" />
+                <div class="error" id="err" style="display:none"></div>
+                <button id="submit" class="btn-cta" type="button" aria-label="Alterar senha">
+                    <span class="text">Alterar senha</span>
+                </button>
+            </div>
+
+            <div id="msg"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const info = document.getElementById('info');
+    const form = document.getElementById('form');
+    const err = document.getElementById('err');
+    const msg = document.getElementById('msg');
+
+    if (!token) {
+      info.textContent = 'Token ausente. Verifique o link recebido por e‑mail.';
+    } else {
+      info.style.display = 'none';
+      form.style.display = 'block';
+    }
+
+    document.getElementById('submit').addEventListener('click', async () => {
+      err.style.display = 'none';
+      msg.textContent = '';
+      msg.className = '';
+
+      const pw = document.getElementById('password').value.trim();
+      const pw2 = document.getElementById('password2').value.trim();
+
+      if (!pw || pw.length < 6) {
+        err.textContent = 'Senha deve ter ao menos 6 caracteres.';
+        err.style.display = 'block';
+        return;
+      }
+      if (pw !== pw2) {
+        err.textContent = 'Senhas não conferem.';
+        err.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch('/auth/reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: token, password: pw })
+        });
+
+        if (res.ok) {
+          msg.className = 'success';
+          msg.textContent = 'Senha alterada com sucesso!';
+          form.style.display = 'none';
+        } else {
+          const body = await res.json().catch(()=>({}));
+          msg.className = 'error';
+          msg.textContent = body.erro || 'Erro ao redefinir senha.';
+        }
+      } catch (e) {
+        msg.className = 'error';
+        msg.textContent = 'Erro de conexão.';
+      }
+    });
+</script>
+</body>
+</html>

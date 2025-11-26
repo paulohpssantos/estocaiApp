@@ -50,6 +50,9 @@ export default function LoginScreen() {
         <Link href="/(auth)/register" asChild>
           <Text style={globalStyles.registerLink}>Criar conta</Text>
         </Link>
+        <Link href="/(auth)/forgot-password" asChild>
+          <Text style={globalStyles.registerLink}>Esqueci minha senha</Text>
+        </Link>
       </View>
       <View style={globalStyles.footer}>
         <Text style={globalStyles.footerText}>© {new Date().getFullYear()} Estocaí</Text>

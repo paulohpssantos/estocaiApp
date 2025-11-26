@@ -45,14 +45,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (username: string, password: string) => {
+    console.log("[LOGIN] Tentando login com usuário:", username);
     try {
       const response = await api.post(`/auth/login?username=${username}&password=${password}`);
       const { token, usuario } = response.data;
+      console.log("[LOGIN] Sucesso! Usuário autenticado:", usuario);
       await AsyncStorage.setItem("token", token);
       await AsyncStorage.setItem("usuario", JSON.stringify(usuario));
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setUser({ token, usuario });
     } catch (error) {
+      console.log("[LOGIN] Erro ao autenticar:", error);
       throw error;
     }
   };
@@ -69,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("usuario");
     setUser(null);
-    router.replace("/(auth)/login"); 
+    router.replace("/(auth)/login");
   };
 
   // Registra o logout global para ser usado pelo interceptor do axios
