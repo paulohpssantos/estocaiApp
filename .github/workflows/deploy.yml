@@ -2,34 +2,29 @@ name: CI/CD Spring Boot to AWS EC2
 
 on:
   push:
-    branches: [ "main" ] # dispara o deploy quando há push na branch main
+    branches: [ "main" ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1 Faz o checkout do código-fonte
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2 Configura o Java 17
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3 Compila o projeto e gera o .jar
       - name: Build with Maven
-        run: mvn clean package -DskipTests
         working-directory: estocai-api
+        run: mvn clean package -DskipTests
 
-      # Mostra o conteúdo da pasta target para depuração
       - name: Show target folder
         run: ls -l estocai-api/target
 
-      # 4 Copia o .jar para a instância EC2 via SSH
       - name: Copy jar to EC2
         uses: appleboy/scp-action@v0.1.6
         with:
@@ -40,7 +35,6 @@ jobs:
           target: "/home/ec2-user/app"
           strip_components: 2
 
-      # 5 Reinicia a aplicação no servidor EC2 com variáveis de ambiente
       - name: Restart Spring Boot App on EC2
         uses: appleboy/ssh-action@v0.1.10
         with:
@@ -54,22 +48,22 @@ jobs:
             echo "Iniciando nova versão..."
             cd /home/ec2-user/app
 
-            # Exporta variáveis de ambiente necessárias para o Spring Boot
             export DB_URL=${{ secrets.DB_URL }}
             export DB_USERNAME=${{ secrets.DB_USERNAME }}
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
 
-	        # Variáveis de e-mail
+            # Variáveis de e-mail
             export MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
             export MAIL_HOST=${{ secrets.MAIL_HOST }}
             export MAIL_PORT=${{ secrets.MAIL_PORT }}
             export MAIL_STARTTLS=${{ secrets.MAIL_STARTTLS }}
             export GMAIL_OAUTH_CLIENT_ID=${{ secrets.GMAIL_OAUTH_CLIENT_ID }}
             export GMAIL_OAUTH_CLIENT_SECRET=${{ secrets.GMAIL_OAUTH_CLIENT_SECRET }}
-            export GMAIL_OAUTH_REFRESH_TOKEN=${{ secrets.GMAIL_OAUTH_REFRESH_TOKEN }}            
-            export APP_URL=${{ secrets.APP_URL }}            
-				
+            export GMAIL_OAUTH_REFRESH_TOKEN=${{ secrets.GMAIL_OAUTH_REFRESH_TOKEN }}
+
+            export APP_URL=${{ secrets.APP_URL }}
 
             nohup java -Dspring.profiles.active=prod -jar *.jar > app.log 2>&1 &
             echo "Aplicação reiniciada com sucesso!"
+
