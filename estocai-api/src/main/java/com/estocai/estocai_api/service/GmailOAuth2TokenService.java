@@ -20,8 +20,6 @@ public class GmailOAuth2TokenService {
 
     public String refreshAccessToken() throws IOException {
 
-        System.out.println("Refreshing access token using clientId=" + clientId + " refreshToken=" + refreshToken + " clientSecret=" + clientSecret);
-
         UserCredentials creds = UserCredentials.newBuilder()
                 .setClientId(clientId)
                 .setClientSecret(clientSecret)

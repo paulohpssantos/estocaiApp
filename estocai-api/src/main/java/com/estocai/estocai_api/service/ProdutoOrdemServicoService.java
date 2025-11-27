@@ -39,7 +39,6 @@ public class ProdutoOrdemServicoService {
         if (saved.getOrdemServico() != null) {
             ordemId = saved.getOrdemServico().getId();
         }
-        log.debug("ProdutoOrdemServico salvo id={} ordemId={}", saved.getId(), ordemId);
         ajustarEstoqueAoSalvar(saved);
         return saved;
     }
@@ -50,7 +49,6 @@ public class ProdutoOrdemServicoService {
 
         Produto produto = item.getProduto();
         if (produto == null) return;
-        System.out.println("Produto: id=" + produto.getId() + " nome=" + produto.getNome()+" qtdEstoque=" + produto.getQtdEstoque());
 
         Long estoqueAtual = produto.getQtdEstoque() != null ? produto.getQtdEstoque() : 0L;
         Long quantidade = item.getQuantidade() != null ? item.getQuantidade() : 0L;
