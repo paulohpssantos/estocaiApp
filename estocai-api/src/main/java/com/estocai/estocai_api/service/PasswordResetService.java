@@ -4,6 +4,7 @@ import com.estocai.estocai_api.model.PasswordResetToken;
 import com.estocai.estocai_api.model.Usuario;
 import com.estocai.estocai_api.repository.PasswordResetTokenRepository;
 import com.estocai.estocai_api.repository.UsuarioRepository;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +55,7 @@ public class PasswordResetService {
 
         String link = appUrl + "/auth/reset?token=" + token;
         String subject = "Recuperação de senha";
+
 
         Map<String, Object> vars = Map.of(
                 "name", u.getNome(),

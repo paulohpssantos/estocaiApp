@@ -6,6 +6,7 @@ import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.lang.Nullable;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -52,10 +53,12 @@ public class EmailServiceImpl implements EmailService {
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
+
+            ClassPathResource logo = new ClassPathResource("static/img/estocai.png");
+            helper.addInline("estocaiLogo", logo);
+
             mailSender.send(message);
-            log.info("Email enviado para {}", to);
         } catch (Exception e) {
-            log.error("Falha ao enviar email para {}", to, e);
             throw new RuntimeException("Erro enviando email", e);
         }
     }
