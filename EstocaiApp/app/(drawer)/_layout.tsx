@@ -137,7 +137,7 @@ export default function DrawerLayout() {
       <Drawer.Screen
         name="ordens/index"
         options={{
-          title: "Ordens de Serviço",
+          title: "Ordens de Serviço / Vendas",
           drawerIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="file-document-outline" size={size} color={color} />
           ),
@@ -147,6 +147,22 @@ export default function DrawerLayout() {
         name="ordens/novo"
         options={{
           title: "Nova Ordem de Serviço",
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="planos/index"
+        options={{
+          title: "Planos",
+          drawerIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="credit-card-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="planos/pagamento"
+        options={{
+          title: "Pagamento",
           drawerItemStyle: { display: 'none' },
         }}
       />
@@ -203,6 +219,7 @@ export default function DrawerLayout() {
           drawerItemStyle: { display: 'none' },
         }}
       />
+      
 
     </Drawer>
   );

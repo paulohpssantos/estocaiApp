@@ -1,10 +1,10 @@
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Button, Image, Text, TextInput, View } from "react-native";
+import { Alert, Button, Image, Linking, Text, TextInput, View } from "react-native";
 import colors from "../../constants/colors";
-import { useAuth } from "../../src/context/AuthContext";
-
+import env from "../../constants/env";
 import globalStyles from '../../constants/globalStyles';
+import { useAuth } from "../../src/context/AuthContext";
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -18,6 +18,23 @@ export default function LoginScreen() {
       router.replace("/(drawer)");
     } catch (error) {
       Alert.alert("Erro", "Usuário ou senha inválidos");
+    }
+  };
+
+  const handleOpenTermos = async () => {
+    const cpf = "";
+    const termosUrl = `${env.API_URL.replace(/\/$/, "")}/termos-uso/termos-uso.html`;
+    try {
+      const canOpen = await Linking.canOpenURL(termosUrl);
+      if (canOpen) {
+        await Linking.openURL(termosUrl);
+      } else {
+        console.warn("Não foi possível abrir a URL dos termos:", termosUrl);
+        Alert.alert("Aviso", `Não foi possível abrir automaticamente. Abra a URL manualmente:\n\n${termosUrl}`);
+      }
+    } catch (e) {
+      console.warn("Erro ao abrir URL dos termos:", e);
+      Alert.alert("Aviso", "Não foi possível abrir os termos automaticamente.");
     }
   };
 
@@ -54,8 +71,14 @@ export default function LoginScreen() {
           <Text style={globalStyles.registerLink}>Esqueci minha senha</Text>
         </Link>
       </View>
+      <Text
+          onPress={handleOpenTermos}
+          style={[globalStyles.registerLink, { marginTop: 6 }]}
+        >
+          Termos de uso
+        </Text>
       <View style={globalStyles.footer}>
-        <Text style={globalStyles.footerText}>© {new Date().getFullYear()} Estocaí</Text>
+        <Text style={globalStyles.footerText}>© {new Date().getFullYear()} Estoca Fácil</Text>
         <Text style={globalStyles.footerSub}>Sistema de Gestão</Text>
       </View>
     </View>

@@ -4,7 +4,7 @@ import com.estocai.estocai_api.model.PasswordResetToken;
 import com.estocai.estocai_api.model.Usuario;
 import com.estocai.estocai_api.repository.PasswordResetTokenRepository;
 import com.estocai.estocai_api.repository.UsuarioRepository;
-import org.springframework.core.io.ClassPathResource;
+import com.estocai.estocai_api.service.impl.EmailServiceImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,7 +64,7 @@ public class PasswordResetService {
         );
 
         // Chamada ao método que renderiza o template e envia o e-mail
-        emailService.sendPasswordResetEmailUsingTemplate(u.getEmail(), subject, "password-reset", vars);
+        emailService.sendEmailUsingTemplate(u.getEmail(), subject, "password-reset", vars);
     }
 
     @Transactional

@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Termos de Uso — Estocaí</title>
+    <style>
+        :root{
+          --card-bg: #fdecec;
+          --card-inner: #fff;
+          --accent: #d6443e;
+          --muted: #666;
+        }
+
+        html,body {
+          height: 100%;
+          margin: 0;
+          font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+          background: #ffffff;
+          color: #222;
+        }
+
+        /* botão já existente estilizado para ocupar toda largura */
+        .btn-cta {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          width: 100%;
+          padding: 14px 18px;
+          background-color: var(--accent);
+          color: #ffffff;
+          border: none;
+          border-radius: 12px;
+          font-size: 18px;
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+          justify-content: center;
+          margin-top: 12px;
+        }
+        .btn-cta .icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 34px;
+          height: 34px;
+          background: rgba(255,255,255,0.12);
+          border-radius: 8px;
+          flex: 0 0 34px;
+        }
+        .btn-cta .text { line-height: 1; color: #fff; }
+
+        .wrap {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 16px;
+        }
+
+        .box {
+          width: 760px;
+          max-width: 96%;
+          text-align: center;
+          position: relative;
+        }
+
+        .logo {
+          width: 120px;
+          height: auto;
+          display: block;
+          margin: 0 auto;
+          position: relative;
+          z-index: 2;
+          margin-bottom: -48px;
+        }
+
+        .card {
+          background: linear-gradient(180deg, var(--card-bg) 0%, var(--card-bg) 100%);
+          border-radius: 14px;
+          padding: 56px 28px 28px;
+          box-shadow: 0 10px 30px rgba(13,13,13,0.08);
+          position: relative;
+          text-align: left;
+        }
+
+        .card h1 {
+          margin: 0 0 8px;
+          font-size: 20px;
+          color: #111;
+        }
+
+        .lead {
+          margin: 0 0 14px;
+          font-size: 14px;
+          color: var(--muted);
+        }
+
+        .terms-meta {
+          font-size: 14px;
+          color: var(--muted);
+          margin-bottom: 12px;
+        }
+
+        .content {
+          background: var(--card-inner);
+          padding: 18px;
+          border-radius: 10px;
+          max-height: 58vh;
+          overflow: auto;
+          box-shadow: inset 0 1px 0 rgba(0,0,0,0.02);
+          line-height: 1.45;
+        }
+
+        .content h3 {
+          margin-top: 16px;
+        }
+
+        .content p, .content li {
+          margin: 8px 0;
+          color: #333;
+        }
+
+        .content ul {
+          padding-left: 20px;
+          margin: 8px 0;
+        }
+
+        .note {
+          margin-top: 12px;
+          font-size: 13px;
+          color: #555;
+        }
+
+        @media (max-width: 420px) {
+          .card { padding: 64px 14px 22px; }
+          .logo { width: 100px; margin-bottom: -42px; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="box">
+        <img src="/img/estocai.png" alt="estocai" class="logo">
+        <div class="progress-wrap" id="progressWrap">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="card">
+            <h1>Termos e Condições Gerais de Uso</h1>
+            <p class="lead">Termo de utilização inicial do sistema — inclui 7 dias de teste gratuitos antes do pagamento.</p>
+            <div class="terms-meta">Em caso de dúvidas: estocaisistema@gmail.com</div>
+
+            <div class="content" id="termsContent">
+                <p>Prezado(a) usuário(a),</p>
+
+                <h3>Capítulo 1: Aplicabilidade e Objetivos dos Termos de Uso</h3>
+                <p>Para você se cadastrar e usar os serviços oferecidos pelo ESTOCAÍ, são indispensáveis a leitura, compreensão e aceitação integral destes Termos e Condições de Uso do Site. Caso você não concorde com algum termo, não utilize nossos serviços. Caso surjam quaisquer dúvidas, entre em contato conosco pelo email estocaisistema@gmail.com.</p>
+                <p>Além disso, o Estocaí implementou medidas de segurança para proteger os dados. Seus dados pessoais são tratados conforme a Lei Geral de Proteção de Dados (LGPD).</p>
+
+                <h3>Capítulo 2: Definições</h3>
+                <p>Nestes "Termos de Uso" utilizamos as seguintes definições:</p>
+                <ul>
+                    <li><strong>Estabelecimento:</strong> é a sua empresa a ser cadastrada, ou seja, a empresa do contratante. Caso não tenha empresa poderá criar utilizando seu CPF.</li>
+                    <li><strong>Funcionários:</strong> são os funcionários que irão executar o atendimento / venda.</li>
+                    <li><strong>Clientes:</strong> são os compradores das mercadorias cadastradas no Estocaí.</li>
+                    <li><strong>Serviços:</strong> são os serviços a serem executados.</li>
+                    <li><strong>Produtos:</strong> são os produtos a serem comercializados.</li>
+                    <li><strong>Usuários:</strong> é quem utiliza(m) a plataforma do Estocaí.</li>
+                    <li><strong>Ordem de Serviço / Venda:</strong> é onde é lançado efetivamente a venda do produto ou serviço.</li>
+                    <li><strong>Estocaí:</strong> aplicativo para celular.</li>
+                </ul>
+
+                <h3>Capítulo 3: Renovação Automática de Assinatura</h3>
+                <p>Ao adquirir um dos nossos planos de assinatura, seja ele mensal, semestral ou anual, você concorda com a renovação automática da sua assinatura. Isso significa que, ao final de cada ciclo de faturamento (mês, semestre ou ano, conforme aplicável), sua assinatura será automaticamente renovada e o pagamento correspondente será cobrado utilizando o método de pagamento registrado em sua conta.</p>
+                <p><strong>(a) Alteração ou Cancelamento da Assinatura:</strong> Você pode alterar ou cancelar sua assinatura a qualquer momento através do seu painel de controle na nossa plataforma. Para evitar a cobrança do próximo ciclo, o cancelamento ou a alteração do plano deve ser feito antes da data de renovação.</p>
+                <p><strong>(b) Reembolso:</strong> Todas as renovações e contratações de assinaturas são estritamente não reembolsáveis, salvo em casos excepcionais, devidamente comprovados, de erro sistêmico ou fraude, os quais serão analisados exclusivamente pelo Estocaí. Isso significa que as assinaturas de planos semestrais ou anuais, pagos à vista ou parcelado(s), não serão reembolsados totalmente.</p>
+                <p><strong>(c) Cancelamento e devolução:</strong> Em caso de cancelamento, será devolvido 50% do saldo remanescente proporcional ao período não utilizado, retendo-se os outros 50% como multa por rescisão. A devolução ocorrerá em até 20 dias após a solicitação formal.</p>
+                <p><strong>(d) Atualização dos Dados de Pagamento:</strong> É sua responsabilidade manter atualizados os dados de pagamento. Caso o pagamento não seja processado devido a informações desatualizadas ou insuficiência de fundos, sua assinatura pode ser suspensa ou cancelada até que o pagamento seja regularizado.</p>
+
+                <h3>Capítulo 4: Obrigações dos Usuários</h3>
+                <p>O Estocaí é uma plataforma direcionada a pessoas em plena capacidade. Menores de idade não gozam da possibilidade de uso. Ao acessar a plataforma o indivíduo deve manifestar seu consentimento por meio do aceite ao “termo de anuência” presente na confirmação de cadastro.</p>
+                <p>O usuário se responsabiliza pela precisão e veracidade dos dados informados e reconhece que a inconsistência destes poderá implicar a impossibilidade de se utilizar o Estocaí. Durante a utilização da plataforma, a fim de resguardar e de proteger os direitos de terceiros, o usuário se compromete a fornecer somente seus dados pessoais, e não os de terceiros e mantê-los permanentemente atualizados.</p>
+                <p>O login e senha só poderão ser utilizados pelo usuário cadastrado. Ele se compromete em manter o sigilo da senha, que é pessoal e intransferível.</p>
+                <p>O usuário da plataforma é responsável pela atualização das suas informações pessoais e consequências na omissão ou erros nas informações pessoais cadastradas.</p>
+                <p>O Usuário é responsável pela reparação de todos e quaisquer danos, diretos ou indiretos, que sejam causados ao Estocaí, a qualquer outro Usuário, ou a qualquer terceiro, inclusive em virtude do descumprimento do disposto nestes Termos de Uso e Política de Privacidade.</p>
+
+                <p>O Estocaí não poderá ser responsabilizado pelos seguintes fatos:</p>
+                <ul>
+                    <li>Equipamento infectado ou invadido por atacantes;</li>
+                    <li>Equipamento avariado no momento do consumo de serviços;</li>
+                    <li>Proteção do celular e das informações baseadas nos celulares dos usuários;</li>
+                    <li>Abuso de uso dos celulares dos usuários;</li>
+                    <li>Monitoração clandestina dos celulares dos usuários;</li>
+                    <li>Vulnerabilidades ou instabilidades existentes nos sistemas dos usuários;</li>
+                    <li>Perímetro inseguro.</li>
+                </ul>
+
+                <p>Em nenhuma hipótese, o Estocaí será responsável pela instalação no equipamento do Usuário ou de terceiros, de códigos maliciosos em decorrência da navegação na Internet pelo Usuário.</p>
+
+                <hr>
+
+                <h3>PLANO MENSAL (DEPOIS DO PAGAMENTO)</h3>
+                <p>Termo de Utilização do Sistema</p>
+                <p><strong>1. Objeto do Contrato</strong><br>O presente Termo regula o uso do sistema Estocaí pelo Contratante durante o período de 01 mês. O pagamento se refere exclusivamente ao direito de uso do sistema durante o contrato, não representando aquisição ou posse do mesmo.</p>
+                <p><strong>2. Pagamento</strong><br>O valor será cobrado de forma recorrente no final do contrato via contato, pelo whatsapp pelo número (41) 99194-7317. Em caso de inadimplência, o sistema será suspenso até a regularização.</p>
+                <p><strong>3. Cancelamento</strong><br>3.1. O Contratante pode solicitar cancelamento antes do final do contrato, pelo whatsapp pelo número (41) 99194-7317.<br>3.2. Será devolvido 50% do saldo remanescente proporcional ao período não utilizado, retendo-se os outros 50% como multa por rescisão.<br>3.3. A devolução ocorrerá em até 20 dias após a solicitação formal.</p>
+                <p><strong>4. Disposições Gerais</strong><br>Este Termo será renovado automaticamente ao final do período, salvo aviso prévio com 7 dias de antecedência. Alterações de valores e condições serão informadas previamente.</p>
+
+                <hr>
+
+                <h3>PLANO SEMESTRAL (DEPOIS DO PAGAMENTO)</h3>
+                <p>(Conteúdo análogo ao Plano Mensal, aplicável ao período semestral.)</p>
+
+                <hr>
+
+                <h3>PLANO ANUAL (DEPOIS DO PAGAMENTO)</h3>
+                <p>(Conteúdo análogo ao Plano Mensal, aplicável ao período anual.)</p>
+
+                <p class="note">Última atualização: <span id="updatedAt"></span></p>
+            </div>
+        </div>
+        <form id="acceptForm" method="post">
+            <input type="hidden" name="cpf" id="cpfInput" value="">
+
+            <!-- controles de aceite: ocultos por padrão e exibidos apenas se ?cpf= estiver presente -->
+            <div id="acceptControls" style="display:none">
+                <div>
+                    <input type="checkbox" id="leuContrato" name="leuContrato" required />
+                    <label for="leuContrato">Li e aceito os Termos e Condições</label>
+                </div>
+                <div style="margin-top:12px;">
+                    <button id="submitBtn" class="btn-cta" type="submit">Confirmar</button>
+                </div>
+                <div id="formMsg" class="error" style="display:none"></div>
+            </div>
+        </form>
+
+        <div id="globalMsg" style="margin-top:12px;"></div>
+    </div>
+</div>
+
+<script>
+    (function(){
+      function fmt(d){
+        const dd = String(d.getDate()).padStart(2,'0');
+        const mm = String(d.getMonth()+1).padStart(2,'0');
+        const yy = d.getFullYear();
+        return dd + '/' + mm + '/' + yy;
+      }
+      const today = new Date();
+      document.getElementById('updatedAt').textContent = fmt(today);
+
+      const params = new URLSearchParams(window.location.search);
+      const cpf = params.get('cpf');
+      const cpfInput = document.getElementById('cpfInput');
+      const form = document.getElementById('acceptForm');
+      const acceptControls = document.getElementById('acceptControls');
+      const submitBtn = document.getElementById('submitBtn');
+      const formMsg = document.getElementById('formMsg');
+      const globalMsg = document.getElementById('globalMsg');
+
+      const progressWrap = document.getElementById('progressWrap');
+      const progressBar = document.getElementById('progressBar');
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
+      // Por padrão oculto (atributo inline), aqui garantimos estado inicial seguro
+      if (!cpf) {
+        acceptControls.style.display = 'none';
+        if (submitBtn) submitBtn.disabled = true;
+        globalMsg.textContent = '';
+        globalMsg.className = 'error';
+        return;
+      }
+
+      // exibe controles e popula cpf
+      acceptControls.style.display = 'block';
+      if (submitBtn) submitBtn.disabled = false;
+      cpfInput.value = cpf;
+
+      function showProgress() {
+        if (progressWrap) progressWrap.style.display = 'block';
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span class="spinner" aria-hidden="true"></span><span class="text" style="margin-left:8px;">Enviando...</span>';
+        }
+      }
+      function hideProgress() {
+        if (progressWrap) progressWrap.style.display = 'none';
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        formMsg.style.display = 'none';
+        globalMsg.textContent = '';
+        showProgress();
+
+        // usa validação nativa do formulário
+        if (!form.checkValidity()) {
+          formMsg.textContent = 'Você deve marcar que leu e aceita os termos.';
+          formMsg.style.display = 'block';
+          hideProgress();
+          document.getElementById('leuContrato').focus();
+          return;
+        }
+
+        const leu = document.getElementById('leuContrato').checked;
+
+        const body = new URLSearchParams();
+        body.append('cpf', cpf);
+        if (leu) body.append('leuContrato', 'on');
+
+        try {
+          const res = await fetch('/termos-uso/aceitar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            credentials: 'include',
+            body: body.toString()
+          });
+
+          if (res.ok) {
+            globalMsg.textContent = 'Termos aceitos com sucesso.';
+            globalMsg.className = 'success';
+            window.location.href = '/?aceito=true';
+          } else if (res.status === 403) {
+            globalMsg.textContent = 'A ação foi negada (CSRF). Verifique configuração de segurança.';
+            globalMsg.className = 'error';
+          } else {
+            const txt = await res.text().catch(()=>null);
+            globalMsg.textContent = txt || 'Erro ao enviar aceite.';
+            globalMsg.className = 'error';
+          }
+        } catch (e) {
+          globalMsg.textContent = 'Erro de conexão.';
+          globalMsg.className = 'error';
+        } finally {
+          hideProgress();
+        }
+      });
+    })();
+</script>
+</body>
+</html>

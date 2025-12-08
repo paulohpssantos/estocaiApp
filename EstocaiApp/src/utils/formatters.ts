@@ -30,6 +30,33 @@ export function parseDateBRtoDate(dateBR: string): Date {
   return isNaN(d.getTime()) ? new Date() : d;
 }
 
+export function parseDateString(dateStr?: string): Date | null {
+  if (!dateStr) return null;
+  // dd/mm/yyyy
+  if (dateStr.includes('/')) {
+    const [dia, mes, ano] = dateStr.split('/');
+    if (ano && mes && dia) return new Date(Number(ano), Number(mes) - 1, Number(dia));
+    return null;
+  }
+  // yyyy-mm-dd or dd-mm-yyyy
+  if (dateStr.includes('-')) {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      // yyyy-mm-dd
+      if (parts[0].length === 4) {
+        const [ano, mes, dia] = parts;
+        return new Date(Number(ano), Number(mes) - 1, Number(dia));
+      }
+      // dd-mm-yyyy
+      const [dia, mes, ano] = parts;
+      return new Date(Number(ano), Number(mes) - 1, Number(dia));
+    }
+  }
+  const parsed = new Date(dateStr);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+
 export function formatISODate(dateStr: string) {
   if (!dateStr) return '';
   const [dia, mes, ano] = dateStr.split('/');

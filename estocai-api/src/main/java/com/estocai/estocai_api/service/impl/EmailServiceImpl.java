@@ -1,7 +1,8 @@
-package com.estocai.estocai_api.service;
+package com.estocai.estocai_api.service.impl;
 
 
-import jakarta.mail.MessagingException;
+import com.estocai.estocai_api.service.EmailService;
+import com.estocai.estocai_api.service.GmailOAuth2TokenService;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +39,7 @@ public class EmailServiceImpl implements EmailService {
         this.tokenService = tokenService;
     }
 
-    @Override
-    public void sendPasswordResetEmail(String to, String subject, String htmlBody) {
+    public void sendEmail(String to, String subject, String htmlBody) {
         try {
             // Se estiver usando OAuth2 via GmailOAuth2TokenService, atualiza o access token antes do envio
             if (mailSender instanceof JavaMailSenderImpl && tokenService != null) {
@@ -54,7 +54,7 @@ public class EmailServiceImpl implements EmailService {
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
 
-            ClassPathResource logo = new ClassPathResource("static/img/estocai.png");
+            ClassPathResource logo = new ClassPathResource("static/img/estocai_old.png");
             helper.addInline("estocaiLogo", logo);
 
             mailSender.send(message);
@@ -64,10 +64,14 @@ public class EmailServiceImpl implements EmailService {
     }
 
     // Método utilitário: renderiza template Thymeleaf e envia
-    public void sendPasswordResetEmailUsingTemplate(String to, String subject, String templateName, Map<String, Object> variables) {
+    public void sendEmailUsingTemplate(String to, String subject, String templateName, Map<String, Object> variables) {
         Context ctx = new Context();
         if (variables != null) ctx.setVariables(variables);
         String html = templateEngine.process(templateName, ctx);
-        sendPasswordResetEmail(to, subject, html);
+        sendEmail(to, subject, html);
     }
+
+
+
+
 }

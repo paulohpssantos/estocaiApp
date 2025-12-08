@@ -64,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await api.post("/auth/register", usuario);
     } catch (error) {
+      console.log("[REGISTER] Erro ao registrar:", error);
       throw error;
     }
   };

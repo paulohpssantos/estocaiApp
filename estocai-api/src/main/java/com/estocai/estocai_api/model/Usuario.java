@@ -34,8 +34,26 @@ public class Usuario {
 
     @NotNull
     @Column(nullable = false)
+    private String plano;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalDate dataCadastro;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalDate dataInicioPlano;
+
+    @NotNull
+    @Column(nullable = false)
     private LocalDate dataExpiracao;
 
     private LocalDateTime ultimoAcesso;
+
+    @NotNull
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean leuContrato = false;
+
+
 
 }

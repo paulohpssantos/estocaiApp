@@ -36,8 +36,12 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/auth/reset",
                                 "/auth/reset.html",
+                                "/termos-uso/termos-uso.html",
+                                "/termos-uso/open",
+                                "/termos-uso/aceitar",
                                 "/img/**",
-                                "/reset.html"
+                                "/reset.html",
+                                "/termos-uso.html"
                         ).permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .anyRequest().authenticated()

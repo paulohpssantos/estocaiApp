@@ -57,13 +57,13 @@ public class ProdutoOrdemServicoService {
 
         produto.setQtdEstoque(novaQtd);
         try {
-            System.out.println("Gravando produto id=" + produto.getId() +
-                    " estoqueAnterior=" + estoqueAtual +
-                    " subtrair=" + quantidade +
-                    " novo=" + novaQtd);
+//            System.out.println("Gravando produto id=" + produto.getId() +
+//                    " estoqueAnterior=" + estoqueAtual +
+//                    " subtrair=" + quantidade +
+//                    " novo=" + novaQtd);
 
             produtoRepo.save(produto);
-            System.out.println("Gravado produto id=" + produto.getId() + " com sucesso");
+//            System.out.println("Gravado produto id=" + produto.getId() + " com sucesso");
 
             em.flush();
             em.clear();

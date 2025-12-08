@@ -18,7 +18,7 @@ public class OrdemServico {
     private Long id;
 
     @NotNull
-    @Column(name = "numero_os", nullable = false, unique = true)
+    @Column(name = "numero_os", nullable = false)
     private String numeroOS;
 
     @NotNull
