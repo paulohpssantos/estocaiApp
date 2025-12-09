@@ -64,7 +64,7 @@
     const appUrl = params.get('appUrl') || '';
 
     const cpfEncoded = encodeURIComponent(cpf);
-    const deepLink = 'estocaiapp://termos?target=dashboard;
+    const deepLink = 'estocaiapp://termos?cpf=' + cpfEncoded + '&aceito=true';
     const fallbackWeb = encodeURIComponent(appUrl + '/termos?aceito=true');
     const intentUri = 'intent://termos?cpf=' + cpfEncoded + '#Intent;scheme=estocaiapp;package=com.paulohps.EstocaiApp;S.browser_fallback_url=' + fallbackWeb + ';end';
 
