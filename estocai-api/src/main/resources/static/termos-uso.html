@@ -322,9 +322,33 @@
           });
 
           if (res.ok) {
-            globalMsg.textContent = 'Termos aceitos com sucesso.';
-            globalMsg.className = 'success';
-            window.location.href = '/?aceito=true';
+              // mensagem de sucesso visível na página
+              globalMsg.textContent = 'Termos aceitos com sucesso.';
+              globalMsg.className = 'success';
+
+              // cria modal/overlay com logo e botão OK
+              const overlay = document.createElement('div');
+              overlay.id = 'acceptedOverlay';
+              overlay.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:9999;';
+
+              overlay.innerHTML = '\
+                <div style="background:#fff;padding:20px;border-radius:12px;max-width:340px;width:90%;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,0.18);">\
+                  <img src="/img/estocai.png" alt="Estocai" style="max-width:120px;height:auto;display:block;margin:0 auto 12px;" />\
+                  <p style="margin:0 0 14px;font-size:16px;color:#222;">Termos aceitos com sucesso. Toque em OK para retornar ao app e fazer login.</p>\
+                  <button id="acceptedOkBtn" style="background:#007bff;color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:600;">OK</button>\
+                </div>';
+
+              document.body.appendChild(overlay);
+
+              const okBtn = document.getElementById('acceptedOkBtn');
+              okBtn.focus();
+
+              okBtn.addEventListener('click', function () {
+                // redireciona para open-app.html que tentará abrir o app e fechar a página
+                const cpfParam = encodeURIComponent(cpf || '');
+                const appUrlParam = encodeURIComponent(location.origin);
+                window.location.href = '/open-app.html?cpf=' + cpfParam + '&appUrl=' + appUrlParam;
+              });
           } else if (res.status === 403) {
             globalMsg.textContent = 'A ação foi negada (CSRF). Verifique configuração de segurança.';
             globalMsg.className = 'error';

@@ -47,22 +47,29 @@ public class TermosController {
     @PostMapping("/aceitar")
     public ResponseEntity<Void> aceitarTermos(@RequestParam("cpf") String cpf,
                                 @RequestParam(value = "leuContrato", required = false) String leuContrato) {
-        Usuario user = usuarioRepository.findByCpf(cpf);
-        if (user != null) {
+        try {
+            Usuario user = usuarioRepository.findByCpf(cpf);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
             user.setLeuContrato(leuContrato != null);
             usuarioRepository.save(user);
 
-            //enviar email de boas vindas
             usuarioService.createBoasVindasEmail(user.getEmail(), user.getNome());
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        //return "redirect:/?aceito=true";
 
 
-        String cpfEncoded = URLEncoder.encode(cpf, StandardCharsets.UTF_8);
-        String appUrlEncoded = URLEncoder.encode(appUrl, StandardCharsets.UTF_8);
-
-        // redireciona para a página intermediária estática passando cpf e appUrl
-        String target = "/open-app.html?cpf=" + cpfEncoded + "&appUrl=" + appUrlEncoded;
-        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(target)).build();
+//        String cpfEncoded = URLEncoder.encode(cpf, StandardCharsets.UTF_8);
+//        String appUrlEncoded = URLEncoder.encode(appUrl, StandardCharsets.UTF_8);
+//
+//        // redireciona para a página intermediária estática passando cpf e appUrl
+//        String target = "/open-app.html?cpf=" + cpfEncoded + "&appUrl=" + appUrlEncoded;
+//        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(target)).build();
     }
 }
