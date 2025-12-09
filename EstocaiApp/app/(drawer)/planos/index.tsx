@@ -2,9 +2,9 @@ import { createCheckoutSession } from "@/src/services/stripeService";
 import { atualizarPlanoUsuario } from "@/src/services/usuarioService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DrawerActions, useNavigation } from "@react-navigation/native";
+import { DrawerActions, useNavigation, useRoute } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
     Alert,
     BackHandler,
@@ -19,6 +19,7 @@ import {
 import { Button } from "react-native-paper";
 import colors from "../../../constants/colors";
 import globalStyles from "../../../constants/globalStyles";
+import { formatDateBR } from "../../../src/utils/formatters";
 
 const plans = [
     { id: "mensal", title: "Plano Mensal", price: "R$ 39,90", note: "" },
@@ -28,16 +29,62 @@ const plans = [
 
 export default function PlanosScreen() {
     const router = useRouter();
+    const route = useRoute();
+    const routeParams: any = (route as any).params ?? {};
     const navigation = useNavigation();
     const params = useLocalSearchParams() as { expired?: string };
     const isExpired = params?.expired === "true";
     const [selected, setSelected] = useState<string | null>(null);
+
+    // estado para exibir dados do usuário logado
+    const [userPlano, setUserPlano] = useState<string | null>(null);
+    const [dataExpiracao, setDataExpiracao] = useState<string | null>(null);
+    const [openedFromDrawer, setOpenedFromDrawer] = useState(false);
+
+    // carrega dados do usuário ao montar a tela
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                // tenta ler objeto completo do usuário
+                const raw = await AsyncStorage.getItem("usuario") || await AsyncStorage.getItem("user");
+                if (raw) {
+                    try {
+                        const u = JSON.parse(raw);
+                        if (mounted) {
+                            setUserPlano(u?.plano ?? u?.plan ?? null);
+                            setDataExpiracao(u?.dataExpiracao ?? u?.data_expiracao ?? u?.expirationDate ?? null);
+                        }
+                        return;
+                    } catch {
+                        // não é JSON, continua para chaves individuais
+                    }
+                }
+                // tenta chaves individuais
+                const plano = await AsyncStorage.getItem("plano") || await AsyncStorage.getItem("userPlano");
+                const venc = await AsyncStorage.getItem("dataExpiracao") || await AsyncStorage.getItem("userDataExpiracao");
+                if (mounted) {
+                    setUserPlano(plano);
+                    setDataExpiracao(venc);
+                }
+            } catch (e) {
+                console.warn("[PLANOS] erro ao carregar dados do usuário:", e);
+            }
+        })();
+        return () => { mounted = false; };
+    }, []);
 
     useLayoutEffect(() => {
         navigation.setOptions?.({ headerLeft: () => null });
 
         const modifiedParents: any[] = [];
         let p: any | undefined = navigation.getParent?.();
+
+        // tenta detectar se foi aberto pelo drawer via param (recomendado: passe { openedFromDrawer: true } ao navegar)
+        if (routeParams.openedFromDrawer) {
+            setOpenedFromDrawer(true);
+        }
+
         while (p) {
             if (typeof p.setOptions === "function") {
                 try {
@@ -51,6 +98,16 @@ export default function PlanosScreen() {
                     console.warn("[PLANOS] não foi possível setOptions no parent:", e);
                 }
             }
+            // fallback: detectar drawer inspecionando o state/type ou id do parent
+            try {
+                const state = p.getState?.();
+                const id = typeof p.getId === "function" ? p.getId() : undefined;
+                if (state && state.type === "drawer") {
+                    setOpenedFromDrawer(true);
+                } else if (typeof id === "string" && id.toLowerCase().includes("drawer")) {
+                    setOpenedFromDrawer(true);
+                }
+            } catch {}
             p = p.getParent?.();
         }
 
@@ -185,12 +242,25 @@ export default function PlanosScreen() {
             }
             return;
         }
-        router.back();
+        if (openedFromDrawer) {
+            router.replace("/(drawer)/dashboard");
+        } else {
+            router.back();
+        }
+        
     };
 
     return (
         <ScrollView contentContainerStyle={[globalStyles.container, styles.container, { paddingBottom: 120 }]}>
-            <Text style={[globalStyles.title, { marginBottom: 24 }]}>Período de teste expirou, selecione um plano para continuar a utilizar.</Text>
+            {openedFromDrawer && userPlano && dataExpiracao ? (
+                <Text style={[globalStyles.title, { marginBottom: 24 }]}>
+                    Plano atual: {userPlano}, vence em {formatDateBR(dataExpiracao)}
+                </Text>
+            ) : (
+                <Text style={[globalStyles.title, { marginBottom: 24 }]}>
+                    Período de teste expirou, selecione um plano para continuar a utilizar.
+                </Text>
+            )}
 
             <View style={styles.list}>
                 {plans.map((p) => {

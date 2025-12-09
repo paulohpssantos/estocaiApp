@@ -1,6 +1,6 @@
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Button, Image, Linking, Text, TextInput, View } from "react-native";
+import { Alert, BackHandler, Button, Image, Linking, Text, TextInput, View } from "react-native";
 import colors from "../../constants/colors";
 import env from "../../constants/env";
 import { useAuth } from "../../src/context/AuthContext";
@@ -65,21 +65,24 @@ export default function RegisterScreen() {
         Alert.alert("Aviso", "Usuário cadastrado, mas não foi possível abrir os termos automaticamente.");
       }
 
+      //alterado para fechar o app
+      BackHandler.exitApp();
+
       // 3) informa sucesso e dá opção de ir para login
-      Alert.alert(
-        "Sucesso",
-        "Usuário cadastrado com sucesso! Deseja ir para a tela de login?",
-        [
-          {
-            text: "Ir para login",
-            onPress: () => router.replace("/(auth)/login"),
-          },
-          {
-            text: "Depois",
-            style: "cancel",
-          },
-        ]
-      );
+      // Alert.alert(
+      //   "Sucesso",
+      //   "Usuário cadastrado com sucesso! Deseja ir para a tela de login?",
+      //   [
+      //     {
+      //       text: "Ir para login",
+      //       onPress: () => router.replace("/(auth)/login"),
+      //     },
+      //     {
+      //       text: "Depois",
+      //       style: "cancel",
+      //     },
+      //   ]
+      // );
     } catch (error) {
       console.warn("Erro geral ao cadastrar:", error);
       Alert.alert("Erro", "Falha ao cadastrar usuário");

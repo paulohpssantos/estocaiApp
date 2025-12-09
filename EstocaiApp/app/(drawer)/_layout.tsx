@@ -264,7 +264,7 @@ function CustomDrawerContent(props: any) {
               resizeMode="contain"
             />
             <View style={styles.headerTextContainer}>
-              <Text style={styles.title}>Estocaí</Text>
+              <Text style={styles.title}>Estoca Fácil</Text>
               <Text style={styles.subtitle}>Sistema de Gestão</Text>
             </View>
           </View>
@@ -357,7 +357,7 @@ function CustomDrawerContent(props: any) {
       </LinearGradient>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>© {new Date().getFullYear()} Estocaí</Text>
+        <Text style={styles.footerText}>© {new Date().getFullYear()} Estoca Fácil</Text>
         <Text style={styles.footerSub}>Sistema de Gestão</Text>
       </View>
     </View>
