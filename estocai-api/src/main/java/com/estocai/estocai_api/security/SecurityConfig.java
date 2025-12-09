@@ -41,6 +41,7 @@ public class SecurityConfig {
                                 "/termos-uso/aceitar",
                                 "/termos-uso/aceitar/open-app.html",
                                 "/img/**",
+                                "/open-app.html",
                                 "/reset.html",
                                 "/termos-uso.html"
                         ).permitAll()
