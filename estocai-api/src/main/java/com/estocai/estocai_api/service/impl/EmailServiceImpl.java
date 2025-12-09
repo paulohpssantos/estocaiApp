@@ -54,7 +54,7 @@ public class EmailServiceImpl implements EmailService {
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
 
-            ClassPathResource logo = new ClassPathResource("static/img/estocai_old.png");
+            ClassPathResource logo = new ClassPathResource("static/img/estocai.png");
             helper.addInline("estocaiLogo", logo);
 
             mailSender.send(message);

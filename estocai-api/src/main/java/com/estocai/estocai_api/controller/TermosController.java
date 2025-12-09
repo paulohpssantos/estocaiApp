@@ -3,6 +3,7 @@ package com.estocai.estocai_api.controller;
 import com.estocai.estocai_api.model.Usuario;
 import com.estocai.estocai_api.repository.UsuarioRepository;
 import com.estocai.estocai_api.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/termos-uso")
 public class TermosController {
+
+    @Value("${APP_URL}")
+    private String appUrl;
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioService usuarioService;
@@ -41,7 +45,7 @@ public class TermosController {
     }
 
     @PostMapping("/aceitar")
-    public String aceitarTermos(@RequestParam("cpf") String cpf,
+    public ResponseEntity<Void> aceitarTermos(@RequestParam("cpf") String cpf,
                                 @RequestParam(value = "leuContrato", required = false) String leuContrato) {
         Usuario user = usuarioRepository.findByCpf(cpf);
         if (user != null) {
@@ -51,6 +55,19 @@ public class TermosController {
             //enviar email de boas vindas
             usuarioService.createBoasVindasEmail(user.getEmail(), user.getNome());
         }
-        return "redirect:/?aceito=true";
+        //return "redirect:/?aceito=true";
+
+
+        String cpfEncoded = URLEncoder.encode(cpf, StandardCharsets.UTF_8);
+
+        // 1) Deep link custom scheme (ios/android se o app registrar o esquema)
+        String deepLink = "estocaiapp://termos?cpf=" + cpfEncoded + "&aceito=true";
+
+        // 2) Android intent format com fallback para web (troque package e fallback)
+        String fallbackWeb = URLEncoder.encode(appUrl + "/termos?aceito=true", StandardCharsets.UTF_8);
+        String intentUri = "intent://termos?cpf=" + cpfEncoded + "#Intent;scheme=estocaiapp;package=com.paulohps.EstocaiApp;S.browser_fallback_url=" + fallbackWeb + ";end";
+
+        // Escolha qual usar; aqui usamos intentUri para Android + fallback
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(intentUri)).build();
     }
 }

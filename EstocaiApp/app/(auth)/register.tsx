@@ -134,7 +134,7 @@ export default function RegisterScreen() {
         </Link>
       </View>
       <View style={globalStyles.footer}>
-        <Text style={globalStyles.footerText}>© {new Date().getFullYear()} Estocaí</Text>
+        <Text style={globalStyles.footerText}>© {new Date().getFullYear()} Estoca Fácil</Text>
         <Text style={globalStyles.footerSub}>Sistema de Gestão</Text>
       </View>
     </View>
