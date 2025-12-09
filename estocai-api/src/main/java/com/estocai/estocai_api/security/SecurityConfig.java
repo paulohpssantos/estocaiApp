@@ -39,6 +39,7 @@ public class SecurityConfig {
                                 "/termos-uso/termos-uso.html",
                                 "/termos-uso/open",
                                 "/termos-uso/aceitar",
+                                "/termos-uso/aceitar/open-app.html",
                                 "/img/**",
                                 "/reset.html",
                                 "/termos-uso.html"

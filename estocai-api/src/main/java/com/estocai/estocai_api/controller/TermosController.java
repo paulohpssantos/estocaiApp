@@ -59,15 +59,10 @@ public class TermosController {
 
 
         String cpfEncoded = URLEncoder.encode(cpf, StandardCharsets.UTF_8);
+        String appUrlEncoded = URLEncoder.encode(appUrl, StandardCharsets.UTF_8);
 
-        // 1) Deep link custom scheme (ios/android se o app registrar o esquema)
-        String deepLink = "estocaiapp://termos?cpf=" + cpfEncoded + "&aceito=true";
-
-        // 2) Android intent format com fallback para web (troque package e fallback)
-        String fallbackWeb = URLEncoder.encode(appUrl + "/termos?aceito=true", StandardCharsets.UTF_8);
-        String intentUri = "intent://termos?cpf=" + cpfEncoded + "#Intent;scheme=estocaiapp;package=com.paulohps.EstocaiApp;S.browser_fallback_url=" + fallbackWeb + ";end";
-
-        // Escolha qual usar; aqui usamos intentUri para Android + fallback
-        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(intentUri)).build();
+        // redireciona para a página intermediária estática passando cpf e appUrl
+        String target = "/open-app.html?cpf=" + cpfEncoded + "&appUrl=" + appUrlEncoded;
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(target)).build();
     }
 }

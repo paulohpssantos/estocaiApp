@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Abrir App</title>
+</head>
+<body>
+<p>Abrindo o app...</p>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const cpf = params.get('cpf') || '';
+    const appUrl = params.get('appUrl') || '';
+
+    const cpfEncoded = encodeURIComponent(cpf);
+    const deepLink = 'estocaiapp://termos?cpf=' + cpfEncoded + '&aceito=true';
+    const fallbackWeb = encodeURIComponent(appUrl + '/termos?aceito=true');
+    const intentUri = 'intent://termos?cpf=' + cpfEncoded + '#Intent;scheme=estocaiapp;package=com.paulohps.EstocaiApp;S.browser_fallback_url=' + fallbackWeb + ';end';
+
+    function isAndroid() { return /Android/i.test(navigator.userAgent); }
+
+    function open() {
+      if (isAndroid()) {
+        window.location = intentUri;
+      } else {
+        const now = Date.now();
+        window.location = deepLink;
+        setTimeout(function() {
+          if (Date.now() - now < 1500) {
+            window.location = appUrl + '/termos?aceito=true';
+          }
+        }, 1200);
+      }
+    }
+
+    open();
+</script>
+</body>
+</html>
