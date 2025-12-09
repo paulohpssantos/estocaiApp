@@ -77,11 +77,9 @@
         const now = Date.now();
         window.location = deepLink;
         setTimeout(function() {
-          // tenta fechar a aba/janela; se falhar, redireciona para web
           try {
             window.open('', '_self');
             window.close();
-            // se browser bloqueou close, redireciona para fallback
             setTimeout(function() {
               if (!window.closed) window.location = appUrl + '/termos?aceito=true';
             }, 600);
@@ -92,28 +90,28 @@
       }
     }
 
-    // mostra modal com logo e chama openAppFlow ao fechá-lo
+    // mostra modal com logo e chama openAppFlow somente ao clicar OK
     window.addEventListener('load', function() {
       const overlay = document.getElementById('successOverlay');
       const okBtn = document.getElementById('okBtn');
 
-      // mostra o modal
+      // mostra o modal imediatamente
       overlay.style.display = 'flex';
+      okBtn.focus();
 
-      // fechar ao clicar OK
+      // fechar ao clicar OK -> só aqui chama openAppFlow
       okBtn.addEventListener('click', function() {
         overlay.style.display = 'none';
-        // pequena espera para evitar race com fechamento de modal
         setTimeout(openAppFlow, 200);
       });
 
-      // fecha automaticamente após 1.2s se o usuário não clicar
-      setTimeout(function() {
-        if (overlay.style.display !== 'none') {
-          overlay.style.display = 'none';
-          openAppFlow();
+      // opcional: permitir Enter para acionar o botão OK
+      okBtn.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          okBtn.click();
         }
-      }, 1200);
+      });
     });
 </script>
 </body>
