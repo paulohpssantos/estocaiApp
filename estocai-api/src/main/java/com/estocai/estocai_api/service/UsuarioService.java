@@ -52,7 +52,7 @@ public class UsuarioService {
             String startDate = start.format(fmt);
             String endDate = end.format(fmt);
 
-            user.setPlano(plano);
+            user.setPlano(plano.toUpperCase());
             user.setDataInicioPlano(LocalDate.parse(startDate));
             user.setDataExpiracao(LocalDate.parse(endDate));
 

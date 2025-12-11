@@ -27,11 +27,24 @@
       "package": "com.paulohps.EstocaiApp"
     },
     "web": {
-      "output": "static",
+      "bundler": "metro",
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
+      ["expo-router",
+        {
+          "origin": "https://estocaiapp.expo.app"
+        }
+      ],
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.paulohps.EstocaiApp",
+          "enableGooglePay": true,
+          "publishableKey": "pk_test_51KzYOkLh5D9uQTs1Yy8J1kT3vR7Di0p3Y6j6k1bXKJ4v3hX4Z5gW8Jt1eF2gX9z5Yz"
+        }
+      ],
       [
         "expo-splash-screen",
         {
@@ -50,7 +63,9 @@
       "reactCompiler": true
     },
     "extra": {
-      "router": {},
+      "router": {
+        "origin": "https://estocaiapp.expo.app"
+      },
       "eas": {
         "projectId": "dac97d43-6d32-4d1f-a01d-1b5ec8881fd8"
       }

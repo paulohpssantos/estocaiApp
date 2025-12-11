@@ -28,7 +28,7 @@ export default function Index() {
           const expMid = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate());
           // se a data atual for maior que a dataExpiracao -> abrir planos (conforme solicitado)
           if (hojeMid.getTime() > expMid.getTime()) {
-            router.replace("/(drawer)/planos?expired=true");
+            router.replace("/planos?expired=true");
             return;
           }
         }

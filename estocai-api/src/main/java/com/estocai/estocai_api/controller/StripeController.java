@@ -1,5 +1,8 @@
 package com.estocai.estocai_api.controller;
 
+import com.estocai.estocai_api.model.Usuario;
+import com.estocai.estocai_api.repository.UsuarioRepository;
+import com.estocai.estocai_api.service.UsuarioService;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
@@ -21,14 +24,32 @@ public class StripeController {
     @Value("${stripe.webhook.secret:}")
     private String webhookSecret;
 
+    private final UsuarioService usuarioService;
+
+    public StripeController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
+
     @PostMapping(value = "/create-checkout-session", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> createCheckout(@RequestBody Map<String, Object> body) throws StripeException {
-        // Exemplo: body deve conter: amount (centavos), currency, successUrl, cancelUrl, name
-        Long amount = ((Number) body.get("amount")).longValue(); // em centavos
+        Long amount = ((Number) body.get("amount")).longValue();
         String currency = (String) body.getOrDefault("currency", "brl");
         String successUrl = (String) body.get("successUrl");
         String cancelUrl = (String) body.get("cancelUrl");
         String name = (String) body.getOrDefault("name", "Pedido");
+
+        // campos para enviar ao webhook
+        String cpf = null;
+        String planName = null;
+        Object metadataObj = body.get("metadata");
+        if (metadataObj instanceof Map) {
+            Map<?, ?> metadataMap = (Map<?, ?>) metadataObj;
+            Object cpfObj = metadataMap.get("cpf");
+            Object planObj = metadataMap.get("plan");
+            if (cpfObj != null) cpf = cpfObj.toString();
+            if (planObj != null) planName = planObj.toString();
+        }
+
 
         SessionCreateParams.LineItem.PriceData.ProductData product =
                 SessionCreateParams.LineItem.PriceData.ProductData.builder()
@@ -48,19 +69,29 @@ public class StripeController {
                         .setQuantity(1L)
                         .build();
 
-        SessionCreateParams params =
+        SessionCreateParams.Builder paramsBuilder =
                 SessionCreateParams.builder()
                         .setMode(SessionCreateParams.Mode.PAYMENT)
                         .addLineItem(lineItem)
                         .setSuccessUrl(successUrl + "?session_id={CHECKOUT_SESSION_ID}")
-                        .setCancelUrl(cancelUrl)
-                        .build();
+                        .setCancelUrl(cancelUrl);
 
-        Session session = Session.create(params);
+        // metadata: aparecerá em session.metadata no webhook
+        if (planName != null && !planName.isBlank()) {
+            paramsBuilder.putMetadata("planName", planName);
+        }
+        if (cpf != null && !cpf.isBlank()) {
+            // opcional: usar cpf como client_reference_id e também em metadata
+            paramsBuilder.setClientReferenceId(cpf);
+            paramsBuilder.putMetadata("cpf", cpf);
+        }
+
+        Session session = Session.create(paramsBuilder.build());
 
         Map<String, String> resp = new HashMap<>();
         resp.put("checkoutUrl", session.getUrl());
         resp.put("sessionId", session.getId());
+        resp.put("resposta", "ok");
         return ResponseEntity.ok().body(resp);
     }
 
@@ -81,11 +112,14 @@ public class StripeController {
                     Session session = (Session) event.getDataObjectDeserializer().getObject().orElse(null);
                     if (session != null) {
                         String sessionId = session.getId();
-                        // marcar pedido como pago no seu sistema usando session.getClientReferenceId() ou metadata
-                        // ex: orderService.markPaidBySession(sessionId);
+                        String cpfFromClientRef = session.getClientReferenceId(); // se setado
+                        Map<String, String> metadata = session.getMetadata();
+                        String planNameFromMetadata = metadata != null ? metadata.get("planName") : null;
+                        String cpfFromMetadata = metadata != null ? metadata.get("cpf") : null;
+
+                        Usuario updated = usuarioService.atualizarPlano(cpfFromMetadata, planNameFromMetadata);
                     }
                     break;
-                // trate outros eventos se necessário
                 default:
                     break;
             }

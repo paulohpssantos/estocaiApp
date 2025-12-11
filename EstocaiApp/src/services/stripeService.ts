@@ -12,6 +12,7 @@ export type CreateCheckoutSessionRequest = {
 export type CreateCheckoutSessionResponse = {
   checkoutUrl?: string; // session.url (Stripe Checkout)
   sessionId?: string;
+  resposta?:string;
   [key: string]: any;
 };
 
