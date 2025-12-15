@@ -20,6 +20,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
+        String path = request.getServletPath();
+
+        if (path.equals("/login") || path.equals("/register")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
         String auth = request.getHeader("Authorization");
         if (auth != null && auth.startsWith("Bearer ")) {
             String token = auth.substring(7);

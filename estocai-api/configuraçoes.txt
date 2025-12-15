@@ -48,6 +48,3 @@ refresh token (conexão da conta de email)
 1//04fW4DNm9iPTgCgYIARAAGAQSNwF-L9Ir_g4SFWrBE3zM8ngdN8Da8V98m0y7FaV88L6XQt8Ug3edAw_7eDu_SQJyyoN3Il96jbw
 
 estocaisistema@gmail.com
-
-[28/11/2025, 14:12:15] Fernando: Client ID: AY-8yuhNRbrBNOdCn1SXlnHNsAZqT2V83RdchhawlRHirHV4DGD0bQPhj75_4TEUwTVa0c2CnTQqH7Sx
-[28/11/2025, 14:12:26] Fernando: Secret key1: EOrL_IesV4RNzmIyvFfUNOn4rh6Kde_CgefPcLqchsDMYUrM322hlHZkCby4oLA0SwmLO-8A_81S--EY

@@ -1,11 +1,11 @@
 const ENV = {
   dev: {
     //API_URL: "http://localhost:8080",
-    API_URL: "https://18.230.144.70:8080",
+    API_URL: "https://www.estocafacil.com.br",
     
   },
   prod: {
-    API_URL: "https://18.230.144.70:8080",
+    API_URL: "https://www.estocafacil.com.br",
     
   },
 };
