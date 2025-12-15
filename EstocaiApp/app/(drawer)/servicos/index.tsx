@@ -91,7 +91,7 @@ export default function Estabelecimentos() {
             <IconButton
               icon="pencil-outline"
               size={22}
-              onPress={() => router.push({ pathname: '/(drawer)/servicos/novo', params: { produto: JSON.stringify(serv) } })}
+              onPress={() => router.push({ pathname: '/(drawer)/servicos/novo', params: { servico: JSON.stringify(serv) } })}
             />
             <IconButton icon="delete-outline" size={22} onPress={handleDelete} />
           </View>

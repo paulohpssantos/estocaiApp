@@ -106,7 +106,7 @@ public class UsuarioService {
                 "endDate", String.format(endDate, fmt)
         );
 
-        emailService.sendEmailUsingTemplate(email, subject, "renovacao", vars);
+        emailService.sendEmailUsingTemplate(email, subject, "contrato-renovado", vars);
     }
 
 }

@@ -57,22 +57,22 @@ export default function NovoServico() {
   );
 
   useEffect(() => {
+    console.log('novo.tsx params ->', params);
     if (params.servico) {
-      const serv = JSON.parse(params.servico as string);
-      setForm(serv);
-      setValorInput(formatMoneyNoSymbol(serv.valor));
-      setDuracaoInput(serv.duracao);
-      
+      try {
+        const serv = JSON.parse(params.servico as string);
+        // mescla o usuário já carregado (prev.usuario) para não sobrescrever com null
+        setForm(prev => ({ ...(serv as Servico), usuario: prev.usuario ?? serv.usuario ?? null }));
+        setValorInput(formatMoneyNoSymbol(serv.valor ?? 0));
+        setDuracaoInput(serv.duracao ?? '00:00');
+      } catch (e) {
+        console.warn('Erro ao parsear params.servico', e);
+      }
     } else {
-      setForm({
-        id: null,
-        nome: '',
-        descricao: '',
-        valor: 0,
-        duracao: '',
-        ativo: true,
-        usuario: null as any,
-      });
+      setForm(prev => ({
+        ...initialForm,
+        usuario: prev.usuario // mantém o usuário já carregado
+      }));
       setValorInput(formatMoneyNoSymbol(0));
       setDuracaoInput('00:00');
     }

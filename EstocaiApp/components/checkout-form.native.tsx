@@ -45,7 +45,11 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
 
     const initializePaymentSheet = async () => {
         try {
+            Alert.alert('DEBUG', 'amount: ' + amount);
+
             const { paymentIntent, ephemeralKey, customer } = await fetchPaymentSheetParams(amount);
+
+            Alert.alert('DEBUG', 'paymentIntent: ' + paymentIntent + '\nephemeralKey: ' + ephemeralKey + '\ncustomer: ' + customer);
 
             const initFn = stripeApi?.initPaymentSheet;
             if (typeof initFn !== "function") {
@@ -71,7 +75,7 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
             }
         } catch (e: any) {
             console.error('[CheckoutForm] initializePaymentSheet error', e);
-            Alert.alert('Erro', e?.message ?? 'Falha ao inicializar pagamento');
+            Alert.alert('Erro 1', e?.message ?? 'Falha ao inicializar pagamento');
         }
     };
 
@@ -109,7 +113,7 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
             }
         } catch (e: any) {
             console.error('[CheckoutForm] openPaymentSheet error', e);
-            Alert.alert('Erro', e?.message ?? 'Falha ao abrir o pagamento');
+            Alert.alert('Erro 2', e?.message ?? 'Falha ao abrir o pagamento');
             setLoading(false);
         }
     }
