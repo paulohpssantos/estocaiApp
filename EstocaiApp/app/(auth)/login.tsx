@@ -49,6 +49,14 @@ export default function LoginScreen() {
       </View>
       <View style={globalStyles.formContainer}>
         <Text style={globalStyles.title}>Login</Text>
+        <View
+              style={{
+                borderBottomWidth: 1,
+                borderBottomColor: colors.border,
+                marginVertical: 12,
+              }}
+            />
+        <Text style={{ marginBottom: 4, color: colors.text }}>CPF</Text>
         <TextInput
           placeholder="CPF"
           value={username}
@@ -56,6 +64,7 @@ export default function LoginScreen() {
           style={globalStyles.input}
           keyboardType="numeric"
         />
+        <Text style={{ marginBottom: 4, color: colors.text }}>Senha</Text>
         <TextInput
           placeholder="Senha"
           secureTextEntry

@@ -100,30 +100,42 @@ export default function RegisterScreen() {
       </View>
       <View style={globalStyles.formContainer}>
         <Text style={globalStyles.title}>Cadastro</Text>
+        <View
+              style={{
+                borderBottomWidth: 1,
+                borderBottomColor: colors.border,
+                marginVertical: 12,
+              }}
+            />
+        <Text style={{ marginBottom: 4, color: colors.text }}>CPF</Text>    
         <TextInput
           placeholder="CPF"
           value={cpf}
           onChangeText={setCpf}
           style={globalStyles.input}
         />
+        <Text style={{ marginBottom: 4, color: colors.text }}>Nome</Text>
         <TextInput
           placeholder="Nome"
           value={nome}
           onChangeText={setNome}
           style={globalStyles.input}
         />
+        <Text style={{ marginBottom: 4, color: colors.text }}>Celular</Text>
         <TextInput
           placeholder="Celular"
           value={celular}
           onChangeText={setCelular}
           style={globalStyles.input}
         />
+        <Text style={{ marginBottom: 4, color: colors.text }}>Email</Text>
         <TextInput
           placeholder="Email"
           value={email}
           onChangeText={setEmail}
           style={globalStyles.input}
         />
+        <Text style={{ marginBottom: 4, color: colors.text }}>Senha</Text>
         <TextInput
           placeholder="Senha"
           secureTextEntry

@@ -8,6 +8,7 @@
     "scheme": "estocaiapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "platforms": ["ios", "android"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.paulohps.EstocaiApp",
@@ -27,7 +28,6 @@
       "package": "com.paulohps.EstocaiApp"
     },
     "web": {
-      "bundler": "metro",
       "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
@@ -70,5 +70,8 @@
         "projectId": "dac97d43-6d32-4d1f-a01d-1b5ec8881fd8"
       }
     }
+  },
+  "devDependencies": {
+    "@react-native-community/cli": "latest",
   }
 }

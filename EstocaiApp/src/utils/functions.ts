@@ -68,6 +68,7 @@ export function isExpired(dateStr: string): boolean {
     return isVencido;
 }
 
+
 //valida se a data de validade está perto do vencimento (30 dias)
 export function isNearExpiration(dateStr: string): boolean {
     const validade = parseDate(dateStr);

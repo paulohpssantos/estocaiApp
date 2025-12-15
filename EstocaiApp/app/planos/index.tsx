@@ -1,4 +1,4 @@
-import CheckoutForm from "@/components/checkout-form.native";
+import CheckoutForm from "@/components/checkout-form";
 import { Usuario } from "@/src/models/usuario";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";

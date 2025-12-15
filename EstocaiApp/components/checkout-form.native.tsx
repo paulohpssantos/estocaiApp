@@ -1,13 +1,11 @@
 import { UpdatePlanoRequest } from '@/src/models/usuario';
 import { atualizarPlanoUsuario } from "@/src/services/usuarioService";
-import { useStripe } from "@stripe/stripe-react-native";
 import * as Linking from 'expo-linking';
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert } from "react-native";
 import { Button } from "react-native-paper";
 import globalStyles from "../constants/globalStyles";
-
 
 async function fetchPaymentSheetParams(amount: number): Promise<{
     paymentIntent: string;
@@ -21,59 +19,97 @@ async function fetchPaymentSheetParams(amount: number): Promise<{
         },
         body: JSON.stringify({ amount }),
     }).then((res) => res.json());
-
 }
 
 export default function CheckoutForm({ amount, cpf, plano }: { amount: number; cpf?: string; plano?: string }) {
 
-    const { initPaymentSheet, presentPaymentSheet } = useStripe();
+    // dynamically loaded stripe api
+    const [stripeApi, setStripeApi] = useState<any | null>(null);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    const initializePaymentSheet = async () => {
-        const { paymentIntent, ephemeralKey, customer } = await fetchPaymentSheetParams(amount);
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const mod = await import("@stripe/stripe-react-native");
+                if (!mounted) return;
+                // prefer named exports initPaymentSheet/presentPaymentSheet if available
+                setStripeApi(mod);
+            } catch (e) {
+                console.warn("[CheckoutForm] failed to load stripe native module:", e);
+            }
+        })();
+        return () => { mounted = false; };
+    }, []);
 
-        const { error } = await initPaymentSheet({
-            customerId: customer,
-            customerEphemeralKeySecret: ephemeralKey,
-            paymentIntentClientSecret: paymentIntent,
-            merchantDisplayName: 'Expo, Inc',
-            allowsDelayedPaymentMethods: true,
-            returnURL: Linking.createURL('stripe-redirect'),
-            applePay: {
-                merchantCountryCode: 'BR',
-            },
-        });
-        if (!error) {
-            setLoading(true);
-            openPaymentSheet();
+    const initializePaymentSheet = async () => {
+        try {
+            const { paymentIntent, ephemeralKey, customer } = await fetchPaymentSheetParams(amount);
+
+            const initFn = stripeApi?.initPaymentSheet;
+            if (typeof initFn !== "function") {
+                Alert.alert("Erro", "initPaymentSheet não disponível. Verifique a versão do @stripe/stripe-react-native.");
+                return;
+            }
+
+            const { error } = await initFn({
+                customerId: customer,
+                customerEphemeralKeySecret: ephemeralKey,
+                paymentIntentClientSecret: paymentIntent,
+                merchantDisplayName: 'Expo, Inc',
+                allowsDelayedPaymentMethods: true,
+                returnURL: Linking.createURL('stripe-redirect'),
+                applePay: {
+                    merchantCountryCode: 'BR',
+                },
+            });
+
+            if (!error) {
+                setLoading(true);
+                openPaymentSheet();
+            }
+        } catch (e: any) {
+            console.error('[CheckoutForm] initializePaymentSheet error', e);
+            Alert.alert('Erro', e?.message ?? 'Falha ao inicializar pagamento');
         }
     };
 
     const openPaymentSheet = async () => {
-        const { error } = await presentPaymentSheet();
-
-        if (error) {
-            if (error.code === 'Canceled') {
-                setLoading(false);
+        try {
+            const presentFn = stripeApi?.presentPaymentSheet;
+            if (typeof presentFn !== "function") {
+                Alert.alert("Erro", "presentPaymentSheet não disponível. Verifique a versão do @stripe/stripe-react-native.");
                 return;
             }
-            Alert.alert(`Error code: ${error.code}`, error.message);
-        } else {
-            Alert.alert('Sucesso', 'Seu pedido foi confirmado!');
 
-            //envia atualização do usuário para o servidor
-            const data: UpdatePlanoRequest = {
-                cpf: cpf!,
-                plano: plano!,
-            };
-            await atualizarPlanoUsuario(data);
+            const { error } = await presentFn();
 
-            //redireciona para a tela inicial
-            setTimeout(() => {
-                //redireciona para a tela inicial
-                 router.replace('/(auth)/login');
-            }, 100);   
+            if (error) {
+                if (error.code === 'Canceled') {
+                    setLoading(false);
+                    return;
+                }
+                Alert.alert(`Error code: ${error.code}`, error.message);
+            } else {
+                Alert.alert('Sucesso', 'Seu pedido foi confirmado!');
+
+                // envia atualização do usuário para o servidor
+                const data: UpdatePlanoRequest = {
+                    cpf: cpf!,
+                    plano: plano!,
+                };
+                await atualizarPlanoUsuario(data);
+
+                // redireciona para a tela de login
+                //setTimeout(() => {
+                    router.replace('/(auth)/login');
+                //}, 100);
+                setLoading(false);
+            }
+        } catch (e: any) {
+            console.error('[CheckoutForm] openPaymentSheet error', e);
+            Alert.alert('Erro', e?.message ?? 'Falha ao abrir o pagamento');
             setLoading(false);
         }
     }
@@ -83,10 +119,6 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
             <Button mode="contained" onPress={initializePaymentSheet} style={[globalStyles.primaryButton, { flex: 1 }]}>
                 Confirmar Pagamento
             </Button>
-            {/* <Button mode="contained" onPress={openPaymentSheet} style={[globalStyles.primaryButton, { flex: 1 }]}>
-                Abrir Pagamento
-            </Button> */}
         </>
-
     )
 }
