@@ -62,11 +62,11 @@ public class StripeService {
 //        Map<String, Object> ekParams = new HashMap<>();
 //        ekParams.put("customer", customer.getId());
 //        EphemeralKey ephemeralKey = EphemeralKey.create(ekParams, requestOptions);
-        
+
             // The 'params' map *must* contain the 'stripe-version' key
             Map<String, Object> params = new HashMap<>();
             params.put("customer", customer.getId());
-            params.put("stripe-version", STRIPE_MOBILE_VERSION); // Explicitly specify the mobile client's API version
+            params.put("stripe-version", STRIPE_API_VERSION); // Explicitly specify the mobile client's API version
 
             // You may also set RequestOptions if needed (e.g., for idempotency key)
             RequestOptions options = RequestOptions.builder()
