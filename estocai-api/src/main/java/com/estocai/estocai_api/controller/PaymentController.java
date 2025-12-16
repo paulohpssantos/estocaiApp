@@ -42,7 +42,7 @@ public class PaymentController {
             if (amount.compareTo(BigDecimal.ZERO) <= 0) {
                 return ResponseEntity.badRequest().body(Map.of("error", "invalid_amount"));
             }
-            
+
 
             Map<String, Object> result = stripeService.createPaymentSheet(amount);
             return ResponseEntity.ok(result);

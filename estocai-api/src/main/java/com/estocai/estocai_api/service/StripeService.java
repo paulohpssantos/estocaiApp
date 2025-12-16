@@ -76,6 +76,7 @@ public class StripeService {
                 .setAutomaticPaymentMethods(autoMethods)
                 .build();
 
+        
         PaymentIntent paymentIntent = PaymentIntent.create(piParams);
         log.info("[PAYMENT-SHEET] created paymentIntent id={}", paymentIntent.getId());
 
