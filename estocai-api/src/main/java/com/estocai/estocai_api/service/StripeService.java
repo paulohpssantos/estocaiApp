@@ -62,7 +62,6 @@ public class StripeService {
 //        Map<String, Object> ekParams = new HashMap<>();
 //        ekParams.put("customer", customer.getId());
 //        EphemeralKey ephemeralKey = EphemeralKey.create(ekParams, requestOptions);
-
         
             // The 'params' map *must* contain the 'stripe-version' key
             Map<String, Object> params = new HashMap<>();
