@@ -50,18 +50,32 @@ public class StripeService {
         Customer customer = Customer.create(custParams);
         log.info("[PAYMENT-SHEET] created customer id={}", customer.getId());
 
-        // Criar RequestOptions apenas com apiKey
-        RequestOptions requestOptions = RequestOptions.builder()
-                .setApiKey(Stripe.apiKey)
-                .build();
+//        // Criar RequestOptions apenas com apiKey
+//        RequestOptions requestOptions = RequestOptions.builder()
+//                .setApiKey(Stripe.apiKey)
+//                .setStripeVersion("2025-05-20")
+//                .build();
+//
+//
+//
+//        // Create ephemeral key: incluir stripe_version nos params para corresponder ao mobile client
+//        Map<String, Object> ekParams = new HashMap<>();
+//        ekParams.put("customer", customer.getId());
+//        EphemeralKey ephemeralKey = EphemeralKey.create(ekParams, requestOptions);
 
+        
+            // The 'params' map *must* contain the 'stripe-version' key
+            Map<String, Object> params = new HashMap<>();
+            params.put("customer", customer.getId());
+            params.put("stripe-version", STRIPE_MOBILE_VERSION); // Explicitly specify the mobile client's API version
 
+            // You may also set RequestOptions if needed (e.g., for idempotency key)
+            RequestOptions options = RequestOptions.builder().build();
 
-        // Create ephemeral key: incluir stripe_version nos params para corresponder ao mobile client
-        Map<String, Object> ekParams = new HashMap<>();
-        ekParams.put("customer", customer.getId());
-        ekParams.put("stripe_version", STRIPE_MOBILE_VERSION);
-        EphemeralKey ephemeralKey = EphemeralKey.create(ekParams, requestOptions);
+            // The Stripe Java SDK will automatically take the 'stripe-version' from params
+            // and put it into the Stripe-Version HTTP header for the request.
+            EphemeralKey ephemeralKey =  EphemeralKey.create(params, options);
+
 
         // Create payment intent
         PaymentIntentCreateParams.AutomaticPaymentMethods autoMethods =
