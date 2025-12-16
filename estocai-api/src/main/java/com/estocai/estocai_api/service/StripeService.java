@@ -20,6 +20,7 @@ import java.util.Map;
 public class StripeService {
     private static final Logger log = LoggerFactory.getLogger(StripeService.class);
     private static final String STRIPE_API_VERSION = "2025-11-17.clover";
+    private static final String STRIPE_MOBILE_VERSION = "2025-11-17";
 
     public StripeService() {
         String key = System.getenv("STRIPE_SECRET_KEY");
@@ -59,6 +60,7 @@ public class StripeService {
         // Create ephemeral key: incluir stripe_version nos params para corresponder ao mobile client
         Map<String, Object> ekParams = new HashMap<>();
         ekParams.put("customer", customer.getId());
+        ekParams.put("stripe_version", STRIPE_MOBILE_VERSION);
         EphemeralKey ephemeralKey = EphemeralKey.create(ekParams, requestOptions);
 
         // Create payment intent
