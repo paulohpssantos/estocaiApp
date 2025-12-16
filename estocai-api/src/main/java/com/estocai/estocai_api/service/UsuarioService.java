@@ -3,6 +3,7 @@ package com.estocai.estocai_api.service;
 import com.estocai.estocai_api.model.Usuario;
 import com.estocai.estocai_api.repository.UsuarioRepository;
 import com.estocai.estocai_api.service.impl.EmailServiceImpl;
+import com.estocai.estocai_api.utils.Formatter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
@@ -97,13 +98,11 @@ public class UsuarioService {
 
         String subject = "Aviso de confirmação do seu plano";
 
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
         Map<String, Object> vars = Map.of(
                 "planName", planName,
                 "mes", mes,
-                "startDate", String.format(startDate, fmt),
-                "endDate", String.format(endDate, fmt)
+                "startDate", Formatter.formatDateBR(startDate),
+                "endDate", Formatter.formatDateBR(endDate)
         );
 
         emailService.sendEmailUsingTemplate(email, subject, "contrato-renovado", vars);
