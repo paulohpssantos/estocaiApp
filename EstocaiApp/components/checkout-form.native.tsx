@@ -1,9 +1,10 @@
 import { UpdatePlanoRequest } from '@/src/models/usuario';
 import { fetchPaymentSheetParams } from "@/src/services/stripeService";
 import { atualizarPlanoUsuario } from "@/src/services/usuarioService";
+import { useStripe } from "@stripe/stripe-react-native";
 import * as Linking from 'expo-linking';
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Alert } from "react-native";
 import { Button } from "react-native-paper";
 import globalStyles from "../constants/globalStyles";
@@ -25,52 +26,78 @@ import globalStyles from "../constants/globalStyles";
 export default function CheckoutForm({ amount, cpf, plano }: { amount: number; cpf?: string; plano?: string }) {
 
     // dynamically loaded stripe api
-    const [stripeApi, setStripeApi] = useState<any | null>(null);
+    //const [stripeApi, setStripeApi] = useState<any | null>(null);
+    const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    useEffect(() => {
-        let mounted = true;
-        (async () => {
-            try {
-                const mod = await import("@stripe/stripe-react-native");
-                if (!mounted) return;
-                // prefer named exports initPaymentSheet/presentPaymentSheet if available
-                setStripeApi(mod);
-            } catch (e) {
-                console.warn("[CheckoutForm] failed to load stripe native module:", e);
-            }
-        })();
-        return () => { mounted = false; };
-    }, []);
+    // useEffect(() => {
+    //     let mounted = true;
+    //     (async () => {
+    //         try {
+    //             const mod = await import("@stripe/stripe-react-native");
+    //             if (!mounted) return;
+    //             // prefer named exports initPaymentSheet/presentPaymentSheet if available
+    //             setStripeApi(mod);
+    //         } catch (e) {
+    //             console.warn("[CheckoutForm] failed to load stripe native module:", e);
+    //         }
+    //     })();
+    //     return () => { mounted = false; };
+    // }, []);
 
     const initializePaymentSheet = async () => {
         try {
 
             const { paymentIntent, ephemeralKey, customer } = await fetchPaymentSheetParams(amount);
 
-            const initFn = stripeApi?.initPaymentSheet;
-            if (typeof initFn !== "function") {
-                Alert.alert("Erro", "initPaymentSheet não disponível. Verifique a versão do @stripe/stripe-react-native.");
-                return;
+            Alert.alert("DEBUG", `paymentIntent: ${paymentIntent}\nephemeralKey: ${ephemeralKey}\ncustomer: ${customer}`);
+
+            // const initFn = stripeApi?.initPaymentSheet;
+            // if (typeof initFn !== "function") {
+            //     Alert.alert("Erro", "initPaymentSheet não disponível. Verifique a versão do @stripe/stripe-react-native.");
+            //     return;
+            // }
+
+            Alert.alert("DEBUG", "1");
+            console.log('[CheckoutForm] params', { paymentIntent, ephemeralKey, customer });
+            if (!paymentIntent || !ephemeralKey || !customer) {
+              Alert.alert('Erro', 'Parâmetros de pagamento inválidos.');
+              console.error('[CheckoutForm] invalid params', { paymentIntent, ephemeralKey, customer });
+              return;
             }
 
-            const { error } = await initFn({
+            try {
+              // captura throws nativos
+              const result = await initPaymentSheet({
                 customerId: customer,
                 customerEphemeralKeySecret: ephemeralKey,
                 paymentIntentClientSecret: paymentIntent,
                 merchantDisplayName: 'Expo, Inc',
                 allowsDelayedPaymentMethods: true,
                 returnURL: Linking.createURL('stripe-redirect'),
-                applePay: {
-                    merchantCountryCode: 'BR',
-                },
-            });
+                applePay: { merchantCountryCode: 'BR' },
+              });
+              console.log('[CheckoutForm] initResult', result);
+              if (result?.error) {
+                Alert.alert('InitPaymentSheet error', result.error.message ?? JSON.stringify(result.error));
+                console.error('[CheckoutForm] initPaymentSheet error object', result.error);
+                return;
+              }
+            } catch (err) {
+              console.error('[CheckoutForm] initPaymentSheet threw', err);
+              Alert.alert('Erro nativo', (err as any)?.message ?? JSON.stringify(err));
+              return;
+            }
 
-            if (!error) {
+            Alert.alert("DEBUG", "2");
+
+            //if (!error) {
                 setLoading(true);
                 openPaymentSheet();
-            }
+            //}
+
+            
         } catch (e: any) {
             console.error('[CheckoutForm] initializePaymentSheet error', e);
             Alert.alert('Erro', e?.message ?? 'Falha ao iniciar o pagamento');
@@ -79,13 +106,15 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
 
     const openPaymentSheet = async () => {
         try {
-            const presentFn = stripeApi?.presentPaymentSheet;
-            if (typeof presentFn !== "function") {
-                Alert.alert("Erro", "presentPaymentSheet não disponível. Verifique a versão do @stripe/stripe-react-native.");
-                return;
-            }
+            // const presentFn = stripeApi?.presentPaymentSheet;
+            // if (typeof presentFn !== "function") {
+            //     Alert.alert("Erro", "presentPaymentSheet não disponível. Verifique a versão do @stripe/stripe-react-native.");
+            //     return;
+            // }
 
-            const { error } = await presentFn();
+            const { error } = await presentPaymentSheet();
+
+            //const { error } = await presentFn();
 
             if (error) {
                 if (error.code === 'Canceled') {
