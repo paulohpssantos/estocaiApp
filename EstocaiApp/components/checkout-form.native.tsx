@@ -1,4 +1,5 @@
 import { UpdatePlanoRequest } from '@/src/models/usuario';
+import { fetchPaymentSheetParams } from "@/src/services/stripeService";
 import { atualizarPlanoUsuario } from "@/src/services/usuarioService";
 import * as Linking from 'expo-linking';
 import { useRouter } from "expo-router";
@@ -7,19 +8,19 @@ import { Alert } from "react-native";
 import { Button } from "react-native-paper";
 import globalStyles from "../constants/globalStyles";
 
-async function fetchPaymentSheetParams(amount: number): Promise<{
-    paymentIntent: string;
-    ephemeralKey: string;
-    customer: string;
-}> {
-    return fetch(`/api/payment-sheet`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ amount }),
-    }).then((res) => res.json());
-}
+// async function fetchPaymentSheetParams(amount: number): Promise<{
+//     paymentIntent: string;
+//     ephemeralKey: string;
+//     customer: string;
+// }> {
+//     return fetch(`/api/payment-sheet`, {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({ amount }),
+//     }).then((res) => res.json());
+// }
 
 export default function CheckoutForm({ amount, cpf, plano }: { amount: number; cpf?: string; plano?: string }) {
 

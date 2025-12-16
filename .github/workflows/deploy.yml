@@ -63,8 +63,8 @@ jobs:
             export GMAIL_OAUTH_REFRESH_TOKEN=${{ secrets.GMAIL_OAUTH_REFRESH_TOKEN }}
 
             export APP_URL=${{ secrets.APP_URL }}
-            export STRIPE_SECRET=${{ secrets.STRIPE_SECRET }}
-            export STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}                        
+            export STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            export EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY }}                        
 
             nohup java -Dspring.profiles.active=prod -jar *.jar > app.log 2>&1 &
             echo "Aplicação reiniciada com sucesso!"
