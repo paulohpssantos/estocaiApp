@@ -69,7 +69,9 @@ public class StripeService {
             params.put("stripe-version", STRIPE_MOBILE_VERSION); // Explicitly specify the mobile client's API version
 
             // You may also set RequestOptions if needed (e.g., for idempotency key)
-            RequestOptions options = RequestOptions.builder().build();
+            RequestOptions options = RequestOptions.builder()
+                    .setApiKey(Stripe.apiKey)
+                    .build();
 
             // The Stripe Java SDK will automatically take the 'stripe-version' from params
             // and put it into the Stripe-Version HTTP header for the request.
