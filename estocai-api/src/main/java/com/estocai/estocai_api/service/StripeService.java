@@ -27,6 +27,7 @@ public class StripeService {
             throw new IllegalStateException("STRIPE_SECRET_KEY not set in environment");
         }
         Stripe.apiKey = key;
+
     }
 
     public Map<String, Object> createPaymentSheet(BigDecimal amountReais) throws Exception {
