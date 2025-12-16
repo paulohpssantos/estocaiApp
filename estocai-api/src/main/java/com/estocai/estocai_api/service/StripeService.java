@@ -53,10 +53,11 @@ public class StripeService {
                 .setApiKey(Stripe.apiKey)
                 .build();
 
+
+
         // Create ephemeral key: incluir stripe_version nos params para corresponder ao mobile client
         Map<String, Object> ekParams = new HashMap<>();
         ekParams.put("customer", customer.getId());
-        ekParams.put("apiVersion", STRIPE_API_VERSION);
         EphemeralKey ephemeralKey = EphemeralKey.create(ekParams, requestOptions);
 
         // Create payment intent
