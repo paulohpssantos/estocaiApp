@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/login",
                                 "/register",
+                                "/health",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/auth/**",
