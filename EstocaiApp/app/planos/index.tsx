@@ -1,4 +1,4 @@
-import CheckoutForm from "@/components/checkout-form";
+import CheckoutForm from "@/components/checkout-form.native";
 import { Usuario } from "@/src/models/usuario";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -16,7 +16,6 @@ import {
     View
 } from "react-native";
 import { Button } from "react-native-paper";
-import StripeProvider from "../../components/stripe-provider";
 import colors from "../../constants/colors";
 import globalStyles from "../../constants/globalStyles";
 import { formatDateBR } from "../../src/utils/formatters";
@@ -92,66 +91,68 @@ export default function PlanosScreen() {
     };
 
     return (
-        <StripeProvider>
-            <ScrollView contentContainerStyle={[globalStyles.container, styles.container, { paddingBottom: 120 }]}>
-                {isExpired ? (
-                    <Text style={[globalStyles.title, { marginBottom: 24 }]}>
-                        Período de teste expirou, selecione um plano para continuar a utilizar.
-                    </Text>
-                ) : (
-                    <Text style={[globalStyles.title, { marginBottom: 24 }]}>
-                        Plano atual: {userPlano}, vence em {formatDateBR(usuario?.dataExpiracao || "")}
-                    </Text>
-                )}
 
-                <View style={styles.list}>
-                    {plans.map((p) => {
-                        const isSelected = selected === p.id;
-                        return (
-                            <TouchableOpacity
-                                key={p.id}
-                                style={[styles.card, isSelected && styles.cardSelected]}
-                                onPress={() => {
-                                    setSelected(p.id);
-                                }}
-                                activeOpacity={0.8}
-                            >
-                                <View style={styles.cardInner}>
-                                    <View style={styles.leftBar} />
-                                    <View style={styles.cardRow}>
-                                        <View style={styles.cardInfo}>
-                                            <Text style={styles.cardTitle}>{p.title}</Text>
-                                            <Text style={styles.cardPrice}>
-                                                {p.price} <Text style={styles.cardNote}>{p.note}</Text>
-                                            </Text>
-                                        </View>
-                                        <MaterialCommunityIcons
-                                            name={isSelected ? "checkbox-marked-circle" : "checkbox-blank-circle-outline"}
-                                            size={28}
-                                            color={isSelected ? colors.primary : colors.text}
-                                        />
+        <ScrollView contentContainerStyle={[globalStyles.container, styles.container, { paddingBottom: 120 }]}>
+            {isExpired ? (
+                <Text style={[globalStyles.title, { marginBottom: 24 }]}>
+                    Período de teste expirou, selecione um plano para continuar a utilizar.
+                </Text>
+            ) : (
+                <Text style={[globalStyles.title, { marginBottom: 24 }]}>
+                    Plano atual: {userPlano}, vence em {formatDateBR(usuario?.dataExpiracao || "")}
+                </Text>
+            )}
+
+            <View style={styles.list}>
+                {plans.map((p) => {
+                    const isSelected = selected === p.id;
+                    return (
+                        <TouchableOpacity
+                            key={p.id}
+                            style={[styles.card, isSelected && styles.cardSelected]}
+                            onPress={() => {
+                                setSelected(p.id);
+                            }}
+                            activeOpacity={0.8}
+                        >
+                            <View style={styles.cardInner}>
+                                <View style={styles.leftBar} />
+                                <View style={styles.cardRow}>
+                                    <View style={styles.cardInfo}>
+                                        <Text style={styles.cardTitle}>{p.title}</Text>
+                                        <Text style={styles.cardPrice}>
+                                            {p.price} <Text style={styles.cardNote}>{p.note}</Text>
+                                        </Text>
                                     </View>
+                                    <MaterialCommunityIcons
+                                        name={isSelected ? "checkbox-marked-circle" : "checkbox-blank-circle-outline"}
+                                        size={28}
+                                        color={isSelected ? colors.primary : colors.text}
+                                    />
                                 </View>
-                            </TouchableOpacity>
-                        );
-                    })}
-                </View>
+                            </View>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
 
-                <View style={styles.footerActions}>
-                    <Button mode="outlined" onPress={handleCancel} labelStyle={{ color: colors.primary }} style={[globalStyles.secondaryButton, { flex: 1, marginRight: 8 }]}>
-                        Cancelar
-                    </Button>
-                    {/* <Button mode="contained" onPress={handleConfirm} style={[globalStyles.primaryButton, { flex: 1 }]}>
+            <View style={styles.footerActions}>
+                <Button mode="outlined" onPress={handleCancel} labelStyle={{ color: colors.primary }} style={[globalStyles.secondaryButton, { flex: 1, marginRight: 8 }]}>
+                    Cancelar
+                </Button>
+                {/* <Button mode="contained" onPress={handleConfirm} style={[globalStyles.primaryButton, { flex: 1 }]}>
                         Confirmar
                     </Button> */}
+                {selected && (
                     <CheckoutForm
-                        amount={selected ? planAmountMap[selected] : 0}
+                        amount={planAmountMap[selected]}
                         cpf={usuario?.cpf ?? ''}
-                        plano={selected ?? userPlano ?? ''}
-                    ></CheckoutForm>
-                </View>
-            </ScrollView>
-        </StripeProvider>
+                        plano={selected}
+                    />
+                )}
+            </View>
+        </ScrollView>
+
     );
 }
 

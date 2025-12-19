@@ -4,117 +4,92 @@ import { atualizarPlanoUsuario } from "@/src/services/usuarioService";
 import { useStripe } from "@stripe/stripe-react-native";
 import * as Linking from 'expo-linking';
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Alert } from "react-native";
+import { useRef, useState } from "react";
+import { Alert, Platform } from "react-native";
 import { Button } from "react-native-paper";
 import globalStyles from "../constants/globalStyles";
 
-// async function fetchPaymentSheetParams(amount: number): Promise<{
-//     paymentIntent: string;
-//     ephemeralKey: string;
-//     customer: string;
-// }> {
-//     return fetch(`/api/payment-sheet`, {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({ amount }),
-//     }).then((res) => res.json());
-// }
 
 export default function CheckoutForm({ amount, cpf, plano }: { amount: number; cpf?: string; plano?: string }) {
 
-    // dynamically loaded stripe api
-    //const [stripeApi, setStripeApi] = useState<any | null>(null);
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const initializedRef = useRef(false);
 
-    // useEffect(() => {
-    //     let mounted = true;
-    //     (async () => {
-    //         try {
-    //             const mod = await import("@stripe/stripe-react-native");
-    //             if (!mounted) return;
-    //             // prefer named exports initPaymentSheet/presentPaymentSheet if available
-    //             setStripeApi(mod);
-    //         } catch (e) {
-    //             console.warn("[CheckoutForm] failed to load stripe native module:", e);
-    //         }
-    //     })();
-    //     return () => { mounted = false; };
-    // }, []);
+    
 
     const initializePaymentSheet = async () => {
         try {
 
+            if (initializedRef.current) {
+                console.log('[CheckoutForm] initPaymentSheet already initialized');
+                return;
+            }
+            initializedRef.current = true;
+
             const { paymentIntent, ephemeralKey, customer } = await fetchPaymentSheetParams(amount);
 
-            Alert.alert("DEBUG", `paymentIntent: ${paymentIntent}\nephemeralKey: ${ephemeralKey}\ncustomer: ${customer}`);
-
-            // const initFn = stripeApi?.initPaymentSheet;
-            // if (typeof initFn !== "function") {
-            //     Alert.alert("Erro", "initPaymentSheet não disponível. Verifique a versão do @stripe/stripe-react-native.");
-            //     return;
-            // }
-
-            Alert.alert("DEBUG", "1");
+           
             console.log('[CheckoutForm] params', { paymentIntent, ephemeralKey, customer });
             if (!paymentIntent || !ephemeralKey || !customer) {
-              Alert.alert('Erro', 'Parâmetros de pagamento inválidos.');
-              console.error('[CheckoutForm] invalid params', { paymentIntent, ephemeralKey, customer });
-              return;
+                Alert.alert('Erro', 'Parâmetros de pagamento inválidos.');
+                console.error('[CheckoutForm] invalid params', { paymentIntent, ephemeralKey, customer });
+                return;
             }
 
             try {
-              // captura throws nativos
-              const result = await initPaymentSheet({
-                customerId: customer,
-                customerEphemeralKeySecret: ephemeralKey,
-                paymentIntentClientSecret: paymentIntent,
-                merchantDisplayName: 'Expo, Inc',
-                allowsDelayedPaymentMethods: true,
-                returnURL: Linking.createURL('stripe-redirect'),
-                applePay: { merchantCountryCode: 'BR' },
-              });
-              console.log('[CheckoutForm] initResult', result);
-              if (result?.error) {
-                Alert.alert('InitPaymentSheet error', result.error.message ?? JSON.stringify(result.error));
-                console.error('[CheckoutForm] initPaymentSheet error object', result.error);
-                return;
-              }
+
+                //const returnUrl = Linking.createURL('stripe-redirect');
+                const returnUrl = Linking.createURL('payment-complete', {
+                    scheme: 'estocaiapp',
+                });
+                console.log('[CheckoutForm] returnURL forced', returnUrl);
+
+
+                // captura throws nativos
+                const result = await initPaymentSheet({
+                    customerId: customer,
+                    customerEphemeralKeySecret: ephemeralKey,
+                    paymentIntentClientSecret: paymentIntent,
+                    merchantDisplayName: 'Expo, Inc',
+                    allowsDelayedPaymentMethods: true,
+                    returnURL: returnUrl,
+                    applePay: Platform.OS === 'ios'
+                        ? { merchantCountryCode: 'BR' }
+                        : undefined,
+                });
+
+
+                console.log('[CheckoutForm] initResult', result);
+                if (result?.error) {
+                    Alert.alert('InitPaymentSheet error', result.error.message ?? JSON.stringify(result.error));
+                    console.error('[CheckoutForm] initPaymentSheet error object', result.error);
+                    return;
+                }
             } catch (err) {
-              console.error('[CheckoutForm] initPaymentSheet threw', err);
-              Alert.alert('Erro nativo', (err as any)?.message ?? JSON.stringify(err));
-              return;
+                console.error('[CheckoutForm] initPaymentSheet threw', err);
+                Alert.alert('Erro nativo', (err as any)?.message ?? JSON.stringify(err));
+                return;
             }
 
-            Alert.alert("DEBUG", "2");
-
-            //if (!error) {
-                setLoading(true);
-                openPaymentSheet();
-            //}
-
+            setLoading(true);
+            openPaymentSheet();
             
+
         } catch (e: any) {
+            initializedRef.current = false;
             console.error('[CheckoutForm] initializePaymentSheet error', e);
             Alert.alert('Erro', e?.message ?? 'Falha ao iniciar o pagamento');
         }
     };
 
     const openPaymentSheet = async () => {
-        try {
-            // const presentFn = stripeApi?.presentPaymentSheet;
-            // if (typeof presentFn !== "function") {
-            //     Alert.alert("Erro", "presentPaymentSheet não disponível. Verifique a versão do @stripe/stripe-react-native.");
-            //     return;
-            // }
+        try { 
+
 
             const { error } = await presentPaymentSheet();
 
-            //const { error } = await presentFn();
 
             if (error) {
                 if (error.code === 'Canceled') {

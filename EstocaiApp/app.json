@@ -1,14 +1,17 @@
 {
   "expo": {
     "name": "EstocaFacilApp",
-    "slug": "EstocaiApp",
+    "slug": "estocaiapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "estocaiapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.paulohps.EstocaiApp",
@@ -25,24 +28,28 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.paulohps.EstocaiApp"
-    },
-    "web": {
-      "output": "server",
-      "favicon": "./assets/images/favicon.png"
+      "package": "com.paulohps.EstocaiApp",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "estocaiapp"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "plugins": [
-      ["expo-router",
-        {
-          "origin": "https://estocaiapp.expo.app"
-        }
-      ],
       [
         "@stripe/stripe-react-native",
         {
           "merchantIdentifier": "merchant.com.paulohps.EstocaiApp",
-          "enableGooglePay": true,
-          "publishableKey": "pk_test_51KzYOkLh5D9uQTs1Yy8J1kT3vR7Di0p3Y6j6k1bXKJ4v3hX4Z5gW8Jt1eF2gX9z5Yz"
+          "urlScheme": "estocaiapp"
         }
       ],
       [
@@ -63,15 +70,13 @@
       "reactCompiler": true
     },
     "extra": {
-      "router": {
-        "origin": "https://estocaiapp.expo.app"
-      },
       "eas": {
-        "projectId": "dac97d43-6d32-4d1f-a01d-1b5ec8881fd8"
-      }
-    }
-  },
-  "devDependencies": {
-    "@react-native-community/cli": "latest",
+        "projectId": "9e182178-6053-4e88-aa24-eef64ffc723b"
+      },
+      "STRIPE_PUBLISHABLE_KEY": "pk_live_51SbM8fJ9opSebKtagV19J8tVg0vECuuFp4nXuF4BDoi5nWHgdR7tGQwpMmo1ZjTiEIFnNPOXNxd9dsjHUi87zcV100CTWYBPEM"
+    },
+    "owner": "paulohpss-organization"
   }
+
 }
+
