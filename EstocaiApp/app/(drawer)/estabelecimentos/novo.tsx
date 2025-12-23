@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, View } from 'react-native';
 import { Button } from 'react-native-paper';
@@ -28,6 +28,7 @@ export default function NovoEstabelecimento() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [form, setForm] = useState<Estabelecimento>(initialForm);
+  const navigation = useNavigation();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -56,6 +57,7 @@ export default function NovoEstabelecimento() {
     if (params.estabelecimento) {
       const est = JSON.parse(params.estabelecimento as string);
       setForm(est);
+      navigation.setOptions?.({ title: 'Editar Estabelecimento' });
     } else {
       const loadUsuario = async () => {
         try {
@@ -68,6 +70,7 @@ export default function NovoEstabelecimento() {
         }
       };
       loadUsuario();
+      navigation.setOptions?.({ title: 'Novo Estabelecimento' });
     }  
     
   }, [params.estabelecimento]);

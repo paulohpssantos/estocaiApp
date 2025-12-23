@@ -1,5 +1,6 @@
 import { Cliente } from '@/src/models/cliente';
 import { Usuario } from '@/src/models/usuario';
+import { validaUsuarioExpirado } from '@/src/utils/functions';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -22,6 +23,19 @@ export default function Clientes() {
     try {
       const usuarioString = await AsyncStorage.getItem("usuario");
       if (!usuarioString) return;
+
+      // redireciona para planos se o usuário estiver expirado
+      try {
+        if (validaUsuarioExpirado(usuarioString)) {
+          setLoading(false);
+          // replace evita voltar para a tela anterior
+          router.replace('/(drawer)/planos');
+          return;
+        }
+      } catch (e) {
+        console.warn('[Clientes] validaUsuarioExpirado failed', e);
+      }
+
       const usuario = JSON.parse(usuarioString) as Usuario;
       setUsuario(usuario);
       const data = await listarClientes(usuario.cpf);

@@ -3,8 +3,11 @@ import { Usuario } from "@/src/models/usuario";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import React, { useCallback, useState } from "react";
-import { ScrollView, View } from "react-native";
+import * as FileSystem from 'expo-file-system/legacy';
+import * as IntentLauncher from 'expo-intent-launcher';
+import * as Sharing from 'expo-sharing';
+import { useCallback, useState } from "react";
+import { Alert, Platform, ScrollView, View } from "react-native";
 import { ActivityIndicator, Button, Text } from "react-native-paper";
 import colors from "../../../constants/colors";
 import { Estabelecimento } from "../../../src/models/estabelecimento";
@@ -41,6 +44,53 @@ export default function RelatorioEstabelecimentos() {
       };
     }, [])
   );
+
+  const exportarCSV = async () => {
+      if (!estabelecimentos.length) return;
+       Alert.alert('Exportando', 'Gerando arquivo CSV, aguarde...');
+  
+      // Cabeçalho e metadados (padrão da aplicação)
+      const title = `Relatorio de Estabelecimentos`;
+      const generatedAt = new Date().toLocaleString('pt-BR');
+  
+      // Colunas
+      const header = [
+        'Nome',
+        'CPF/CNPJ',
+        'Telefone',
+        'Email'
+      ];
+      // Linhas
+      const rows = estabelecimentos.map(estabelecimento => [
+        `"${estabelecimento.nome}"`,
+        `"${formatCpfCnpj(estabelecimento.cpfCnpj)}"`,
+        `"${formatCelular(estabelecimento.telefone)}"`,
+        `"${estabelecimento.email}"`
+      ].join(','));
+  
+      const csv = [title, header.join(','), ...rows].join('\n');
+      const fileUri = (FileSystem as any).documentDirectory + `relatorio_estabelecimentos_${Date.now()}.csv`;
+      await FileSystem.writeAsStringAsync(fileUri, csv, { encoding: 'utf8' });
+  
+      try {
+        if (Platform.OS === 'android') {
+          // on Android convert to content URI and open with an intent
+          const contentUri = await (FileSystem as any).getContentUriAsync(fileUri);
+          await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+            data: contentUri,
+            type: 'text/csv',
+            flags: 1,
+          });
+        } else {
+          // iOS: open share sheet (allows "Open in..." or saving to Files)
+          await Sharing.shareAsync(fileUri, { mimeType: 'text/csv', dialogTitle: 'Abrir relatório' });
+        }
+      } catch (err) {
+        console.error('Erro ao abrir/compartilhar arquivo', err);
+        // fallback: informar o caminho do arquivo
+        Alert.alert('Arquivo gerado', `Arquivo salvo em:\n${fileUri}`);
+      }
+  };
 
   return (
     <View style={globalStyles.containerReport}>
@@ -86,7 +136,7 @@ export default function RelatorioEstabelecimentos() {
         <Button
           mode="contained"
           icon="download"
-          onPress={() => {}}
+          onPress={exportarCSV}
           style={globalStyles.primaryButton}
         >
           Exportar CSV

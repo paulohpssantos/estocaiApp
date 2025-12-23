@@ -3,7 +3,7 @@ import { Usuario } from "@/src/models/usuario";
 import { formatDateBR, formatISODate } from "@/src/utils/formatters";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Button } from 'react-native-paper';
@@ -39,7 +39,7 @@ export default function NovoCliente() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<Cliente>(initialForm);
-
+  const navigation = useNavigation();
   const [estabelecimentoBusca, setEstabelecimentoBusca] = useState('');
   const [estabelecimentosFiltrados, setEstabelecimentosFiltrados] = useState<Estabelecimento[]>([]);
 
@@ -89,6 +89,7 @@ export default function NovoCliente() {
         estabelecimento: cliente.estabelecimento || null,
       });
       setEstabelecimentoBusca(cliente.estabelecimento?.nome || '');
+      navigation.setOptions?.({ title: 'Editar Cliente' });
     } else {
       setForm({
         cpf: '',
@@ -107,6 +108,7 @@ export default function NovoCliente() {
         usuario: null as any,
       });
       setEstabelecimentoBusca('');
+      navigation.setOptions?.({ title: 'Novo Cliente' });
     }
   }, [params.cliente]);
 

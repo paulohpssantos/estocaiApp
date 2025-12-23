@@ -1,5 +1,6 @@
 import { Funcionario } from '@/src/models/funcionario';
 import { Usuario } from '@/src/models/usuario';
+import { validaUsuarioExpirado } from '@/src/utils/functions';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -16,13 +17,26 @@ export default function Funcionarios() {
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [loading, setLoading] = useState(true);
   const [usuario, setUsuario] = useState<Usuario | null>(null);
-  
+
 
   const fetchFuncionarios = async () => {
     setLoading(true);
     try {
       const usuarioString = await AsyncStorage.getItem("usuario");
       if (!usuarioString) return;
+
+      // redireciona para planos se o usuário estiver expirado
+      try {
+        if (validaUsuarioExpirado(usuarioString)) {
+          setLoading(false);
+          // replace evita voltar para a tela anterior
+          router.replace('/(drawer)/planos');
+          return;
+        }
+      } catch (e) {
+        console.warn('[Clientes] validaUsuarioExpirado failed', e);
+      }
+
       const usuario = JSON.parse(usuarioString) as Usuario;
       setUsuario(usuario);
       const data = await listarFuncionarios(usuario.cpf);
@@ -59,7 +73,7 @@ export default function Funcionarios() {
               try {
                 const atualizado = { ...func, ativo: false };
                 await cadastrarFuncionario(atualizado);
-                await fetchFuncionarios(); 
+                await fetchFuncionarios();
               } catch (e) {
                 Alert.alert('Erro', 'Não foi possível deletar o funcionário.');
               }
@@ -70,7 +84,7 @@ export default function Funcionarios() {
     };
     return (
       <Card style={{ marginBottom: 18, borderRadius: 18, backgroundColor: colors.background, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 18, paddingBottom: 10 , backgroundColor: colors.accent}}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 18, paddingBottom: 10, backgroundColor: colors.accent }}>
           <View style={{ backgroundColor: colors.primary, borderRadius: 16, padding: 12, marginRight: 14 }}>
             <MaterialIcons name="people" size={32} color={colors.background} />
           </View>
@@ -126,7 +140,7 @@ export default function Funcionarios() {
         )}
       </View>
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, backgroundColor: '#fff', borderTopWidth: 0.5, borderColor: '#eee', flexDirection: 'row', justifyContent: 'center', gap: 12 }}>
-      <Button
+        <Button
           mode="contained"
           icon="plus"
           onPress={() => router.push('/(drawer)/funcionarios/novo')}

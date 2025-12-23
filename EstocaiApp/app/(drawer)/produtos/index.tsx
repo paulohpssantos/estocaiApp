@@ -10,7 +10,7 @@ import globalStyles from '../../../constants/globalStyles';
 import { Produto } from '../../../src/models/produto';
 import { listarProdutos } from '../../../src/services/produtoService';
 import { formatMoney } from '../../../src/utils/formatters';
-import { isExpired, isNearExpiration, verifyIsLowStock } from '../../../src/utils/functions';
+import { isExpired, isNearExpiration, validaUsuarioExpirado, verifyIsLowStock } from '../../../src/utils/functions';
 
 export default function Estabelecimentos() {
   const router = useRouter();
@@ -23,6 +23,18 @@ export default function Estabelecimentos() {
     try {
       const usuarioString = await AsyncStorage.getItem("usuario");
       if (!usuarioString) return;
+
+      // redireciona para planos se o usuário estiver expirado
+      try {
+        if (validaUsuarioExpirado(usuarioString)) {
+          setLoading(false);
+          // replace evita voltar para a tela anterior
+          router.replace('/(drawer)/planos');
+          return;
+        }
+      } catch (e) {
+        console.warn('[Clientes] validaUsuarioExpirado failed', e);
+      }
       const usuario = JSON.parse(usuarioString) as Usuario;
       setUsuario(usuario);
       const data = await listarProdutos(usuario.cpf);
@@ -56,14 +68,14 @@ export default function Estabelecimentos() {
       return new Date(Number(ano), Number(mes) - 1, Number(dia));
     };
 
-    
+
     let isVencido = isExpired(prod.dataValidade);
     let isPertoVencimento = isNearExpiration(prod.dataValidade);
 
 
     return (
       <Card style={{ marginBottom: 18, borderRadius: 18, backgroundColor: colors.background, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 18, paddingBottom: 10 , backgroundColor: colors.accent}}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 18, paddingBottom: 10, backgroundColor: colors.accent }}>
           <View style={{
             backgroundColor: isLowStock || isVencido || isPertoVencimento ? colors.primary : colors.green,
             borderRadius: 16,
@@ -104,7 +116,7 @@ export default function Estabelecimentos() {
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 0 }}>
                 <MaterialCommunityIcons name="cube-scan" size={18} color={colors.primary} style={{ marginRight: 6 }} />
                 <Text style={{
-                  color: isLowStock ? colors.background: colors.darkGreen,
+                  color: isLowStock ? colors.background : colors.darkGreen,
                   fontWeight: '600',
                   fontSize: 15,
                   marginBottom: 0,
@@ -180,7 +192,7 @@ export default function Estabelecimentos() {
               <Text style={{ color: '#B3261E', fontWeight: '600', fontSize: 16 }}>Vencimento próximo</Text>
             </View>
           )}
-        </View>   
+        </View>
       </Card>
     );
   }

@@ -12,7 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFocusEffect } from '@react-navigation/native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Button } from 'react-native-paper';
@@ -66,6 +66,7 @@ export default function NovaOrdemServico() {
   const [produtosSelecionados, setProdutosSelecionados] = useState<{ id?: number, produto: Produto, quantidade: number }[]>([]);
   const [form, setForm] = useState<OrdemServico>(initialForm);
   const quantidadeRefs = useRef<Array<TextInput | null>>([]);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const loadUsuario = async () => {
@@ -166,6 +167,7 @@ export default function NovaOrdemServico() {
     const carregarDadosEdicao = async () => {
       if (params.ordem) {
         try {
+          navigation.setOptions?.({ title: 'Editar Ordem/Venda' });
           const ordem = JSON.parse(params.ordem as string);
 
           // 1. Buscar funcionários do estabelecimento da ordem
@@ -202,6 +204,8 @@ export default function NovaOrdemServico() {
         } catch (e) {
           // Se der erro, não faz nada
         }
+      }else{
+        navigation.setOptions?.({ title: 'Nova Ordem/Venda' });
       }
     };
     carregarDadosEdicao();

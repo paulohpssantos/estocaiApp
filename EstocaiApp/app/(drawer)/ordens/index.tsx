@@ -1,6 +1,7 @@
 import { OrdemServico } from '@/src/models/ordemServico';
 import { Produto } from '@/src/models/produto';
 import { Usuario } from '@/src/models/usuario';
+import { validaUsuarioExpirado } from '@/src/utils/functions';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -17,7 +18,7 @@ export default function Ordens() {
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
   const [loading, setLoading] = useState(true);
   const [usuario, setUsuario] = useState<Usuario | null>(null);
-  
+
   const produtosDaOrdem = async (idOrdemSelecionada: number): Promise<Produto[]> => {
     const produtosOrdem = await listarProdutosOrdemServico(idOrdemSelecionada);
     return produtosOrdem.map(pos => pos.produto);
@@ -28,6 +29,18 @@ export default function Ordens() {
     try {
       const usuarioString = await AsyncStorage.getItem("usuario");
       if (!usuarioString) return;
+
+      // redireciona para planos se o usuário estiver expirado
+      try {
+        if (validaUsuarioExpirado(usuarioString)) {
+          setLoading(false);
+          // replace evita voltar para a tela anterior
+          router.replace('/(drawer)/planos');
+          return;
+        }
+      } catch (e) {
+        console.warn('[Clientes] validaUsuarioExpirado failed', e);
+      }
       const usuario = JSON.parse(usuarioString) as Usuario;
       setUsuario(usuario);
       const data = await listarOrdensServico(usuario.cpf);
@@ -63,14 +76,14 @@ export default function Ordens() {
             onPress: async () => {
               try {
                 if (ordem.id != null) {
-                  
+
                   // 3. Deletar vínculos e ordem
                   //await deletarProdutosOrdemServicoPorOrdem(ordem.id);
                   //await deletarServicosOrdemServicoPorOrdem(ordem.id);
                   await deletarOrdemServico(ordem.id);
                   await fetchOrdens();
                 }
-                
+
               } catch (e) {
                 Alert.alert('Erro', 'Não foi possível deletar a ordem de serviço.');
               }
@@ -81,22 +94,22 @@ export default function Ordens() {
     };
 
     const statusBackgroundColors = {
-      'Aberta': colors.backgroundYellow,        
-      'Em Andamento': colors.backgroundBlue,     
-      'Finalizada': colors.backgroundGreen,    
-      'Cancelada': colors.accent,        
+      'Aberta': colors.backgroundYellow,
+      'Em Andamento': colors.backgroundBlue,
+      'Finalizada': colors.backgroundGreen,
+      'Cancelada': colors.accent,
     };
     const statusBorderColors = {
-      'Aberta': colors.yellowBorder,        
-      'Em Andamento': colors.blueBorder,     
-      'Finalizada': colors.greenBorder,    
-      'Cancelada': colors.border,        
+      'Aberta': colors.yellowBorder,
+      'Em Andamento': colors.blueBorder,
+      'Finalizada': colors.greenBorder,
+      'Cancelada': colors.border,
     };
     const statusFontColors = {
-      'Aberta': colors.darkYellow,        
-      'Em Andamento': colors.darkBlue,     
-      'Finalizada': colors.darkGreen,    
-      'Cancelada': colors.secondary,        
+      'Aberta': colors.darkYellow,
+      'Em Andamento': colors.darkBlue,
+      'Finalizada': colors.darkGreen,
+      'Cancelada': colors.secondary,
     };
     const statusBg = statusBackgroundColors[ordem.status as keyof typeof statusBackgroundColors] || '#EEE';
     const statusBorder = statusBorderColors[ordem.status as keyof typeof statusBorderColors] || '#EEE';
@@ -137,7 +150,7 @@ export default function Ordens() {
                   fontSize: 15,
                   borderColor: statusBorder,
                   borderWidth: 1,
-                  alignSelf: 'flex-start', 
+                  alignSelf: 'flex-start',
                   paddingHorizontal: 18,
                   paddingVertical: 4,
                   borderRadius: 12,
@@ -187,7 +200,7 @@ export default function Ordens() {
               color: colors.darkGreen,
               fontWeight: '600',
               fontSize: 15,
-              backgroundColor:  colors.backgroundGreen,
+              backgroundColor: colors.backgroundGreen,
               borderColor: colors.greenBorder,
               borderWidth: 1,
               paddingHorizontal: 8,
@@ -224,7 +237,7 @@ export default function Ordens() {
         )}
       </View>
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, backgroundColor: '#fff', borderTopWidth: 0.5, borderColor: '#eee', flexDirection: 'row', justifyContent: 'center', gap: 12 }}>
-      <Button
+        <Button
           mode="contained"
           icon="plus"
           onPress={() => router.push('/(drawer)/ordens/novo')}

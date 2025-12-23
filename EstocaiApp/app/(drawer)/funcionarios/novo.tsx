@@ -2,8 +2,8 @@ import { Funcionario } from "@/src/models/funcionario";
 import { Usuario } from "@/src/models/usuario";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Button } from 'react-native-paper';
 import colors from '../../../constants/colors';
@@ -32,6 +32,7 @@ export default function NovoFuncionario() {
   const [form, setForm] = useState<Funcionario>(initialForm);
   const [estabelecimentoBusca, setEstabelecimentoBusca] = useState('');
   const [estabelecimentosFiltrados, setEstabelecimentosFiltrados] = useState<Estabelecimento[]>([]);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const loadUsuario = async () => {
@@ -86,9 +87,11 @@ export default function NovoFuncionario() {
         const funcionario = JSON.parse(params.funcionario as string) as Funcionario;
         setForm(funcionario);
         setEstabelecimentoBusca(funcionario.estabelecimento?.nome || '');
+        navigation.setOptions?.({ title: 'Editar Funcionário' });
       } else {
         setForm(initialForm);
         setEstabelecimentoBusca('');
+        navigation.setOptions?.({ title: 'Novo Funcionário' });
       }
     }, [params.funcionario])
   );

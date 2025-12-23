@@ -2,7 +2,7 @@ import { Servico } from "@/src/models/servico";
 import { Usuario } from "@/src/models/usuario";
 import { cadastrarServico } from "@/src/services/servicoService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, View } from 'react-native';
 import { Button } from 'react-native-paper';
@@ -27,6 +27,7 @@ export default function NovoServico() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [valorInput, setValorInput] = useState(formatMoneyNoSymbol(0));
   const [duracaoInput, setDuracaoInput] = useState('00:00');
+  const navigation = useNavigation();
 
   useEffect(() => {
     const loadUsuario = async () => {
@@ -65,6 +66,8 @@ export default function NovoServico() {
         setForm(prev => ({ ...(serv as Servico), usuario: prev.usuario ?? serv.usuario ?? null }));
         setValorInput(formatMoneyNoSymbol(serv.valor ?? 0));
         setDuracaoInput(serv.duracao ?? '00:00');
+        //Altera o título da tela para "Serviço"
+        navigation.setOptions?.({ title: 'Editar Serviço' });
       } catch (e) {
         console.warn('Erro ao parsear params.servico', e);
       }
@@ -75,6 +78,7 @@ export default function NovoServico() {
       }));
       setValorInput(formatMoneyNoSymbol(0));
       setDuracaoInput('00:00');
+      navigation.setOptions?.({ title: 'Novo Serviço' });
     }
   }, [params.servico]);
 

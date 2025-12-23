@@ -1,4 +1,6 @@
 import colors from "../../constants/colors";
+import { Usuario } from "../models/usuario";
+import { parseDateString } from "./formatters";
 
 const statusBackgroundColors = {
     'Aberta': colors.backgroundYellow,
@@ -181,4 +183,22 @@ export function addYearsFromNow(years: number): string {
     const d = String(targetDate.getDate()).padStart(2, '0');
 
     return `${y}-${m}-${d}`;
+}
+
+export function validaUsuarioExpirado(usuarioString: string): boolean {
+
+    const usuario = JSON.parse(usuarioString) as Usuario;
+    // normaliza hoje meia-noite
+    const hoje = new Date();
+    const hojeMid = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+
+    const expDate = parseDateString(usuario?.dataExpiracao);
+    if (expDate) {
+        const expMid = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate());
+        // se a data atual for maior que a dataExpiracao -> abrir planos (conforme solicitado)
+        if (hojeMid.getTime() > expMid.getTime()) {
+            return true;
+        }
+    }
+    return false;
 }

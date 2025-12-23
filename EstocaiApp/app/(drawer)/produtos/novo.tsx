@@ -3,7 +3,7 @@ import { Usuario } from "@/src/models/usuario";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFocusEffect } from '@react-navigation/native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Button } from 'react-native-paper';
@@ -32,6 +32,7 @@ export default function NovoProduto() {
   const [valorInput, setValorInput] = useState(formatMoneyNoSymbol(0));
   const [showDatePickerFab, setShowDatePickerFab] = useState(false);
   const [showDatePickerVal, setShowDatePickerVal] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const loadUsuario = async () => {
@@ -69,6 +70,7 @@ export default function NovoProduto() {
       prod.dataValidade = formatDateBR(prod.dataValidade);
       setForm(prod);
       setValorInput(formatMoneyNoSymbol(prod.valor));
+      navigation.setOptions?.({ title: 'Editar Produto' });
     } else {
       setForm({
         id: null,
@@ -82,6 +84,7 @@ export default function NovoProduto() {
         usuario: null as any,
       });
       setValorInput(formatMoneyNoSymbol(0));
+      navigation.setOptions?.({ title: 'Novo Produto' });
     }
   }, [params.produto]);
 

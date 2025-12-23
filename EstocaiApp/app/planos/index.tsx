@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Alert,
     BackHandler,
@@ -53,6 +53,47 @@ export default function PlanosScreen() {
     const [dataExpiracao, setDataExpiracao] = useState<string | null>(null);
     const [usuario, setUsuario] = useState<Usuario | null>(null);
     const [openedFromDrawer, setOpenedFromDrawer] = useState(false);
+
+     // Ao montar esta tela desabilita o gesto de abrir o drawer e remove o botão de menu.
+    // Ao desmontar restaura o comportamento anterior.
+    useEffect(() => {
+        // coleciona alguns parents (até 5) e aplica as opções no que suportar setOptions
+        const parents: any[] = [];
+        let p: any = (navigation as any).getParent?.();
+        for (let i = 0; i < 5 && p; i++) {
+            parents.push(p);
+            p = p.getParent?.();
+        }
+
+        // desativa gestos / swipe / headerLeft em todos os parents possíveis
+        parents.forEach(parent => {
+            try {
+                parent?.setOptions?.({
+                    // para Drawer: swipeEnabled desativa swipe; edgeWidth=0 evita abertura por borda
+                    swipeEnabled: false,
+                    gestureEnabled: false,
+                    edgeWidth: 0,
+                });
+            } catch (e) { /* noop */ }
+        });
+
+        // remove o botão de menu no header desta tela
+        navigation.setOptions?.({ headerLeft: () => null });
+
+        return () => {
+            // restaura estado anterior ao desmontar
+            parents.forEach(parent => {
+                try {
+                    parent?.setOptions?.({
+                        swipeEnabled: true,
+                        gestureEnabled: true,
+                        edgeWidth: undefined,
+                    });
+                } catch (e) { /* noop */ }
+            });
+            navigation.setOptions?.({ headerLeft: undefined });
+        };
+    }, [navigation]);
 
     // carrega dados do usuário ao montar a tela
     useEffect(() => {
