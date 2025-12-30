@@ -27,17 +27,18 @@ const plans = [
     { id: "anual", title: "Plano Anual", price: "R$ 420,00", note: "(12,28% off)" },
 ];
 
-// const planAmountMap: Record<string, number> = {
-//     mensal: 39.9,
-//     semestral: 220.0,
-//     anual: 420.0,
-// };
-
 const planAmountMap: Record<string, number> = {
-    mensal: 1.00,
-    semestral: 1.50,
-    anual: 2.00,
+    mensal: 39.9,
+    semestral: 220.0,
+    anual: 420.0,
 };
+
+//TODO somente para Teste
+// const planAmountMap: Record<string, number> = {
+//     mensal: 1.00,
+//     semestral: 1.50,
+//     anual: 2.00,
+// };
 
 export default function PlanosScreen() {
     const router = useRouter();

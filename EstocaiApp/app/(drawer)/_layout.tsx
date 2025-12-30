@@ -3,10 +3,11 @@ import {
   DrawerContentScrollView,
   DrawerItemList
 } from "@react-navigation/drawer";
+import Constants from 'expo-constants';
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import colors from "../../constants/colors";
 import { useAuth } from "../../src/context/AuthContext";
@@ -229,6 +230,7 @@ function CustomDrawerContent(props: any) {
   const { logout } = useAuth();
   const router = useRouter();
   const [relatoriosOpen, setRelatoriosOpen] = useState(false);
+  const appVersion = (Constants.expoConfig?.version ?? (Constants.manifest as any)?.version) ?? '';
 
   const handleLogout = async () => {
     try {
@@ -359,6 +361,7 @@ function CustomDrawerContent(props: any) {
       <View style={styles.footer}>
         <Text style={styles.footerText}>© {new Date().getFullYear()} Estoca Fácil</Text>
         <Text style={styles.footerSub}>Sistema de Gestão</Text>
+        <Text style={styles.footerSub}>{appVersion}</Text>
       </View>
     </View>
   );

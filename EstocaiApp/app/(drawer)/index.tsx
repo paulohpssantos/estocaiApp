@@ -19,9 +19,20 @@ export default function Index() {
         }
 
         const usuario = JSON.parse(usuarioString) as Usuario;
+
+        let referenceDate: Date = new Date();
+        if (usuario?.ultimoAcesso) {
+          const parsed = parseDateString(usuario.ultimoAcesso);
+          if (parsed) {
+            referenceDate = parsed;
+          } else {
+            const alt = new Date(usuario.ultimoAcesso);
+            if (!isNaN(alt.getTime())) referenceDate = alt;
+          }
+        }
+
         // normaliza hoje meia-noite
-        const hoje = new Date();
-        const hojeMid = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+        const hojeMid = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
 
         const expDate = parseDateString(usuario?.dataExpiracao);
         if (expDate) {

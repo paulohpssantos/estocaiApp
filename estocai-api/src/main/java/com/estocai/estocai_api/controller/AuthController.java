@@ -69,10 +69,9 @@ public class AuthController {
         }
 
         String token = gerarToken(usuario.getCpf());
-        usuarioRepository.save(usuario);
-
         //Atualiza a data do acesso
         usuario.setUltimoAcesso( LocalDateTime.now());
+        usuarioRepository.save(usuario);
 
         return ResponseEntity.ok(Map.of("token", token, "usuario", usuario));
     }
