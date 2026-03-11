@@ -26,6 +26,11 @@ public class UsuarioController {
         return usuarioRepository.save(usuario);
     }
 
+    @PostMapping("/excluir")
+    public void excluir(@RequestBody Usuario usuario){
+        usuarioRepository.delete(usuario);
+    }
+
     @GetMapping
     public Usuario getUsuario(@RequestParam(required = false) String cpf) {
         if (cpf != null)
