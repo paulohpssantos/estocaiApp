@@ -5,10 +5,12 @@ import com.estocai.estocai_api.model.Usuario;
 import com.estocai.estocai_api.repository.UsuarioRepository;
 import com.estocai.estocai_api.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.Map;
 
 
@@ -34,9 +36,9 @@ public class UsuarioController {
     }
 
     @GetMapping("/excluir-dados")
-    public String excluirDados() {
-
-        return "excluir-dados";
+    public ResponseEntity<Void> excluirDados() {
+        String target = "/excluir-dados.html";
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(target)).build();
     }
 
     @PostMapping("/excluir")
