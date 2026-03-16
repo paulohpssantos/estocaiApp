@@ -35,7 +35,7 @@ public class UsuarioController {
         return usuarioRepository.save(usuario);
     }
 
-    @GetMapping("/excluir-dados")
+    @GetMapping("/excluir-dados.html")
     public ResponseEntity<Void> excluirDados() {
         String target = "/excluir-dados.html";
         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(target)).build();

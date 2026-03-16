@@ -49,8 +49,9 @@ public class SecurityConfig {
                                 "/reset.html",
                                 "/termos-uso.html",
                                 "/excluir-dados.html",
-                                "/excluir-dados",
-                                "/usuario/excluir-dados"
+                                "/excluir-dados.html",
+                                "/usuario/excluir-dados",
+                                "/usuario/excluir-dados.html"
                         ).permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .anyRequest().authenticated()
