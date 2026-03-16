@@ -1,5 +1,6 @@
 package com.estocai.estocai_api;
 
+import com.stripe.model.Application;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -8,6 +9,7 @@ public class EstocaiApiApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(EstocaiApiApplication.class, args);
+
 	}
 
 }

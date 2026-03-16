@@ -4,8 +4,12 @@ import com.estocai.estocai_api.dto.UpdatePlanoRequest;
 import com.estocai.estocai_api.model.Usuario;
 import com.estocai.estocai_api.repository.UsuarioRepository;
 import com.estocai.estocai_api.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 
 @RestController
@@ -14,6 +18,9 @@ public class UsuarioController {
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioService usuarioService;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     public UsuarioController(UsuarioRepository usuarioRepository, UsuarioService usuarioService) {
         this.usuarioRepository = usuarioRepository;
@@ -26,9 +33,22 @@ public class UsuarioController {
         return usuarioRepository.save(usuario);
     }
 
+    @GetMapping("/excluir-dados")
+    public String excluirDados() {
+
+        return "excluir-dados";
+    }
+
     @PostMapping("/excluir")
-    public void excluir(@RequestBody Usuario usuario){
+    public String excluir(@RequestParam String username, @RequestParam String password){
+        Usuario usuario = usuarioRepository.findByCpf(username);
+
+        if (usuario == null || !passwordEncoder.matches(password, usuario.getSenha())) {
+            return "Usuário ou senha inválidos";
+        }
+
         usuarioRepository.delete(usuario);
+        return null;
     }
 
     @GetMapping

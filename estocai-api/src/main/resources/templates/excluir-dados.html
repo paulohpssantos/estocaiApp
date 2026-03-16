@@ -1,0 +1,135 @@
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Excluir perfil</title>
+    <style>
+        body { margin:0;padding:0;background:#ffffff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial;color:#222; }
+        .container { max-width:600px;margin:0 auto;padding:32px 12px; }
+        .card { background:linear-gradient(180deg,#fdecec 0%,#fdecec 100%);border-radius:14px;padding:28px; }
+        .inner { background:#fff;border-radius:10px;padding:20px;box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+        .btn { display:inline-block;padding:12px 18px;background:#d6443e;color:#fff;border-radius:12px;text-decoration:none;font-weight:600;font-size:16px;border:0;cursor:pointer; }
+        .btn-secondary { background:#ccc;color:#222; }
+        .field { width:100%;padding:10px;border-radius:8px;border:1px solid #e6e6e6;font-size:14px;margin-top:8px;box-sizing:border-box; }
+        .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:1000; }
+        .modal { background:#fff;border-radius:10px;padding:20px;max-width:420px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+        .modal-actions { display:flex;gap:10px;justify-content:flex-end;margin-top:16px; }
+    </style>
+</head>
+<body>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:32px 12px;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="600" style="max-width:600px;" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="text-align:center;padding-bottom:12px;">
+                        <img src="cid:estocaiLogo" alt="Estoca Fácil" width="120" style="display:block;border:0;outline:none;text-decoration:none;">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:0 0 0;">
+                        <div class="card">
+                            <div class="inner">
+                                <h2 style="margin:0 0 12px;font-size:18px;color:#111;text-align:left;">Excluir perfil</h2>
+
+                                <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#333;">
+                                    Olá <span th:text="${name}">Usuário</span>,
+                                </p>
+
+                                <form id="deleteForm" th:action="@{/usuario/excluir}" method="post" style="margin-top:12px;">
+                                    <!-- CSRF, se o Spring Security estiver ativo -->
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                                    <label style="font-size:13px;color:#666;">CPF</label>
+                                    <input class="field" type="text" name="username" th:value="${cpf}" placeholder="000.000.000-00" required />
+
+                                    <label style="font-size:13px;color:#666;margin-top:12px;display:block;">Senha</label>
+                                    <input class="field" type="password" name="password" placeholder="Sua senha" required />
+
+                                    <p style="margin:12px 0 0;font-size:13px;color:#666;">
+                                        Ao excluir, todos os dados associados a este perfil serão removidos permanentemente.
+                                    </p>
+
+                                    <div style="text-align:center;margin:18px 0;">
+                                        <button id="confirmBtn" type="button" class="btn">Excluir</button>
+                                    </div>
+                                </form>
+
+                                <p style="margin:18px 0 0;font-size:14px;color:#333;">
+                                    Se você não tem certeza, cancele a operação.
+                                </p>
+                            </div>
+
+                            <div style="margin-top:12px;text-align:center;font-size:12px;color:#999;">
+                                <div>Se não solicitou esta ação, não prossiga.</div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:16px 0 0;text-align:center;font-size:12px;color:#999;">
+                        <div>Equipe Estoca Fácil</div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<!-- Modal de confirmação (inicialmente escondido) -->
+<div id="confirmModal" style="display:none;">
+    <div class="modal-backdrop" id="backdrop">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <h3 id="modalTitle" style="margin:0 0 8px;font-size:16px;color:#111;">Confirmar exclusão</h3>
+            <p style="margin:0;font-size:14px;color:#333;">
+                Esta ação excluirá todos os dados do usuário permanentemente. Deseja continuar?
+            </p>
+            <div class="modal-actions">
+                <button id="cancelDelete" class="btn btn-secondary" type="button">Não</button>
+                <button id="proceedDelete" class="btn" type="button">Sim</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    (function(){
+        var confirmBtn = document.getElementById('confirmBtn');
+        var modal = document.getElementById('confirmModal');
+        var backdrop = document.getElementById('backdrop');
+        var cancelBtn = document.getElementById('cancelDelete');
+        var proceedBtn = document.getElementById('proceedDelete');
+        var form = document.getElementById('deleteForm');
+
+        function showModal() {
+            modal.style.display = 'block';
+        }
+        function hideModal() {
+            modal.style.display = 'none';
+        }
+
+        confirmBtn.addEventListener('click', function(e){
+            e.preventDefault();
+            showModal();
+        });
+
+        cancelBtn.addEventListener('click', function(){
+            hideModal();
+        });
+
+        backdrop.addEventListener('click', function(ev){
+            if (ev.target === backdrop) hideModal();
+        });
+
+        proceedBtn.addEventListener('click', function(){
+            // Submete o formulário para o endpoint /usuario/excluir
+            form.submit();
+        });
+    })();
+     /*]]>*/
+</script>
+</body>
+</html>

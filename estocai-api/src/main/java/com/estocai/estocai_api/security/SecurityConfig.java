@@ -47,7 +47,9 @@ public class SecurityConfig {
                                 "/img/**",
                                 "/open-app.html",
                                 "/reset.html",
-                                "/termos-uso.html"
+                                "/termos-uso.html",
+                                "/excluir-dados.html",
+                                "/usuario/excluir-dados.html"
                         ).permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .anyRequest().authenticated()
