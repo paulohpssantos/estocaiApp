@@ -34,7 +34,7 @@
                                 <h2 style="margin:0 0 12px;font-size:18px;color:#111;text-align:left;">Excluir perfil</h2>
 
                                 <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#333;">
-                                    Olá <span th:text="${name}">Usuário</span>,
+                                    Olá <span th:text="${name}">Usuário</span>, para confirmar a exclusão do seu perfil, por favor, preencha os campos abaixo. Esta ação é irreversível e resultará na perda permanente de todos os seus dados associados ao perfil. Certifique-se de que deseja prosseguir antes de confirmar a exclusão.
                                 </p>
 
                                 <form id="deleteForm" th:action="@{/usuario/excluir}" method="post" style="margin-top:12px;">
