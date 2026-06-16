@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import {
-  DrawerContentScrollView,
-  DrawerItemList
+    DrawerContentScrollView,
+    DrawerItemList
 } from "@react-navigation/drawer";
 import Constants from 'expo-constants';
 import { LinearGradient } from "expo-linear-gradient";
@@ -157,6 +157,15 @@ export default function DrawerLayout() {
           title: "Planos",
           drawerIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="credit-card-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="meus-dados/index"
+        options={{
+          title: "Meus Dados",
+          drawerIcon: ({ color, size }) => (
+            <MaterialIcons name="person" size={size} color={color} />
           ),
         }}
       />

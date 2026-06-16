@@ -1,13 +1,27 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { StripeProvider } from "@stripe/stripe-react-native";
 import Constants from "expo-constants";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import { AuthProvider } from "../src/context/AuthContext";
+import revenuecatService from "../src/services/revenuecatService";
 
-const STRIPE_PUBLISHABLE_KEY =
-  Constants.expoConfig?.extra?.STRIPE_PUBLISHABLE_KEY!;
+// Configure RevenueCat at module load to ensure SDK is initialized
+// before any child components mount and call SDK methods.
+try {
+  if (Platform.OS !== 'web') {
+    const iosKey = Constants.expoConfig?.extra?.REVENUECAT_IOS_API_KEY;
+    const androidKey = Constants.expoConfig?.extra?.REVENUECAT_ANDROID_API_KEY;
+    const apiKey = (Platform.OS === 'ios') ? iosKey : androidKey;
+    if (apiKey) {
+      revenuecatService.configure(apiKey);
+    } else {
+      console.warn('[app/_layout] RevenueCat API key missing in expo.extra');
+    }
+  }
+} catch (e) {
+  console.error('[app/_layout] RevenueCat configure error', e);
+}
 
 export default function RootLayout() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -18,6 +32,7 @@ export default function RootLayout() {
       setIsAuthenticated(!!token);
     };
     checkAuth();
+    // RevenueCat already configured at module load
   }, []);
 
   if (isAuthenticated === null) {
@@ -29,13 +44,8 @@ export default function RootLayout() {
   }
 
   return (
-    <StripeProvider
-      publishableKey={STRIPE_PUBLISHABLE_KEY}
-      merchantIdentifier="merchant.com.paulohps.EstocaiApp"
-    >
-      <AuthProvider>
-        <Stack screenOptions={{ headerShown: false }} />
-      </AuthProvider>
-    </StripeProvider>
+    <AuthProvider>
+      <Stack screenOptions={{ headerShown: false }} />
+    </AuthProvider>
   );
 }

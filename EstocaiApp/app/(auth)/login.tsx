@@ -1,5 +1,5 @@
 import { Link, useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Alert, Button, Image, Linking, Text, TextInput, View } from "react-native";
 import colors from "../../constants/colors";
 import env from "../../constants/env";
@@ -7,7 +7,7 @@ import globalStyles from '../../constants/globalStyles';
 import { useAuth } from "../../src/context/AuthContext";
 
 export default function LoginScreen() {
-  const { login } = useAuth();
+  const { login, user, logout } = useAuth();
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -37,6 +37,8 @@ export default function LoginScreen() {
       Alert.alert("Aviso", "Não foi possível abrir os termos automaticamente.");
     }
   };
+
+  
 
   return (
     <View style={globalStyles.centeredContainer}>

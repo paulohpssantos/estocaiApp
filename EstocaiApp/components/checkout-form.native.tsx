@@ -1,130 +1,150 @@
 import { UpdatePlanoRequest } from '@/src/models/usuario';
-import { fetchPaymentSheetParams } from "@/src/services/stripeService";
+import revenuecatService from '@/src/services/revenuecatService';
 import { atualizarPlanoUsuario } from "@/src/services/usuarioService";
-import { useStripe } from "@stripe/stripe-react-native";
-import * as Linking from 'expo-linking';
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
-import { Alert, Platform } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, Platform, Text, View } from "react-native";
 import { Button } from "react-native-paper";
 import globalStyles from "../constants/globalStyles";
 
 
+const productIdMap: Record<string, string> = {
+    // Use `||` to fallback when env var is falsy (empty string) as well as undefined
+    mensal: process.env.IAP_PRODUCT_MENSAL || 'plano_mensal_v2',
+    semestral: process.env.IAP_PRODUCT_SEMESTRAL || 'plano_semestral_v2',
+    anual: process.env.IAP_PRODUCT_ANUAL || 'plano_anual_v2',
+};
+
 export default function CheckoutForm({ amount, cpf, plano }: { amount: number; cpf?: string; plano?: string }) {
 
-    const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const [loading, setLoading] = useState(false);
+    const [offeringsAvailable, setOfferingsAvailable] = useState<boolean | null>(null);
+    const [loadingOfferings, setLoadingOfferings] = useState(false);
     const router = useRouter();
-    const initializedRef = useRef(false);
+    const isIos = (Platform.OS as any) === 'ios';
 
-    
+    useEffect(() => {
+        // Check RevenueCat offerings on mount so we can disable purchase when empty
+        let mounted = true;
+        (async () => {
+            try {
+                setLoadingOfferings(true);
+                const offerings = await revenuecatService.getOfferings();
+                if (!mounted) return;
+                const hasPackages = !!(
+                    offerings && (
+                        (offerings.current && offerings.current.availablePackages && offerings.current.availablePackages.length > 0) ||
+                        (offerings.all && Object.keys(offerings.all).length > 0)
+                    )
+                );
+                setOfferingsAvailable(hasPackages);
+            } catch (e) {
+                console.warn('[CheckoutForm] getOfferings failed', e);
+                if (mounted) setOfferingsAvailable(false);
+            } finally {
+                if (mounted) setLoadingOfferings(false);
+            }
+        })();
+
+        // No native IAP listeners here — RevenueCat purchase will be handled synchronously
+        return () => { mounted = false; };
+    }, [cpf, plano, router]);
 
     const initializePaymentSheet = async () => {
         try {
-
-            if (initializedRef.current) {
-                console.log('[CheckoutForm] initPaymentSheet already initialized');
+            // Prevent attempts to use RevenueCat on web (not supported)
+            if (Platform.OS === 'web') {
+                Alert.alert('Pagamento não disponível', 'Compras só são suportadas no aplicativo iOS/Android.');
                 return;
             }
-            initializedRef.current = true;
-
-            const { paymentIntent, ephemeralKey, customer } = await fetchPaymentSheetParams(amount);
-
-           
-            console.log('[CheckoutForm] params', { paymentIntent, ephemeralKey, customer });
-            if (!paymentIntent || !ephemeralKey || !customer) {
-                Alert.alert('Erro', 'Parâmetros de pagamento inválidos.');
-                console.error('[CheckoutForm] invalid params', { paymentIntent, ephemeralKey, customer });
+            if (offeringsAvailable === false) {
+                Alert.alert('Produtos indisponíveis', 'Nenhuma oferta configurada no RevenueCat. Tente novamente mais tarde.');
                 return;
             }
-
-            try {
-
-                //const returnUrl = Linking.createURL('stripe-redirect');
-                const returnUrl = Linking.createURL('payment-complete', {
-                    scheme: 'estocaiapp',
-                });
-                console.log('[CheckoutForm] returnURL forced', returnUrl);
-
-
-                // captura throws nativos
-                const result = await initPaymentSheet({
-                    customerId: customer,
-                    customerEphemeralKeySecret: ephemeralKey,
-                    paymentIntentClientSecret: paymentIntent,
-                    merchantDisplayName: 'Expo, Inc',
-                    allowsDelayedPaymentMethods: true,
-                    returnURL: returnUrl,
-                    applePay: Platform.OS === 'ios'
-                        ? { merchantCountryCode: 'BR' }
-                        : undefined,
-                });
-
-
-                console.log('[CheckoutForm] initResult', result);
-                if (result?.error) {
-                    Alert.alert('InitPaymentSheet error', result.error.message ?? JSON.stringify(result.error));
-                    console.error('[CheckoutForm] initPaymentSheet error object', result.error);
+            if (Platform.OS === 'ios') {
+                // IAP flow for iOS
+                const productId = plano ? productIdMap[plano] : undefined;
+                if (!productId || (typeof productId === 'string' && productId.trim() === '')) {
+                    Alert.alert('Erro', 'Produto IAP não configurado para este plano.');
                     return;
                 }
-            } catch (err) {
-                console.error('[CheckoutForm] initPaymentSheet threw', err);
-                Alert.alert('Erro nativo', (err as any)?.message ?? JSON.stringify(err));
+                setLoading(true);
+                try {
+                    const purchaserInfo = await revenuecatService.purchaseProduct(productId);
+                    // On success, update backend and navigate
+                    try {
+                        const data: UpdatePlanoRequest = { cpf: cpf!, plano: plano! };
+                        await atualizarPlanoUsuario(data);
+                        Alert.alert('Sucesso', 'Compra realizada com sucesso!');
+                        setTimeout(() => router.replace('/(auth)/login'), 100);
+                    } catch (e) {
+                        console.error('[CheckoutForm][RevenueCat] backend update error', e);
+                        Alert.alert('Erro', 'Compra concluída, mas falha ao atualizar o plano no servidor.');
+                    }
+                } catch (e: any) {
+                    console.error('[CheckoutForm][RevenueCat] purchase error', e);
+                    Alert.alert('Erro', e?.message ?? 'Falha ao iniciar compra.');
+                } finally {
+                    setLoading(false);
+                }
                 return;
             }
 
+            // Use RevenueCat for purchases on all platforms
+            const productId = plano ? productIdMap[plano] : undefined;
+            if (!productId || (typeof productId === 'string' && productId.trim() === '')) {
+                Alert.alert('Erro', 'Produto IAP não configurado para este plano.');
+                return;
+            }
             setLoading(true);
-            openPaymentSheet();
-            
+            try {
+                const purchaserInfo = await revenuecatService.purchaseProduct(productId);
+                try {
+                    const data: UpdatePlanoRequest = { cpf: cpf!, plano: plano! };
+                    await atualizarPlanoUsuario(data);
+                    Alert.alert('Sucesso', 'Compra realizada com sucesso!');
+                    setTimeout(() => router.replace('/(auth)/login'), 100);
+                } catch (e) {
+                    console.error('[CheckoutForm][RevenueCat] backend update error', e);
+                    Alert.alert('Erro', 'Compra concluída, mas falha ao atualizar o plano no servidor.');
+                }
+            } catch (e: any) {
+                console.error('[CheckoutForm][RevenueCat] purchase error', e);
+                Alert.alert('Erro', e?.message ?? 'Falha ao iniciar compra.');
+            } finally {
+                setLoading(false);
+            }
 
         } catch (e: any) {
-            initializedRef.current = false;
             console.error('[CheckoutForm] initializePaymentSheet error', e);
             Alert.alert('Erro', e?.message ?? 'Falha ao iniciar o pagamento');
+            setLoading(false);
         }
     };
 
-    const openPaymentSheet = async () => {
-        try { 
-
-
-            const { error } = await presentPaymentSheet();
-
-
-            if (error) {
-                if (error.code === 'Canceled') {
-                    setLoading(false);
-                    return;
-                }
-                Alert.alert(`Error code: ${error.code}`, error.message);
-            } else {
-                Alert.alert('Sucesso', 'Seu pedido foi confirmado!');
-
-                // envia atualização do usuário para o servidor
-                const data: UpdatePlanoRequest = {
-                    cpf: cpf!,
-                    plano: plano!,
-                };
-                await atualizarPlanoUsuario(data);
-
-                // redireciona para a tela de login
-                setTimeout(() => {
-                    router.replace('/(auth)/login');
-                }, 100);
-                setLoading(false);
-            }
-        } catch (e: any) {
-            console.error('[CheckoutForm] openPaymentSheet error', e);
-            Alert.alert('Erro', e?.message ?? 'Falha ao abrir o pagamento');
-            setLoading(false);
-        }
-    }
+    // Payment sheet removed — RevenueCat handles purchases directly.
 
     return (
         <>
-            <Button mode="contained" onPress={initializePaymentSheet} style={[globalStyles.primaryButton, { flex: 1 }]}>
-                Confirmar Pagamento
-            </Button>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button
+                    mode="contained"
+                    onPress={initializePaymentSheet}
+                    loading={loading}
+                    disabled={loadingOfferings || offeringsAvailable === false}
+                    style={[globalStyles.primaryButton, { flex: 1 }]}
+                >
+                    Confirmar Pagamento
+                </Button>
+            </View>
+            {loadingOfferings && (
+                <Text style={{ marginTop: 8, textAlign: 'center', color: '#666' }}>Verificando disponibilidade de ofertas...</Text>
+            )}
+            {offeringsAvailable === false && (
+                <Text style={{ marginTop: 8, textAlign: 'center', color: '#b00020' }}>
+                    Nenhuma oferta disponível no momento. Por favor, tente novamente mais tarde.
+                </Text>
+            )}
         </>
     )
 }

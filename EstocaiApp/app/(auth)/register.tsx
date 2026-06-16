@@ -1,5 +1,5 @@
 import { Link, useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Alert, BackHandler, Button, Image, Linking, Text, TextInput, View } from "react-native";
 import colors from "../../constants/colors";
 import env from "../../constants/env";
@@ -14,6 +14,7 @@ export default function RegisterScreen() {
   const [cpf, setCpf] = useState("");
   const [nome, setNome] = useState("");
   const [celular, setCelular] = useState("");
+  const showCelular = false;
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
@@ -121,13 +122,17 @@ export default function RegisterScreen() {
           onChangeText={setNome}
           style={globalStyles.input}
         />
-        <Text style={{ marginBottom: 4, color: colors.text }}>Celular</Text>
-        <TextInput
-          placeholder="Celular"
-          value={celular}
-          onChangeText={setCelular}
-          style={globalStyles.input}
-        />
+        {showCelular && (
+          <>
+            <Text style={{ marginBottom: 4, color: colors.text }}>Celular</Text>
+            <TextInput
+              placeholder="Celular"
+              value={celular}
+              onChangeText={setCelular}
+              style={globalStyles.input}
+            />
+          </>
+        )}
         <Text style={{ marginBottom: 4, color: colors.text }}>Email</Text>
         <TextInput
           placeholder="Email"

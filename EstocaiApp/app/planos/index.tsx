@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import {
     Alert,
     BackHandler,
+    Linking,
     Platform,
     ScrollView,
     StyleSheet,
@@ -22,16 +23,39 @@ import { formatDateBR } from "../../src/utils/formatters";
 
 
 const plans = [
-    { id: "mensal", title: "Plano Mensal", price: "R$ 39,90", note: "" },
-    { id: "semestral", title: "Plano Semestral", price: "R$ 220,00", note: "(8,1% off)" },
-    { id: "anual", title: "Plano Anual", price: "R$ 420,00", note: "(12,28% off)" },
+    { id: "mensal", displayName: "Mensal", description: "Acesso completo durante 30 dias, renovação automática" },
+    { id: "semestral", displayName: "Semestral", description: "Acesso completo durante 6 meses, renovação automática" },
+    { id: "anual", displayName: "Anual", description: "Acesso completo durante 12 meses, renovação automática" },
 ];
+
+const planBenefits: Record<string, string[]> = {
+    mensal: [
+        "Acesso completo durante 30 dias",
+        "Atualizações do app",
+        "Suporte prioritário",
+    ],
+    semestral: [
+        "Acesso completo durante 6 meses",
+        "Atualizações do app",
+        "Suporte prioritário",
+    ],
+    anual: [
+        "Acesso completo durante 12 meses",
+        "Atualizações do app",
+        "Suporte prioritário",
+    ],
+};
 
 const planAmountMap: Record<string, number> = {
     mensal: 39.9,
-    semestral: 220.0,
-    anual: 420.0,
+    semestral: 219.90,
+    anual: 419.90,
 };
+
+function formatCurrencyBR(amount: number | undefined) {
+    if (amount == null || Number.isNaN(amount)) return "";
+    return `R$ ${amount.toFixed(2).replace('.', ',')}`;
+}
 
 //TODO somente para Teste
 // const planAmountMap: Record<string, number> = {
@@ -161,9 +185,10 @@ export default function PlanosScreen() {
                                 <View style={styles.leftBar} />
                                 <View style={styles.cardRow}>
                                     <View style={styles.cardInfo}>
-                                        <Text style={styles.cardTitle}>{p.title}</Text>
+                                        <Text style={styles.cardTitle}>{p.displayName}</Text>
+                                        {p.description ? <Text style={styles.cardNote}>{p.description}</Text> : null}
                                         <Text style={styles.cardPrice}>
-                                            {p.price} <Text style={styles.cardNote}>{p.note}</Text>
+                                            {formatCurrencyBR(planAmountMap[p.id])}
                                         </Text>
                                     </View>
                                     <MaterialCommunityIcons
@@ -177,6 +202,25 @@ export default function PlanosScreen() {
                     );
                 })}
             </View>
+
+            {/* Benefícios e links exigidos pela App Review - substitua as URLs pelos reais */}
+            {selected && (
+                <>
+                    <View style={styles.benefitsContainer}>
+                        {planBenefits[selected]?.map((b) => (
+                            <Text key={b} style={styles.benefit}>• {b}</Text>
+                        ))}
+                    </View>
+                </>
+            )}
+            <View style={styles.linksContainer}>
+                        <Text style={styles.link} onPress={() => Linking.openURL('https://estocafacil.com.br/privacy-policy/')}>
+                            Política de Privacidade
+                        </Text>
+                        <Text style={styles.link} onPress={() => Linking.openURL('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/')}>
+                            Termos de Uso (EULA)
+                        </Text>
+                    </View>
 
             <View style={styles.footerActions}>
                 <Button mode="outlined" onPress={handleCancel} labelStyle={{ color: colors.primary }} style={[globalStyles.secondaryButton, { flex: 1, marginRight: 8 }]}>
@@ -260,6 +304,25 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontWeight: "400",
         color: "#666",
+    },
+    linksContainer: {
+        marginTop: 12,
+        alignItems: "center",
+    },
+    link: {
+        color: colors.primary,
+        textDecorationLine: "underline",
+        marginVertical: 4,
+    },
+    benefitsContainer: {
+        marginTop: 8,
+        marginBottom: 8,
+        paddingHorizontal: 8,
+    },
+    benefit: {
+        color: "#444",
+        fontSize: 13,
+        marginVertical: 2,
     },
     footerActions: {
         position: "absolute",

@@ -48,3 +48,46 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Pagamentos no app (RevenueCat / IAP)
+
+Este projeto usa RevenueCat para gerenciar assinaturas (iOS e Android) e integra IAP quando necessário.
+
+- Produtos e entitlements devem ser configurados no painel do RevenueCat e associados aos product IDs no App Store / Play Console.
+
+Passos importantes para habilitar IAP no iOS
+
+Se usar diretamente o IAP nativo, instale a dependência:
+
+```bash
+expo install expo-in-app-purchases
+```
+
+Criar os produtos (Product IDs) no App Store Connect e anotar os identificadores.
+Definir as variáveis de ambiente (ex.: via EAS Secrets ou .env local):
+
+ - `IAP_PRODUCT_MENSAL` — product id para o plano mensal
+ - `IAP_PRODUCT_SEMESTRAL` — product id para o plano semestral
+ - `IAP_PRODUCT_ANUAL` — product id para o plano anual
+
+Teste: IAP deve ser testado em dispositivo físico iOS (não funciona no simulador). Use uma conta sandbox do App Store Connect.
+
+Variáveis do RevenueCat (adicionar via EAS secrets ou app.json extra):
+
+- `REVENUECAT_IOS_API_KEY`
+- `REVENUECAT_ANDROID_API_KEY`
+
+Segurança e recibos
+
+- Recomendo validar recibos/assinaturas no servidor (verificação com a App Store / RevenueCat webhooks) para evitar fraudes.
+- Para compras críticas, registre e verifique as transações no backend antes de provisionar o plano ao usuário.
+
+Testes rápidos
+
+- Android/iOS (RevenueCat/IAP): execute em dispositivo físico e use contas de teste (sandbox/TestFlight) para validar compras, restaurações e renovações.
+
+Se quiser, posso:
+
+- adicionar um wrapper em `src/services` para IAP (recomendado),
+- atualizar scripts de build para injetar variáveis de ambiente, ou
+- documentar um passo-a-passo para configurar produtos no App Store Connect.

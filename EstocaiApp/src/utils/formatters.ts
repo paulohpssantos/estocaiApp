@@ -32,26 +32,43 @@ export function parseDateBRtoDate(dateBR: string): Date {
 
 export function parseDateString(dateStr?: string): Date | null {
   if (!dateStr) return null;
+
+  // ISO datetime with 'T' (may contain more than 3 fractional digits)
+  if (dateStr.includes('T')) {
+    // Trim long fractional seconds to milliseconds (3 digits) because JS Date only supports ms
+    const iso = dateStr.replace(/(\.\d{3})\d+/, '$1');
+    const parsed = new Date(iso);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  }
+
   // dd/mm/yyyy
   if (dateStr.includes('/')) {
-    const [dia, mes, ano] = dateStr.split('/');
-    if (ano && mes && dia) return new Date(Number(ano), Number(mes) - 1, Number(dia));
+    const parts = dateStr.split('/').map(p => p.trim());
+    const [dia, mes, ano] = parts;
+    if (ano && mes && dia) {
+      const d = new Date(Number(ano), Number(mes) - 1, Number(dia));
+      return isNaN(d.getTime()) ? null : d;
+    }
     return null;
   }
+
   // yyyy-mm-dd or dd-mm-yyyy
   if (dateStr.includes('-')) {
-    const parts = dateStr.split('-');
+    const parts = dateStr.split('-').map(p => p.trim());
     if (parts.length === 3) {
-      // yyyy-mm-dd
+      // yyyy-mm-dd (year first)
       if (parts[0].length === 4) {
         const [ano, mes, dia] = parts;
-        return new Date(Number(ano), Number(mes) - 1, Number(dia));
+        const d = new Date(Number(ano), Number(mes) - 1, Number(dia));
+        return isNaN(d.getTime()) ? null : d;
       }
       // dd-mm-yyyy
       const [dia, mes, ano] = parts;
-      return new Date(Number(ano), Number(mes) - 1, Number(dia));
+      const d = new Date(Number(ano), Number(mes) - 1, Number(dia));
+      return isNaN(d.getTime()) ? null : d;
     }
   }
+
   const parsed = new Date(dateStr);
   return isNaN(parsed.getTime()) ? null : parsed;
 }

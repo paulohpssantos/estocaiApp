@@ -2,7 +2,7 @@
   "expo": {
     "name": "EstocaFacilApp",
     "slug": "estocaiapp",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "estocaiapp",
@@ -16,7 +16,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.paulohps.EstocaiApp",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Este aplicativo não utiliza a câmera diretamente, mas a permissão é exigida por bibliotecas internas."
       }
     },
     "android": {
@@ -46,13 +47,6 @@
     },
     "plugins": [
       [
-        "@stripe/stripe-react-native",
-        {
-          "merchantIdentifier": "merchant.com.paulohps.EstocaiApp",
-          "urlScheme": "estocaiapp"
-        }
-      ],
-      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
@@ -61,6 +55,14 @@
           "backgroundColor": "#ffffff",
           "dark": {
             "backgroundColor": "#000000"
+          }
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
           }
         }
       ]
@@ -72,8 +74,8 @@
     "extra": {
       "eas": {
         "projectId": "9e182178-6053-4e88-aa24-eef64ffc723b"
-      },
-      "STRIPE_PUBLISHABLE_KEY": "pk_live_51SbM8fJ9opSebKtagV19J8tVg0vECuuFp4nXuF4BDoi5nWHgdR7tGQwpMmo1ZjTiEIFnNPOXNxd9dsjHUi87zcV100CTWYBPEM"
+      }
+      
     },
     "owner": "paulohpss-organization"
   }
