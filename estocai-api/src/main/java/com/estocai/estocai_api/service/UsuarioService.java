@@ -60,7 +60,8 @@ public class UsuarioService {
             repo.save(user);
 
             //envia email de confirmação
-            createContratoRenovadoEmail(user.getEmail(), user.getPlano(), mes, startDate, endDate);
+            //TODO verificar o problema de envio de email
+            //createContratoRenovadoEmail(user.getEmail(), user.getPlano(), mes, startDate, endDate);
 
             return user;
         }
