@@ -17,7 +17,7 @@ import java.util.Map;
 public class UsuarioService {
 
     @PersistenceContext
-    private EntityManager em;
+    private EntityManager em; 
 
     private final UsuarioRepository repo;
     private final EmailServiceImpl emailService;
