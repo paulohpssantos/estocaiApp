@@ -4,6 +4,7 @@ import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { Platform, Text, View } from "react-native";
 import { AuthProvider } from "../src/context/AuthContext";
+import metaService from "../src/services/metaService";
 import revenuecatService from "../src/services/revenuecatService";
 
 // Configure RevenueCat at module load to ensure SDK is initialized
@@ -32,6 +33,8 @@ export default function RootLayout() {
       setIsAuthenticated(!!token);
     };
     checkAuth();
+    // ATT prompt (iOS) + Meta SDK init
+    metaService.initMeta();
     // RevenueCat already configured at module load
   }, []);
 

@@ -4,6 +4,7 @@ import { Alert, BackHandler, Button, Image, Linking, Text, TextInput, View } fro
 import colors from "../../constants/colors";
 import env from "../../constants/env";
 import { useAuth } from "../../src/context/AuthContext";
+import metaService from "../../src/services/metaService";
 
 import globalStyles from '../../constants/globalStyles';
 
@@ -50,6 +51,10 @@ export default function RegisterScreen() {
         Alert.alert("Erro", "Falha ao cadastrar usuário.");
         return;
       }
+
+      // Cadastro inicia o período de teste gratuito de 7 dias
+      metaService.logCompleteRegistration();
+      metaService.logStartTrial();
 
       // 2) abre a página de termos no navegador usando a URL do backend
       const termosUrl = `${env.API_URL.replace(/\/$/, "")}/termos-uso/open?cpf=${encodeURIComponent(cpf)}`;

@@ -1,4 +1,5 @@
 import { UpdatePlanoRequest } from '@/src/models/usuario';
+import metaService from '@/src/services/metaService';
 import revenuecatService from '@/src/services/revenuecatService';
 import { atualizarPlanoUsuario } from "@/src/services/usuarioService";
 import { useRouter } from "expo-router";
@@ -71,6 +72,7 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
                 setLoading(true);
                 try {
                     const purchaserInfo = await revenuecatService.purchaseProduct(productId);
+                    metaService.logSubscribe(amount, plano!);
                     // On success, update backend and navigate
                     try {
                         const data: UpdatePlanoRequest = { cpf: cpf!, plano: plano! };
@@ -99,6 +101,7 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
             setLoading(true);
             try {
                 const purchaserInfo = await revenuecatService.purchaseProduct(productId);
+                metaService.logSubscribe(amount, plano!);
                 try {
                     const data: UpdatePlanoRequest = { cpf: cpf!, plano: plano! };
                     await atualizarPlanoUsuario(data);
