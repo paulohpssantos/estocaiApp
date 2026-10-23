@@ -1,4 +1,4 @@
-import Purchases, { LOG_LEVEL } from 'react-native-purchases';
+import Purchases, { LOG_LEVEL, PURCHASES_ERROR_CODE, PurchasesStoreProduct } from 'react-native-purchases';
 
 export type PurchaserInfo = any;
 
@@ -37,6 +37,40 @@ export async function getOfferings(): Promise<any> {
     console.error('[revenuecatService] getOfferings error', e);
     throw e;
   }
+}
+
+export async function getProduct(productId: string): Promise<PurchasesStoreProduct | null> {
+  try {
+    if (!_configured) {
+      const msg = '[revenuecatService] getProduct called before configure. Make sure configure() runs on app startup.';
+      console.error(msg);
+      throw new Error(msg);
+    }
+    const products = await Purchases.getProducts([productId]);
+    return products?.find((p) => p.identifier === productId || p.identifier.startsWith(`${productId}:`)) ?? products?.[0] ?? null;
+  } catch (e) {
+    console.error('[revenuecatService] getProduct error', e);
+    throw e;
+  }
+}
+
+export async function purchaseStoreProduct(product: PurchasesStoreProduct): Promise<PurchaserInfo> {
+  try {
+    if (!_configured) {
+      const msg = '[revenuecatService] purchaseStoreProduct called before configure. Make sure configure() runs on app startup.';
+      console.error(msg);
+      throw new Error(msg);
+    }
+    const result = await Purchases.purchaseStoreProduct(product);
+    return result?.customerInfo ?? null;
+  } catch (e) {
+    console.error('[revenuecatService] purchaseStoreProduct error', e);
+    throw e;
+  }
+}
+
+export function isUserCancelled(e: any): boolean {
+  return !!e?.userCancelled || e?.code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR;
 }
 
 export async function purchaseProduct(productId: string): Promise<PurchaserInfo> {
@@ -81,6 +115,9 @@ export async function getPurchaserInfo(): Promise<PurchaserInfo> {
 export default {
   configure,
   getOfferings,
+  getProduct,
+  purchaseStoreProduct,
+  isUserCancelled,
   purchaseProduct,
   restorePurchases,
   getPurchaserInfo,

@@ -3,9 +3,10 @@ import metaService from '@/src/services/metaService';
 import revenuecatService from '@/src/services/revenuecatService';
 import { atualizarPlanoUsuario } from "@/src/services/usuarioService";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert, Platform, Text, View } from "react-native";
 import { Button } from "react-native-paper";
+import type { PurchasesStoreProduct } from "react-native-purchases";
 import globalStyles from "../constants/globalStyles";
 
 
@@ -19,135 +20,105 @@ const productIdMap: Record<string, string> = {
 export default function CheckoutForm({ amount, cpf, plano }: { amount: number; cpf?: string; plano?: string }) {
 
     const [loading, setLoading] = useState(false);
-    const [offeringsAvailable, setOfferingsAvailable] = useState<boolean | null>(null);
-    const [loadingOfferings, setLoadingOfferings] = useState(false);
+    const [product, setProduct] = useState<PurchasesStoreProduct | null>(null);
+    const [loadingProduct, setLoadingProduct] = useState(false);
+    const [productError, setProductError] = useState(false);
     const router = useRouter();
-    const isIos = (Platform.OS as any) === 'ios';
+    const productId = plano ? productIdMap[plano] : undefined;
+
+    // Loads the store product for the selected plan. Never disables the button permanently:
+    // if it fails, the user can tap again and we retry before purchasing.
+    const loadProduct = useCallback(async (): Promise<PurchasesStoreProduct | null> => {
+        if (!productId || Platform.OS === 'web') return null;
+        setLoadingProduct(true);
+        try {
+            const p = await revenuecatService.getProduct(productId);
+            setProduct(p);
+            setProductError(!p);
+            return p;
+        } catch (e) {
+            console.warn('[CheckoutForm] getProduct failed', e);
+            setProduct(null);
+            setProductError(true);
+            return null;
+        } finally {
+            setLoadingProduct(false);
+        }
+    }, [productId]);
 
     useEffect(() => {
-        // Check RevenueCat offerings on mount so we can disable purchase when empty
-        let mounted = true;
-        (async () => {
-            try {
-                setLoadingOfferings(true);
-                const offerings = await revenuecatService.getOfferings();
-                if (!mounted) return;
-                const hasPackages = !!(
-                    offerings && (
-                        (offerings.current && offerings.current.availablePackages && offerings.current.availablePackages.length > 0) ||
-                        (offerings.all && Object.keys(offerings.all).length > 0)
-                    )
-                );
-                setOfferingsAvailable(hasPackages);
-            } catch (e) {
-                console.warn('[CheckoutForm] getOfferings failed', e);
-                if (mounted) setOfferingsAvailable(false);
-            } finally {
-                if (mounted) setLoadingOfferings(false);
-            }
-        })();
+        setProduct(null);
+        setProductError(false);
+        loadProduct();
+    }, [loadProduct]);
 
-        // No native IAP listeners here — RevenueCat purchase will be handled synchronously
-        return () => { mounted = false; };
-    }, [cpf, plano, router]);
+    const handlePurchase = async () => {
+        if (Platform.OS === 'web') {
+            Alert.alert('Pagamento não disponível', 'Compras só são suportadas no aplicativo iOS/Android.');
+            return;
+        }
+        if (!productId) {
+            Alert.alert('Erro', 'Produto não configurado para este plano.');
+            return;
+        }
+        if (!cpf) {
+            Alert.alert('Aguarde', 'Ainda estamos carregando seus dados. Tente novamente em instantes.');
+            return;
+        }
 
-    const initializePaymentSheet = async () => {
+        setLoading(true);
         try {
-            // Prevent attempts to use RevenueCat on web (not supported)
-            if (Platform.OS === 'web') {
-                Alert.alert('Pagamento não disponível', 'Compras só são suportadas no aplicativo iOS/Android.');
-                return;
-            }
-            if (offeringsAvailable === false) {
-                Alert.alert('Produtos indisponíveis', 'Nenhuma oferta configurada no RevenueCat. Tente novamente mais tarde.');
-                return;
-            }
-            if (Platform.OS === 'ios') {
-                // IAP flow for iOS
-                const productId = plano ? productIdMap[plano] : undefined;
-                if (!productId || (typeof productId === 'string' && productId.trim() === '')) {
-                    Alert.alert('Erro', 'Produto IAP não configurado para este plano.');
-                    return;
-                }
-                setLoading(true);
-                try {
-                    const purchaserInfo = await revenuecatService.purchaseProduct(productId);
-                    metaService.logSubscribe(amount, plano!);
-                    // On success, update backend and navigate
-                    try {
-                        const data: UpdatePlanoRequest = { cpf: cpf!, plano: plano! };
-                        await atualizarPlanoUsuario(data);
-                        Alert.alert('Sucesso', 'Compra realizada com sucesso!');
-                        setTimeout(() => router.replace('/(auth)/login'), 100);
-                    } catch (e) {
-                        console.error('[CheckoutForm][RevenueCat] backend update error', e);
-                        Alert.alert('Erro', 'Compra concluída, mas falha ao atualizar o plano no servidor.');
-                    }
-                } catch (e: any) {
-                    console.error('[CheckoutForm][RevenueCat] purchase error', e);
-                    Alert.alert('Erro', e?.message ?? 'Falha ao iniciar compra.');
-                } finally {
-                    setLoading(false);
-                }
+            const storeProduct = product ?? await loadProduct();
+            if (!storeProduct) {
+                Alert.alert('Plano indisponível', 'Não foi possível carregar o plano na loja. Verifique sua conexão e tente novamente.');
                 return;
             }
 
-            // Use RevenueCat for purchases on all platforms
-            const productId = plano ? productIdMap[plano] : undefined;
-            if (!productId || (typeof productId === 'string' && productId.trim() === '')) {
-                Alert.alert('Erro', 'Produto IAP não configurado para este plano.');
-                return;
-            }
-            setLoading(true);
             try {
-                const purchaserInfo = await revenuecatService.purchaseProduct(productId);
-                metaService.logSubscribe(amount, plano!);
-                try {
-                    const data: UpdatePlanoRequest = { cpf: cpf!, plano: plano! };
-                    await atualizarPlanoUsuario(data);
-                    Alert.alert('Sucesso', 'Compra realizada com sucesso!');
-                    setTimeout(() => router.replace('/(auth)/login'), 100);
-                } catch (e) {
-                    console.error('[CheckoutForm][RevenueCat] backend update error', e);
-                    Alert.alert('Erro', 'Compra concluída, mas falha ao atualizar o plano no servidor.');
-                }
+                await revenuecatService.purchaseStoreProduct(storeProduct);
             } catch (e: any) {
+                if (revenuecatService.isUserCancelled(e)) return;
                 console.error('[CheckoutForm][RevenueCat] purchase error', e);
-                Alert.alert('Erro', e?.message ?? 'Falha ao iniciar compra.');
-            } finally {
-                setLoading(false);
+                Alert.alert('Erro', e?.message ?? 'Falha ao concluir a compra.');
+                return;
             }
 
-        } catch (e: any) {
-            console.error('[CheckoutForm] initializePaymentSheet error', e);
-            Alert.alert('Erro', e?.message ?? 'Falha ao iniciar o pagamento');
+            metaService.logSubscribe(amount, plano!);
+            try {
+                const data: UpdatePlanoRequest = { cpf, plano: plano! };
+                await atualizarPlanoUsuario(data);
+                Alert.alert('Sucesso', 'Compra realizada com sucesso!');
+                setTimeout(() => router.replace('/(auth)/login'), 100);
+            } catch (e) {
+                console.error('[CheckoutForm][RevenueCat] backend update error', e);
+                Alert.alert('Erro', 'Compra concluída, mas falha ao atualizar o plano no servidor.');
+            }
+        } finally {
             setLoading(false);
         }
     };
 
-    // Payment sheet removed — RevenueCat handles purchases directly.
-
     return (
-        <>
+        <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Button
                     mode="contained"
-                    onPress={initializePaymentSheet}
-                    loading={loading}
-                    disabled={loadingOfferings || offeringsAvailable === false}
+                    onPress={handlePurchase}
+                    loading={loading || loadingProduct}
+                    disabled={loading || loadingProduct}
                     style={[globalStyles.primaryButton, { flex: 1 }]}
                 >
                     Confirmar Pagamento
                 </Button>
             </View>
-            {loadingOfferings && (
-                <Text style={{ marginTop: 8, textAlign: 'center', color: '#666' }}>Verificando disponibilidade de ofertas...</Text>
+            {product?.priceString && (
+                <Text style={{ marginTop: 8, textAlign: 'center', color: '#666' }}>{product.priceString}</Text>
             )}
-            {offeringsAvailable === false && (
+            {productError && !loadingProduct && (
                 <Text style={{ marginTop: 8, textAlign: 'center', color: '#b00020' }}>
-                    Nenhuma oferta disponível no momento. Por favor, tente novamente mais tarde.
+                    Não foi possível carregar o plano. Toque em Confirmar Pagamento para tentar novamente.
                 </Text>
             )}
-        </>
+        </View>
     )
 }
