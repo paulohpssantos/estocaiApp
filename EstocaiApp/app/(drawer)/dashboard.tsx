@@ -1,6 +1,8 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { PlanoTrialBanner } from '../../components/plano-badge';
+import { getPlanoStatus, PlanoStatus } from '../../src/utils/plano';
 import React, { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
@@ -50,6 +52,8 @@ export default function Dashboard() {
   const [produtosPertoVencer, setProdutosPertoVencer] = useState<any[]>([]);
   const [produtosVencidos, setProdutosVencidos] = useState<any[]>([]);
   const [ordensAbertas, setOrdensAbertas] = useState<OrdemServico[]>([]);
+  const [planoStatus, setPlanoStatus] = useState<PlanoStatus | null>(null);
+  const router = useRouter();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -60,6 +64,7 @@ export default function Dashboard() {
         if (usuarioString) {
           const usuario = JSON.parse(usuarioString);
           cpfUsuario = usuario.cpf;
+          if (isActive) setPlanoStatus(getPlanoStatus(usuario));
         }
         const [
           estabelecimentos,
@@ -119,6 +124,7 @@ export default function Dashboard() {
     <PaperProvider>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 32 }}>
         <View style={globalStyles.container}>
+          <PlanoTrialBanner status={planoStatus} onPressVerPlanos={() => router.push("/(drawer)/planos")} />
           <Text style={globalStyles.title}>Visão geral do seu sistema de gestão</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 24, marginBottom: 32 }}>
             {CARD_DATA.map(item => (

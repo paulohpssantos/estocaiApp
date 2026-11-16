@@ -2,6 +2,7 @@ import { UpdatePlanoRequest } from '@/src/models/usuario';
 import metaService from '@/src/services/metaService';
 import revenuecatService from '@/src/services/revenuecatService';
 import { atualizarPlanoUsuario } from "@/src/services/usuarioService";
+import { salvarUsuarioAtualizado } from "@/src/utils/plano";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Platform, Text, View } from "react-native";
@@ -10,7 +11,7 @@ import type { PurchasesStoreProduct } from "react-native-purchases";
 import globalStyles from "../constants/globalStyles";
 
 
-const productIdMap: Record<string, string> = {
+export const productIdMap: Record<string, string> = {
     // Use `||` to fallback when env var is falsy (empty string) as well as undefined
     mensal: process.env.IAP_PRODUCT_MENSAL || 'plano_mensal_v2',
     semestral: process.env.IAP_PRODUCT_SEMESTRAL || 'plano_semestral_v2',
@@ -23,6 +24,7 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
     const [product, setProduct] = useState<PurchasesStoreProduct | null>(null);
     const [loadingProduct, setLoadingProduct] = useState(false);
     const [productError, setProductError] = useState(false);
+    const [productErrorMsg, setProductErrorMsg] = useState<string | null>(null);
     const router = useRouter();
     const productId = plano ? productIdMap[plano] : undefined;
 
@@ -35,11 +37,13 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
             const p = await revenuecatService.getProduct(productId);
             setProduct(p);
             setProductError(!p);
+            setProductErrorMsg(p ? null : `Produto "${productId}" não encontrado na loja.`);
             return p;
-        } catch (e) {
+        } catch (e: any) {
             console.warn('[CheckoutForm] getProduct failed', e);
             setProduct(null);
             setProductError(true);
+            setProductErrorMsg(e?.message ?? String(e));
             return null;
         } finally {
             setLoadingProduct(false);
@@ -49,6 +53,7 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
     useEffect(() => {
         setProduct(null);
         setProductError(false);
+        setProductErrorMsg(null);
         loadProduct();
     }, [loadProduct]);
 
@@ -70,7 +75,11 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
         try {
             const storeProduct = product ?? await loadProduct();
             if (!storeProduct) {
-                Alert.alert('Plano indisponível', 'Não foi possível carregar o plano na loja. Verifique sua conexão e tente novamente.');
+                Alert.alert(
+                    'Plano indisponível',
+                    'Não foi possível carregar o plano na loja. Verifique sua conexão e tente novamente.' +
+                    (__DEV__ && productErrorMsg ? `\n\nDetalhe: ${productErrorMsg}` : '')
+                );
                 return;
             }
 
@@ -86,9 +95,9 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
             metaService.logSubscribe(amount, plano!);
             try {
                 const data: UpdatePlanoRequest = { cpf, plano: plano! };
-                await atualizarPlanoUsuario(data);
-                Alert.alert('Sucesso', 'Compra realizada com sucesso!');
-                setTimeout(() => router.replace('/(auth)/login'), 100);
+                const atualizado = await atualizarPlanoUsuario(data);
+                await salvarUsuarioAtualizado(atualizado);
+                router.replace('/planos/sucesso');
             } catch (e) {
                 console.error('[CheckoutForm][RevenueCat] backend update error', e);
                 Alert.alert('Erro', 'Compra concluída, mas falha ao atualizar o plano no servidor.');
@@ -117,6 +126,7 @@ export default function CheckoutForm({ amount, cpf, plano }: { amount: number; c
             {productError && !loadingProduct && (
                 <Text style={{ marginTop: 8, textAlign: 'center', color: '#b00020' }}>
                     Não foi possível carregar o plano. Toque em Confirmar Pagamento para tentar novamente.
+                    {__DEV__ && productErrorMsg ? `\n(${productErrorMsg})` : ''}
                 </Text>
             )}
         </View>

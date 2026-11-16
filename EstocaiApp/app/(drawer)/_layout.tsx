@@ -1,16 +1,19 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import {
     DrawerContentScrollView,
-    DrawerItemList
+    DrawerItemList,
+    useDrawerStatus
 } from "@react-navigation/drawer";
 import Constants from 'expo-constants';
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { PlanoBadge } from "../../components/plano-badge";
 import colors from "../../constants/colors";
 import { useAuth } from "../../src/context/AuthContext";
+import { getPlanoStatus, getUsuarioSalvo, PlanoStatus } from "../../src/utils/plano";
 
 export default function DrawerLayout() {
   return (
@@ -239,6 +242,14 @@ function CustomDrawerContent(props: any) {
   const { logout } = useAuth();
   const router = useRouter();
   const [relatoriosOpen, setRelatoriosOpen] = useState(false);
+  const [planoStatus, setPlanoStatus] = useState<PlanoStatus | null>(null);
+  const drawerStatus = useDrawerStatus();
+
+  // Recarrega o plano sempre que o menu é aberto (pode ter mudado após uma compra)
+  useEffect(() => {
+    if (drawerStatus !== "open") return;
+    getUsuarioSalvo().then((u) => setPlanoStatus(getPlanoStatus(u)));
+  }, [drawerStatus]);
   const appVersion = (Constants.expoConfig?.version ?? (Constants.manifest as any)?.version) ?? '';
 
   const handleLogout = async () => {
@@ -279,6 +290,8 @@ function CustomDrawerContent(props: any) {
               <Text style={styles.subtitle}>Sistema de Gestão</Text>
             </View>
           </View>
+
+          <PlanoBadge status={planoStatus} onPressAssinar={() => props.navigation.navigate("planos/index")} />
 
           <View style={{ flex: 1, paddingTop: 10 }}>
             {/* Renderiza todos os itens exceto relatórios */}

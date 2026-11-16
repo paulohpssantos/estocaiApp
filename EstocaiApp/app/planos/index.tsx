@@ -1,5 +1,8 @@
-import CheckoutForm from "@/components/checkout-form.native";
+import CheckoutForm, { productIdMap } from "@/components/checkout-form.native";
 import { Usuario } from "@/src/models/usuario";
+import revenuecatService from "@/src/services/revenuecatService";
+import { atualizarPlanoUsuario } from "@/src/services/usuarioService";
+import { getPlanoStatus, salvarUsuarioAtualizado } from "@/src/utils/plano";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -78,6 +81,41 @@ export default function PlanosScreen() {
     const [dataExpiracao, setDataExpiracao] = useState<string | null>(null);
     const [usuario, setUsuario] = useState<Usuario | null>(null);
     const [openedFromDrawer, setOpenedFromDrawer] = useState(false);
+    const [restoring, setRestoring] = useState(false);
+    const planoStatus = getPlanoStatus(usuario);
+
+    // Exigido pela App Review (Guideline 3.1.1): botão explícito de "Restaurar Compras"
+    const handleRestore = async () => {
+        setRestoring(true);
+        try {
+            const info: any = await revenuecatService.restorePurchases();
+            const active: string[] = info?.activeSubscriptions ?? [];
+            // Identificadores podem vir como "plano_mensal_v2" ou "plano_mensal_v2:base-plan" (Android)
+            const plano = Object.keys(productIdMap).find((key) =>
+                active.some((id) => id === productIdMap[key] || id.startsWith(`${productIdMap[key]}:`))
+            );
+
+            if (!plano) {
+                Alert.alert('Nenhuma compra encontrada', 'Não encontramos assinaturas ativas vinculadas à sua conta da loja.');
+                return;
+            }
+
+            const cpf = usuario?.cpf;
+            if (!cpf) {
+                Alert.alert('Aguarde', 'Ainda estamos carregando seus dados. Tente novamente em instantes.');
+                return;
+            }
+
+            const atualizado = await atualizarPlanoUsuario({ cpf, plano });
+            await salvarUsuarioAtualizado(atualizado);
+            router.replace('/planos/sucesso?restaurado=true');
+        } catch (e: any) {
+            console.error('[Planos] restore error', e);
+            Alert.alert('Erro', e?.message ?? 'Não foi possível restaurar as compras.');
+        } finally {
+            setRestoring(false);
+        }
+    };
 
      // Ao montar esta tela desabilita o gesto de abrir o drawer e remove o botão de menu.
     // Ao desmontar restaura o comportamento anterior.
@@ -165,17 +203,20 @@ export default function PlanosScreen() {
                 </Text>
             ) : (
                 <Text style={[globalStyles.title, { marginBottom: 24 }]}>
-                    Plano atual: {userPlano}, vence em {formatDateBR(usuario?.dataExpiracao || "")}
+                    {planoStatus?.isPago
+                        ? `Plano atual: ${planoStatus.nome}, ativo até ${formatDateBR(usuario?.dataExpiracao || "")}`
+                        : `Você está no teste grátis, válido até ${formatDateBR(usuario?.dataExpiracao || "")}`}
                 </Text>
             )}
 
             <View style={styles.list}>
                 {plans.map((p) => {
                     const isSelected = selected === p.id;
+                    const isAtual = !!planoStatus?.isPago && !planoStatus.isExpirado && planoStatus.codigo === p.id.toUpperCase();
                     return (
                         <TouchableOpacity
                             key={p.id}
-                            style={[styles.card, isSelected && styles.cardSelected]}
+                            style={[styles.card, isAtual && styles.cardAtual, isSelected && styles.cardSelected]}
                             onPress={() => {
                                 setSelected(p.id);
                             }}
@@ -185,7 +226,15 @@ export default function PlanosScreen() {
                                 <View style={styles.leftBar} />
                                 <View style={styles.cardRow}>
                                     <View style={styles.cardInfo}>
-                                        <Text style={styles.cardTitle}>{p.displayName}</Text>
+                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                            <Text style={styles.cardTitle}>{p.displayName}</Text>
+                                            {isAtual && (
+                                                <View style={styles.seuPlanoTag}>
+                                                    <MaterialCommunityIcons name="crown" size={12} color="#fff" />
+                                                    <Text style={styles.seuPlanoText}>Seu plano</Text>
+                                                </View>
+                                            )}
+                                        </View>
                                         {p.description ? <Text style={styles.cardNote}>{p.description}</Text> : null}
                                         <Text style={styles.cardPrice}>
                                             {formatCurrencyBR(planAmountMap[p.id])}
@@ -221,6 +270,19 @@ export default function PlanosScreen() {
                             Termos de Uso (EULA)
                         </Text>
                     </View>
+
+            {Platform.OS !== 'web' && (
+                <Button
+                    mode="text"
+                    onPress={handleRestore}
+                    loading={restoring}
+                    disabled={restoring}
+                    labelStyle={{ color: colors.primary }}
+                    style={{ marginTop: 8 }}
+                >
+                    Restaurar Compras
+                </Button>
+            )}
 
             <View style={styles.footerActions}>
                 <Button mode="outlined" onPress={handleCancel} labelStyle={{ color: colors.primary }} style={[globalStyles.secondaryButton, { flex: 1, marginRight: 8 }]}>
@@ -273,6 +335,25 @@ const styles = StyleSheet.create({
         borderBottomLeftRadius: 12,
         marginRight: 12,
         alignSelf: "stretch",
+    },
+    cardAtual: {
+        borderColor: "#b8860b",
+        backgroundColor: "#fffdf5",
+    },
+    seuPlanoTag: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#b8860b",
+        borderRadius: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        marginLeft: 8,
+    },
+    seuPlanoText: {
+        color: "#fff",
+        fontSize: 11,
+        fontWeight: "700",
+        marginLeft: 4,
     },
     cardSelected: {
         borderColor: colors.primary,

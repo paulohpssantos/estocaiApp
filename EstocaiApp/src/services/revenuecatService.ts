@@ -46,8 +46,26 @@ export async function getProduct(productId: string): Promise<PurchasesStoreProdu
       console.error(msg);
       throw new Error(msg);
     }
+    const matches = (p: PurchasesStoreProduct) =>
+      p.identifier === productId || p.identifier.startsWith(`${productId}:`);
+
+    // 1) Direct lookup in the store
     const products = await Purchases.getProducts([productId]);
-    return products?.find((p) => p.identifier === productId || p.identifier.startsWith(`${productId}:`)) ?? products?.[0] ?? null;
+    const direct = products?.find(matches) ?? products?.[0];
+    if (direct) return direct;
+
+    // 2) Fallback: search the packages configured in RevenueCat Offerings
+    console.warn(`[revenuecatService] getProducts returned no product for "${productId}", trying offerings`);
+    const offerings = await Purchases.getOfferings();
+    const allOfferings = Object.values(offerings?.all ?? {});
+    for (const offering of allOfferings) {
+      const pkg = offering.availablePackages.find((pk) => matches(pk.product));
+      if (pkg) return pkg.product;
+    }
+
+    const available = allOfferings.flatMap((o) => o.availablePackages.map((pk) => pk.product.identifier));
+    console.warn(`[revenuecatService] product "${productId}" not found. Products in offerings: ${JSON.stringify(available)}`);
+    return null;
   } catch (e) {
     console.error('[revenuecatService] getProduct error', e);
     throw e;
@@ -93,6 +111,11 @@ export async function purchaseProduct(productId: string): Promise<PurchaserInfo>
 
 export async function restorePurchases(): Promise<PurchaserInfo> {
   try {
+    if (!_configured) {
+      const msg = '[revenuecatService] restorePurchases called before configure. Make sure configure() runs on app startup.';
+      console.error(msg);
+      throw new Error(msg);
+    }
     const info = await Purchases.restorePurchases();
     return info ?? null;
   } catch (e) {
